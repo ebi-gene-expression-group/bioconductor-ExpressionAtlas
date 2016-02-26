@@ -27,11 +27,10 @@ getAtlasExperiment <- function( experimentAccession ) {
         sep = "/" 
     )
     
-    cat( 
+    message( 
         paste( 
             "Downloading Expression Atlas experiment summary from:\n", 
-            fullUrl, 
-            "...\n" 
+            fullUrl
         ) 
     )
 
@@ -81,11 +80,10 @@ getAtlasExperiment <- function( experimentAccession ) {
     }
 
     # If we're still here, things must have worked ok.
-    cat( 
+    message( 
         paste( 
             "Successfully downloaded experiment summary object for", 
-            experimentAccession, 
-            "\n" 
+            experimentAccession
         ) 
     )
 
@@ -201,7 +199,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
     # If we weren't passed a species, log this.
     if( missing( species ) ) {
     
-        cat( "No species was provided. Will search for data from all available species.\n" )
+        message( "No species was provided. Will search for data from all available species." )
     
     } else if( typeof( species ) != "character" ) {
        
@@ -239,7 +237,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
     }
     
     # Log search is beginning.
-    cat( "Searching for Expression Atlas experiments matching your query ...\n" )
+    message( "Searching for Expression Atlas experiments matching your query ..." )
     
     # Run the query and download the result.
     response <- GET( queryURL )
@@ -254,7 +252,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
             )
         )
     } else {
-        cat( "Query successful.\n" )
+        message( "Query successful." )
     }
     
     # Parse the XML document.
@@ -268,10 +266,10 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
 
     # If there were no results, quit here.
     if( numExps == 0 ) {
-        return( cat( "No results found. Cannot continue.\n" ) )
+        return( message( "No results found. Cannot continue." ) )
     
     } else {
-        cat( paste( "Found", numExps, "experiments matching your query.\n" ) )
+        message( paste( "Found", numExps, "experiments matching your query." ) )
     }
 
     # Get a list of all the experiments from the root node.
