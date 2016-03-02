@@ -2,13 +2,19 @@
 \title{ ExpressionAtlas News }
 \encoding{ UTF-8 }
 
-\section{ Version 0.99.1 }
+\section{ Version 0.99.2 }{
+    \itemize{
+        \item Using dummy example data for the vignette examples, instead of trying to download real data.
+    }
+}
+
+\section{ Version 0.99.1 }{
     \itemize{
         \item Updated DESCRIPTION; use message() instead of cat() for logging
     }
 }
 
-\section{ Version 0.99}{
+\section{ Version 0.99 }{
     \itemize{
         \item Initial release.
     }

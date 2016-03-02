@@ -41,7 +41,20 @@ optionally provide a species to limit your search to, as a second argument.
 
 ```{r}
 suppressMessages( library( ExpressionAtlas ) )
+```
+
+```{r eval=FALSE}
 atlasRes <- searchAtlasExperiments( properties = "salt", species = "rice" )
+# Searching for Expression Atlas experiments matching your query ...
+# Query successful.
+# Found 3 experiments matching your query.
+```
+
+```{r, echo=FALSE}
+data( "atlasRes" )
+```
+
+```{r}
 atlasRes
 ```
 
@@ -59,14 +72,30 @@ entry per experiment, listed by accession.
 
 For example, to download all the datasets in your results:
 
-```{r}
+```{r eval=FALSE}
 allExps <- getAtlasData( atlasRes$Accession )
+# Downloading Expression Atlas experiment summary from:
+#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-GEOD-11175/E-GEOD-11175-atlasExperimentSummary.Rdata
+# Successfully downloaded experiment summary object for E-GEOD-11175
+# Downloading Expression Atlas experiment summary from:
+#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-1625/E-MTAB-1625-atlasExperimentSummary.Rdata
+# Successfully downloaded experiment summary object for E-MTAB-1625
+# Downloading Expression Atlas experiment summary from:
+#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-1624/E-MTAB-1624-atlasExperimentSummary.Rdata
+# Successfully downloaded experiment summary object for E-MTAB-1624
+```
+
+```{r, echo=FALSE}
+data( "allExps" )
+```
+
+```{r}
 allExps
 ```
 
 To only download the RNA-seq experiment(s):
 
-```{r}
+```{r eval=FALSE}
 rnaseqExps <- getAtlasData( 
     atlasRes$Accession[ 
         grep( 
@@ -76,6 +105,16 @@ rnaseqExps <- getAtlasData(
         ) 
     ] 
 )
+# Downloading Expression Atlas experiment summary from:
+#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-1625/E-MTAB-1625-atlasExperimentSummary.Rdata
+# Successfully downloaded experiment summary object for E-MTAB-1625
+```
+
+```{r, echo=FALSE}
+data( "rnaseqExps" )
+```
+
+```{r}
 rnaseqExps
 ```
 
@@ -161,7 +200,10 @@ preproc( experimentData( affy126data ) )
 You can also download data for a single Expression Atlas experiment using the
 `getAtlasExperiment()` function:
 
-```{r}
+```{r eval=FALSE}
 mtab3007 <- getAtlasExperiment( "E-MTAB-3007" )
+# Downloading Expression Atlas experiment summary from:
+#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-3007/E-MTAB-3007-atlasExperimentSummary.Rdata
+# Successfully downloaded experiment summary object for E-MTAB-3007
 ```
 
