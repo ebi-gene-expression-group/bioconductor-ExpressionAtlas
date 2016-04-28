@@ -1,0 +1,28 @@
+CHANGES IN VERSION 0.99.4
+-------------------------
+
+    o Minor change to NAMESPACE to remove NOTE from check logs.
+
+    o Fixed NEWS file so it works for Bioconductor release notes.
+
+CHANGES IN VERSION 0.99.3
+-------------------------
+
+    o Made dummy data for vignette examples smaller. 
+    
+    o Updated DESCRIPTION.
+
+CHANGES IN VERSION 0.99.2
+-------------------------
+
+    o Using dummy example data for the vignette examples, instead of trying to download real data.
+
+CHANGES IN VERSION 0.99.1
+-------------------------
+
+    o Updated DESCRIPTION; use message() instead of cat() for logging
+
+CHANGES IN VERSION 0.99
+-----------------------
+
+    o Initial release.
