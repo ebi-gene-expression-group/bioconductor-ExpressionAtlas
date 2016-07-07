@@ -34,8 +34,11 @@ getAtlasExperiment <- function( experimentAccession ) {
         ) 
     )
 
-    # Download the data and load it into R.
-    loadResult <- try( load( url( fullUrl ) ), silent = TRUE )
+    # Create connection object for downloading data.
+    connection <- url( fullUrl )
+    
+    # Try download, catching any errors
+    loadResult <- try( load( connection ), silent = TRUE )
     
     # Quit if we got an error.
     if( class( loadResult ) == "try-error" ) {
@@ -69,6 +72,9 @@ getAtlasExperiment <- function( experimentAccession ) {
         return( )
     }
     
+    # Close the connection.
+    close( connection )
+
     # Make sure experiment summary object exists before trying to return it.
     getResult <- try( get( "experimentSummary" ) )
 
