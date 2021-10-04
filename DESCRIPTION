@@ -1,9 +1,9 @@
 Package: ExpressionAtlas
-Version: 1.21.0
-Date: 2018/05/09
+Version: 1.21.1
+Date: 2021/10/04
 Title: Download datasets from EMBL-EBI Expression Atlas
 Author: Maria Keays
-Maintainer: Suhaib Mohammed <suhaib@ebi.ac.uk>
+Maintainer: Pedro Madrigal <pmadrigal@ebi.ac.uk>
 Description: This package is for searching for datasets in EMBL-EBI Expression
     Atlas, and downloading them into R for further analysis. Each Expression Atlas
     dataset is represented as a SimpleList object with one element per platform.
