@@ -25,7 +25,7 @@
 \examples{
     
     # Search for experiments on salt in rice.
-    atlasRes <- searchAtlasExperiments( "salt", "Oryza sativa" )
+    atlasRes <- searchAtlasExperiments( properties = "salt", species = "rice"  )
 
     # Download data for all experiments found.
     atlasData <- getAtlasData( atlasRes$Accession )
