@@ -225,7 +225,6 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
     queryURL <- paste( 
         aeAPIbase,
         paste( properties, collapse = "+OR+" ),
-        "&gxa=TRUE",
         sep = ""
     )
     
