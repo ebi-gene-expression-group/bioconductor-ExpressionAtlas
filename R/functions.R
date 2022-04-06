@@ -76,7 +76,7 @@ getAtlasExperiment <- function( experimentAccession ) {
     close( connection )
 
     # Make sure experiment summary object exists before trying to return it.
-    getResult <- try( get( "experimentSummary" ) )
+    getResult <- try( get( "experiment_summary" ) )
 
     if( class( getResult ) == "try-error" ) {
         
@@ -94,7 +94,7 @@ getAtlasExperiment <- function( experimentAccession ) {
     )
 
     # Return the experiment summary.
-    expSum <- get( "experimentSummary" )
+    expSum <- get( "experiment_summary" )
 
     return( expSum )
 }
