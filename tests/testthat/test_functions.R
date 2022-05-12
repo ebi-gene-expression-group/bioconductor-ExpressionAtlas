@@ -35,5 +35,4 @@ test_that("Search for cancer datasets in human", {
     check_api()
     cancerRes <- searchAtlasExperiments( properties = "cancer", species = "human"  )
     expect_false( ( nrow(cancerRes) == 0 ) ) 
-
 })
