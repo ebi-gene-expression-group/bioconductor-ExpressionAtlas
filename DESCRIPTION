@@ -1,6 +1,6 @@
 Package: ExpressionAtlas
-Version: 1.25.0
-Date: 2022/04/06
+Version: 1.25.1
+Date: 2022/05/12
 Title: Download datasets from EMBL-EBI Expression Atlas
 Author: Maria Keays
 Maintainer: Pedro Madrigal <pmadrigal@ebi.ac.uk>
