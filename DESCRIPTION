@@ -1,6 +1,6 @@
 Package: ExpressionAtlas
-Version: 1.25.1
-Date: 2022/05/12
+Version: 1.25.2
+Date: 2022/05/13
 Title: Download datasets from EMBL-EBI Expression Atlas
 Author: Maria Keays
 Maintainer: Pedro Madrigal <pmadrigal@ebi.ac.uk>
@@ -12,7 +12,7 @@ Description: This package is for searching for datasets in EMBL-EBI Expression
 biocViews: ExpressionData, ExperimentData, SequencingData,
         MicroarrayData, ArrayExpress
 Depends: R (>= 4.1.1), methods, Biobase, SummarizedExperiment, limma,
-        S4Vectors, xml2
+        S4Vectors, xml2, RCurl
 Imports: utils, XML, httr
 Suggests: knitr, testthat, rmarkdown
 VignetteBuilder: knitr
