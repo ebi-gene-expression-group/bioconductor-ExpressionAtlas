@@ -12,7 +12,7 @@ test_that("check test data", {
     data( "rnaseqExps" )
     expect_equal( nrow(atlasRes), 3 )
     expect_equal( ncol(atlasRes), 4 )
-    expect_equal( names(rnaseqExps), "E-MTAB-1625" )
+    expect_identical( names(rnaseqExps), "E-MTAB-1625" )
 })
 
 # the following tests require internet connection
@@ -27,7 +27,7 @@ test_that("Download the experiment summary for E-GEOD-11175", {
 
     check_api()
     geod11175 <- getAtlasExperiment( "E-GEOD-11175" )
-    expect_equal( names( geod11175 ), "A-AFFY-126" )
+    expect_identical( names( geod11175 ), "A-AFFY-126" )
 })
 
 test_that("Search for cancer datasets in human", {
