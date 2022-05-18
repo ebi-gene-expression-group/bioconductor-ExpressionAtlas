@@ -26,7 +26,7 @@ check_api <- function() {
 test_that("Download the experiment summary for E-GEOD-11175", {
 
     check_api()
-    expect_identical( names(getAtlasExperiment("E-GEOD-11175")), "A-AFFY-126" )
+    expect_identical( names(as.list(getAtlasExperiment("E-GEOD-11175"))), "A-AFFY-126" )
 })
 
 test_that("Search for cancer datasets in human", {
