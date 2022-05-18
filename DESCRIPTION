@@ -1,6 +1,6 @@
 Package: ExpressionAtlas
-Version: 1.25.3
-Date: 2022/05/16
+Version: 1.25.4
+Date: 2022/05/18
 Title: Download datasets from EMBL-EBI Expression Atlas
 Author: Maria Keays
 Maintainer: Pedro Madrigal <gene-expression@ebi.ac.uk>
