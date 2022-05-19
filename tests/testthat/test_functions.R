@@ -17,21 +17,15 @@ test_that("check test data", {
 
 # the following tests require internet connection
 
-check_api <- function() {
-    if ( is.character(getURL("www.ebi.ac.uk/arrayexpress/")) == FALSE ) {
-        skip("API not available")
-    }
-}
+test_that("Download data for E-MTAB-1624", {
 
-test_that("Download the experiment summary for E-GEOD-11175", {
-
-    check_api()
-    expect_identical( names(as.list(getAtlasExperiment("E-GEOD-11175"))), "A-AFFY-126" )
+    skip_if_offline()
+    expect_identical( names(getAtlasData( "E-MTAB-1624" )), "E-MTAB-1624" )
 })
 
 test_that("Search for cancer datasets in human", {
 
-    check_api()
-    cancerRes <- searchAtlasExperiments( properties = "cancer", species = "human"  )
-    expect_false( ( nrow(cancerRes) == 0 ) ) 
+    skip_if_offline()
+    cancer_res <- searchAtlasExperiments( properties = "cancer", species = "human"  )
+    expect_false( ( nrow(cancer_res) == 0 ) ) 
 })
