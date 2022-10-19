@@ -62,7 +62,7 @@ getAtlasExperiment <- function( experimentAccession ) {
                         experimentAccession,
                         sep = ""
                     ),
-                    ", or email us at atlas-feedback@ebi.ac.uk",
+                    ", or contact us at https://www.ebi.ac.uk/about/contact/support/gxa",
                     sep = ""
                 ),
                 sep = "\n"
@@ -130,7 +130,7 @@ getAtlasData <- function( experimentAccessions ) {
     # The experimentAccessions vector is empty if none of the accessions are
     # valid. Just quit here if so.
     if( length( experimentAccessions ) == 0 ) {
-        stop( "None of the accessions passed are valid ArrayExpress accessions. Cannot continue." )
+        stop( "None of the accessions passed are valid ArrayExpress/BioStudies accessions. Cannot continue." )
     }
 
     # Go through each one and download it, creating a list.
@@ -154,7 +154,7 @@ getAtlasData <- function( experimentAccessions ) {
 
 
 # .isValidExperimentAccession
-#   - Return TRUE if experiment accession matches expected ArrayExpress
+#   - Return TRUE if experiment accession matches expected ArrayExpress/BioStudies
 #   experiment accession pattern. Return FALSE otherwise.
 .isValidExperimentAccession <- function( experimentAccession ) {
 
@@ -171,7 +171,7 @@ getAtlasData <- function( experimentAccessions ) {
             paste(
                 "\"",
                 experimentAccession,
-                "\" does not look like an ArrayExpress experiment accession. Please check.",
+                "\" does not look like an ArrayExpress/BioStudies experiment accession. Please check.",
                 sep=""
             )
         )
@@ -186,7 +186,7 @@ getAtlasData <- function( experimentAccessions ) {
 
 
 # searchAtlasExperiments
-#   - Search (currently against ArrayExpress API) for datasets in Atlas matching given terms.
+#   - Search (currently against BioStudies API) for datasets in Atlas matching given terms.
 searchAtlasExperiments <- function( properties, species = NULL ) {
 
     # Quit if we don't have any search terms
@@ -218,12 +218,12 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
         stop( "More than one species found. You may only specify one species at a time." )
     }
 
-    # ArrayExpress API base URL.
-    aeAPIbase <- "http://www.ebi.ac.uk/arrayexpress/xml/v2/experiments?keywords="
+    # BioStudies API base URL.
+    bioAPIbase <- "http://www.ebi.ac.uk/biostudies/api/v1/search?keywords="
 
     # Construct the query URL
     queryURL <- paste(
-        aeAPIbase,
+        bioAPIbase,
         paste( properties, collapse = "+OR+" ),
         "&gxa=TRUE",
         sep = ""
@@ -236,7 +236,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
 
         queryURL <- paste(
             queryURL,
-            "&species=",
+            "&organism=",
             species,
             sep = ""
         )
@@ -254,7 +254,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
             paste(
                 "Error running query. Received HTTP error code",
                 status_code( response ),
-                "from server. Please try again later. If you continue to experience problems please email atlas-feedback@ebi.ac.uk"
+                "from server. Please try again later. If you continue to experience problems please contact us at https://www.ebi.ac.uk/about/contact/support/gxa"
             )
         )
     } else {

@@ -18,8 +18,8 @@ test_that("check test data", {
 # the following tests require internet connection
 
 check_api <- function() {
-    if ( is.character(getURL("www.ebi.ac.uk/arrayexpress/")) == FALSE ) {
-        skip("API not available")
+    if ( is.character(getURL("www.ebi.ac.uk/biostudies/")) == FALSE ) {
+        skip("BioStudies API not available")
     }
 }
 

@@ -19,7 +19,7 @@
     }
 }
 \value{
-    A DataFrame containing the ArrayExpress accessions, the species, experiment
+    A DataFrame containing the ArrayExpress/BioStudies accessions, the species, experiment
     types, and titles of Expression Atlas experiments matching the query.
 }
 \examples{
