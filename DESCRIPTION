@@ -2,7 +2,6 @@ Package: ExpressionAtlas
 Version: 1.25.6
 Date: 2022/10/19
 Title: Download datasets from EMBL-EBI Expression Atlas
-Author: Maria Keays, Pedro Madrigal
 Authors@R: 
     c(person(given = "Maria Keays",
            family = "Keays",
