@@ -19,14 +19,19 @@
     }
 }
 \value{
-    A DataFrame containing the ArrayExpress accessions, the species, experiment
+    A DataFrame containing the ArrayExpress/BioStudies accessions, the species, experiment
     types, and titles of Expression Atlas experiments matching the query.
 }
 \examples{
     
-    # Search for experiments on salt in rice.
-    atlasRes <- searchAtlasExperiments( properties = "salt", species = "rice"  )
+    # Search for experiments on salt in oryza (rice)
+    atlasRes <- searchAtlasExperiments( properties = "salt", species = "oryza"  )
 
-    # Download data for all experiments found.
-    atlasData <- getAtlasData( atlasRes$Accession )
+    # Download data for first experiment found.
+    if ( nrow( atlasRes ) == 1 ) {
+        atlasData <- getAtlasData( atlasRes$Accession )
+    } else {
+        atlasData <- getAtlasData( atlasRes$Accession[1] )
+    }
+
 }

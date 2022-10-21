@@ -3,7 +3,7 @@
 \title{ Download data from multiple Expression Atlas experiments }
 \description{
     This function downloads Expression Atlas experiment summary SimpleList
-    objects based on a vector of ArrayExpress experiment accessions, and
+    objects based on a vector of ArrayExpress/BioStudies experiment accessions, and
     returns a list containing these objects.
 }
 \usage{
@@ -11,12 +11,12 @@
 }
 \arguments{
     \item{ experimentAccessions }{
-    Vector of ArrayExpress accessions for experiments to be downloaded.
+    Vector of ArrayExpress/BioStudies accessions for experiments to be downloaded.
     }
 }
 \value{
     A list with one entry per experiment summary SimpleList object. Entries are
-    named using the ArrayExpres accession of the respective experiment.
+    named using the ArrayExpres/BioStudies accession of the respective experiment.
 }
 \examples{
 
