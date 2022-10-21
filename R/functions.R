@@ -301,7 +301,12 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
 
     # get the list of experiments
     allExperiments <- c()
-    modulus <- numExps%%page_size
+    if ( numExps < page_size || numExps%%page_size != 0 ){
+        modulus <- 1
+    } else {
+        modulus <- 0
+    }
+
     number_pages <-  floor(numExps/page_size ) + modulus
     for ( page_number in  1:number_pages ){
 

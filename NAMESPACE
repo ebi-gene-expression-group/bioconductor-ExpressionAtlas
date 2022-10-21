@@ -1,5 +1,5 @@
 export( getAtlasExperiment, getAtlasData, searchAtlasExperiments )
-import( SummarizedExperiment, limma, methods, XML, xml2 )
+import( SummarizedExperiment, limma, methods, XML, xml2, BiocStyle, RCurl )
 importClassesFrom( Biobase, ExpressionSet )
 importFrom( S4Vectors, SimpleList, DataFrame, List )
 importFrom( httr, GET, status_code, content )

@@ -46,15 +46,17 @@ suppressMessages( library( ExpressionAtlas ) )
 ```
 
 ```{r eval=FALSE}
-atlasRes <- searchAtlasExperiments( properties = "salt", species = "rice" )
+atlasRes <- searchAtlasExperiments( properties = "salt", species = "oryza" )
 # Searching for Expression Atlas experiments matching your query ...
 # Query successful.
-# Found 3 experiments matching your query.
+# Found 16 experiments matching your query.
 ```
 
 ```{r, echo=FALSE}
 data( "atlasRes" )
 ```
+
+We will proceed with a subset of three accessions:
 
 ```{r}
 atlasRes
