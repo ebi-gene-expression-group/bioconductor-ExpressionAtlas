@@ -271,15 +271,10 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
         message( "Query successful." )
     }
 
-
-    ## Parse the XML document.
-    #parsedXML <- xmlParse( content( response ) )
+    ## Parse the JSON document.
     parsedJSON <- fromJSON( txt = queryURL )
-    ## Get the root node of the XML.
-    #allExpsNode <- xmlRoot( parsedXML )
-    #
+
     ## Get the number of experiments we found.
-    #numExps <- xmlAttrs( allExpsNode )[ "total" ]
     numExps <- as.numeric( parsedJSON$totalHits )
 
     # If there were no results, quit here.
@@ -299,7 +294,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
         message( "WARNING: Total number of hits reported by BioStudies is not exact" )
     } 
 
-    # get the list of experiments
+    # traverse BioStudies pages to get the list of experiments
     allExperiments <- c()
     if ( numExps < page_size || numExps%%page_size != 0 ){
         modulus <- 1
@@ -307,7 +302,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
         modulus <- 0
     }
 
-    number_pages <-  floor(numExps/page_size ) + modulus
+    number_pages <- floor( numExps/page_size ) + modulus
     for ( page_number in  1:number_pages ){
 
         pageQueryURL <- paste(
@@ -334,6 +329,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
 
 
     # Pull out the title, accession, type and species of each experiment.
+    message( paste( "Retrieving information from", length( allExperiments ), "experiments..." ) )
     for ( acc in 1:length( allExperiments ) ) {
 
         accQueryURL <- paste(
@@ -377,6 +373,8 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
 
     }
 
+    message( "Retrieving information completed."  )
+
     # Create DataFrame containing the above results as columns.
     resultsSummary <- DataFrame(
         Accession = allExperiments,
@@ -388,7 +386,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
 
     # Remove experiments with connection errors.
     if ( any( resultsSummary$ConnectionError ) ) {
-        message( "WARNING: One or more studies removed due to Error running query. Received HTTP error code" )
+        message( "WARNING: One or more studies removed due to Error running query - received HTTP error code" )
         resultsSummary <- resultsSummary[ !resultsSummary$ConnectionError, ]
     }
   
@@ -420,7 +418,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
             return( exptype )
             break
         } else {
-            # will return the first in the list
+            # otherwise will return the first in the list
         }
     }
     return( experiment_list[1] )
