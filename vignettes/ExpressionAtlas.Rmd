@@ -12,8 +12,10 @@ vignette: >
 
 The [EMBL-EBI](http://www.ebi.ac.uk) [Expression
 Atlas](http://www.ebi.ac.uk/gxa) consists of hand-picked high quality datasets
-from [ArrayExpress](http://www.ebi.ac.uk/arrayexpress) that have been manually
-curated and re-analyzed via the Expression Atlas analysis pipeline. The
+from [ArrayExpress](https://www.ebi.ac.uk/biostudies/arrayexpress) that have been manually
+curated and re-analyzed via the Expression Atlas analysis pipeline. Since October 
+2022, ArrayExpress is a collection of functional genomics data in [BioStudies]
+(https://www.ebi.ac.uk/biostudies). The 
 Expression Atlas website allows users to search these datasets for genes and/or
 experimental conditions, to discover which genes are expressed in which
 tissues, cell types, developmental stages, and hundreds of other experimental
@@ -44,15 +46,17 @@ suppressMessages( library( ExpressionAtlas ) )
 ```
 
 ```{r eval=FALSE}
-atlasRes <- searchAtlasExperiments( properties = "salt", species = "rice" )
+atlasRes <- searchAtlasExperiments( properties = "salt", species = "oryza" )
 # Searching for Expression Atlas experiments matching your query ...
 # Query successful.
-# Found 3 experiments matching your query.
+# Found 16 experiments matching your query.
 ```
 
 ```{r, echo=FALSE}
 data( "atlasRes" )
 ```
+
+We will proceed with a subset of three accessions:
 
 ```{r}
 atlasRes

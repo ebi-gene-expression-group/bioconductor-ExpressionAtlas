@@ -2,6 +2,12 @@
 \title{ ExpressionAtlas News }
 \encoding{ UTF-8 }
 
+\section{ Version 1.25.6 }{
+    \itemize{
+        \item Update API for programmatic access from ArrayExpress to BioStudies.
+    }
+}
+
 \section{ Version 0.99.2 }{
     \itemize{
         \item Using dummy example data for the vignette examples, instead of trying to download real data.

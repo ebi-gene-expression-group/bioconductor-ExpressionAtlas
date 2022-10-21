@@ -3,7 +3,7 @@
 \title{ A DataFrame listing some Expression Atlas experiments }
 \description{
     This is a DataFrame object listing some Expression Atlas experiments, to
-    demonstrate a typical example of the reesults of using the
+    demonstrate a typical example of the results of using the
     \code{searchAtlasExperiments()} function.
 }
 \usage{
