@@ -424,3 +424,10 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
     return( experiment_list[1] )
 }
 
+
+# ----- add single-cell support
+
+getSCAtlasExperiment <- function( experimentAccession ) {
+
+searchSCAtlasExperiments <- function( properties, species = NULL ) {
+    
