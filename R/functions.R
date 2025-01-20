@@ -171,7 +171,7 @@ getAtlasData <- function( experimentAccessions ) {
             paste(
                 "\"",
                 experimentAccession,
-                "\" does not look like an ArrayExpress/BioStudies experiment accession. Please check.",
+                "\" does not look like an ArrayExpress/BioStudies/Atlas experiment accession. Please check.",
                 sep=""
             )
         )
@@ -425,9 +425,122 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
 }
 
 
-# ----- add single-cell support
+# ----- add single-cell support ----
 
-getSCAtlasExperiment <- function( experimentAccession ) {
+#getSCAtlasExperiment <- function( experimentAccession ) {
 
-searchSCAtlasExperiments <- function( properties, species = NULL ) {
-    
+#searchSCAtlasExperiments <- function( properties, species = NULL ) {
+
+getAtlasSCExperiment <- function( experimentAccession ) {
+
+    # Make sure the experiment accession is in the correct format.
+    if( ! .isValidExperimentAccession( experimentAccession ) ) {
+
+        stop( "Experiment accession not valid. Cannot continue." )
+    }
+
+    # URL to download Atlas data from.
+    urlBase <- "http://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/sc_experiments"
+
+    # Create filename for anndata file.
+    atlasAnnDataFile <- paste(
+        experimentAccession,
+        ".project.h5ad",
+        sep = ""
+    )
+
+    # Create full URL to download R data from.
+    fullUrl <- paste(
+        urlBase,
+        experimentAccession,
+        atlasAnnDataFile,
+        sep = "/"
+    )
+
+    message(
+        paste(
+            "Downloading Single Cell Atlas experiment annData into a temp path from:\n",
+            fullUrl
+        )
+    )
+
+    # Create connection object for downloading data.
+    connection <- url( fullUrl )
+
+    # Try download, catching any errors
+    #loadResult <- try( load( connection ), silent = TRUE )
+
+    # Download the H5AD file to a temporary location
+    tempFile <- tempfile(fileext = ".h5ad")
+    download.file(fullUrl, tempFile, mode = "wb")
+
+
+    # Load the AnnData object (pkgs 'rhdf5' 'HDF5Array' required)
+    adata <- readH5AD( tempFile, reader="R" )
+    # Reads a H5AD file and returns a SingleCellExperiment object.
+
+    loadResult <- try( readH5AD( tempFile, reader="R" ), silent = TRUE )
+
+
+    # Quit if we got an error.
+    if( class( loadResult ) == "try-error" ) {
+
+        msg <- geterrmessage()
+
+        warning(
+            paste(
+                paste(
+                    "Error encountered while trying to download anndata file for",
+                    experimentAccession,
+                    ":"
+                ),
+                msg,
+                paste(
+                    "There may not currently be a Single-Cell Expression Atlas experiment anndata file available for ",
+                    experimentAccession,
+                    ".\nPlease try again later, check the website at ",
+                    paste(
+                        "http://www.ebi.ac.uk/gxa/sc/experiments/",
+                        experimentAccession,
+                        sep = ""
+                    ),
+                    ", or contact us at https://www.ebi.ac.uk/about/contact/support/gxasc",
+                    sep = ""
+                ),
+                sep = "\n"
+            )
+        )
+
+        return( )
+    }
+
+    # Close the connection.
+    close( connection )
+
+
+    # Make sure matrix X exists before trying to return it.
+    getResult <- try( assays(adata)$X )
+
+    if( class( getResult ) == "try-error" ) {
+
+        stop(
+            "ERROR - Download appeared successful but no assay X was found."
+        )
+    }
+
+    # If we're still here, things must have worked ok.
+    message(
+        paste(
+            "Successfully downloaded assay X object for",
+            experimentAccession
+        )
+    )
+
+    # Return the experiment summary.
+    X <- assays(adata)$X 
+
+    return( X )
+    # we need to decide if we a returning here a matrix, of the complete SingleCellExperiment object
+}
+
+
