@@ -425,6 +425,41 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
 }
 
 
+getExperimentType <- function(experimentAccession) {
+
+    # Base URL for downloading data.
+    urlBase <- "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments"
+    
+    # Define filenames for configuration files.
+    configFile <- paste(experimentAccession, "-configuration.xml", sep = "")
+
+    # Define ftpUrl for configuration file.
+    ftpUrl <- paste(urlBase, experimentAccession, configFile, sep = "/")
+
+    # Read the XML file directly from the FTP URL
+    message("Downloading XML file from FTP...")
+    xmlContent <- tryCatch({
+        read_xml(ftpUrl)
+    }, error = function(e) {
+        stop("Failed to download or read the XML file: ", e$message)
+    })
+    
+    # Extract the <configuration> node and the experimentType attribute
+    configurationNode <- xml_find_first(xmlContent, "/configuration")
+    if (is.na(configurationNode)) {
+        stop("No <configuration> node found in the XML file.")
+    }
+    
+    # Get the value of the experimentType attribute
+    experimentType <- xml_attr(configurationNode, "experimentType")
+    if (is.na(experimentType)) {
+        stop("The 'experimentType' attribute is missing in the <configuration> node.")
+    }
+    
+    return(experimentType)
+}
+
+
 # ----- add visualisation support ----
 
 # at
