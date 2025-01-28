@@ -425,7 +425,8 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
 }
 
 
-getExperimentType <- function(experimentAccession) {
+# Internal helper to get Experiment Type from accession
+.getExperimentType <- function(experimentAccession) {
 
     # Base URL for downloading data.
     urlBase <- "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments"
