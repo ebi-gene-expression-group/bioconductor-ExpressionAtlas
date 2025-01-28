@@ -425,11 +425,25 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
 }
 
 
+# ----- add visualisation support ----
+
+# at
+# getNormalisedAtlasExpression ( experimentAccession , normalisation='TPM' ) { }
+# heatmapAtlasExperiment ( experimentAccession  )
+#    input is the output of 'getAtlasExperiment' OR 'getNormalisedAtlasExpression'
+#    in the first case it will normalise the raw counts to CPM
+#    the heatmpa should show Expression Units
+# possible packages -> complexHeatmap , or ggpplot2
+
+# getAnalysticsDifferentialAtlasExpression ( experimentAccession ) {}
+# volcanoDifferentialAtlasExperiment ( experimentAccession  )
+# input is the output of 'getAnalysticsDifferentialAtlasExpression'
+
+
 # ----- add single-cell support ----
 
-#getSCAtlasExperiment <- function( experimentAccession ) {
-
-#searchSCAtlasExperiments <- function( properties, species = NULL ) {
+# pm
+#searchSCAtlasExperiments <- function( properties, species = NULL ) { }
 
 getAtlasSCExperiment <- function( experimentAccession ) {
 
@@ -541,6 +555,12 @@ getAtlasSCExperiment <- function( experimentAccession ) {
 
     return( X )
     # we need to decide if we a returning here a matrix, of the complete SingleCellExperiment object
+    # or an object from "anndata" package
 }
 
+# iy
+# heatmapSCAtlasExperiment ( experimentAccession , genes=NULL )
+#  input here would be output of 'getAtlasSCExperiment', aka a SingleCellExperiment object
+#  The goal is to plot a Heatmap, from user-defined genes
 
+# dimreadSCAtlasExperiment ( experimentAccession , dim='umap' ) {  }
