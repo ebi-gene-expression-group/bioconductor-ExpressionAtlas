@@ -518,9 +518,31 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         sapply(strsplit(col, ","), function(x) x[3])
     }
 
-
     # the first two columns are GeneID and Gene.Name, fetching 3rd column as it contains mean values. 
     results[ ,3:ncol(results)] <- lapply(results[ ,3:ncol(results)], get_mean_value)
+
+    # Define filenames for configuration files.
+    configFile <- paste(experimentAccession, "-configuration.xml", sep = "")
+
+    # Define ftpUrl for configuration file.
+    configUrl <- paste(urlBase, experimentAccession, configFile, sep = "/")
+
+    # Read the XML file directly from the FTP URL
+    message("Downloading XML file from FTP...")
+    xmlContent <- tryCatch({
+        read_xml(configUrl)
+    }, error = function(e) {
+        stop("Failed to download or read the XML file: ", e$message)
+    })
+
+    # Extract the assay_group id and label attributes
+    assay_groups <- xml_find_all(xmlContent, ".//assay_group")
+
+    # Create a named vector with id as names and label as values
+    assay_vector <- setNames(xml_attr(assay_groups, "label"), xml_attr(assay_groups, "id"))
+
+    # Replace the columns names in results, excluding 'GeneID' and 'Gene.Name' columns
+    colnames(results)[-c(1, 2)] <- assay_vector[colnames(results)[-c(1, 2)]]
 
     return(results)
 }
