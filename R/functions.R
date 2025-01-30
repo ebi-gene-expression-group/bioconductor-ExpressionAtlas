@@ -460,6 +460,71 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
     return(experimentType)
 }
 
+getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "tpm") {
+
+    # Ensure the experiment accession is in the correct format.
+    if (!.isValidExperimentAccession(experimentAccession)) {
+        stop("Experiment accession not valid. Cannot continue.")
+    }
+
+    expType <- .getExperimentType(experimentAccession)
+
+    if (expType %in% c("rnaseq_mrna_baseline" )){
+        message(paste(experimentAccession," is ", expType , ", will continue downloading data"))
+    } else {
+        stop("Experiment type not contain normalised expression data.")
+    }
+
+    # Ensure the normalisation is valid.
+    fileType <- match.arg(normalisation, c("tpm", "fpkm"))
+
+    # Base URL for downloading data.
+    urlBase <- "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments"
+
+    # Define filenames for TPM and FPKM files.
+    expressionFile <- paste(experimentAccession, "-", fileType, "s.tsv", sep = "")
+
+    # Create full URLs for TPM and FPKM files.
+    expressionUrl <- paste(urlBase, experimentAccession, expressionFile, sep = "/")
+
+    # Initialise a list to hold the results.
+    results <- list()
+
+    # Download and read TPM file if requested or in "both" mode.
+    message(paste("Downloading expression file from:\n", expressionUrl))
+    results <- tryCatch({
+        read.table(expressionUrl, header = TRUE, sep = "\t", stringsAsFactors = FALSE, na.strings = "", comment.char = "#")
+    }, error = function(e) {
+        warning(paste("Failed to download or read expression file for", experimentAccession, ":", e$message))
+        NULL
+    })
+
+    # Remove NULL results for files that could not be downloaded.
+    results <- Filter(Negate(is.null), results)
+
+    # Check if any files were successfully downloaded.
+    if (length(results) == 0) {
+        stop("ERROR - Could not download the requested data. Please check the experiment type is RNAseq baseline or try again later.")
+    }
+
+    # Message indicating success.
+    if ("expression" %in% names(results)) {
+        message(paste("Successfully downloaded expression data for", experimentAccession))
+    }
+
+    # TPMs and FPKMs can have multiple values in expression comma-separated columns (min, lower quartile, mean, higher quartile and max)
+    get_mean_value <- function(col) {
+        # Split by commas and return the third value
+        sapply(strsplit(col, ","), function(x) x[3])
+    }
+
+
+    # the first two columns are GeneID and Gene.Name, fetching 3rd column as it contains mean values. 
+    results[ ,3:ncol(results)] <- lapply(results[ ,3:ncol(results)], get_mean_value)
+
+    return(results)
+}
+
 
 # ----- add visualisation support ----
 
