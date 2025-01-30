@@ -548,6 +548,102 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
 }
 
 
+generate_heatmap_from_df <- function(df, 
+                                     filename = "heatmap",
+                                     gene_column = "Gene.Name",   
+                                     heatmap_color = "Blues",
+                                     top_n = 100,
+                                     title = TRUE ) {  
+  
+    if (!is.data.frame(df)) stop("Input must be a dataframe.")
+        rownames( df ) <- df[[1]]
+    # Remove the gene id column.
+    df[[1]] <- NULL
+    geneIDsToGeneNames <- data.frame( id = df[[1]], stringsAsFactors=FALSE )
+    
+    # Add the Ensembl gene IDs as the row names.
+    rownames( geneIDsToGeneNames ) <- rownames(df)
+
+    # Identify rows where the first column (gene names) is NA
+    naGeneNameIndices <- which(is.na(geneIDsToGeneNames[, 1]))
+
+    # Replace NA values with the corresponding row names (gene IDs)
+    geneIDsToGeneNames[naGeneNameIndices, 1] <- rownames(geneIDsToGeneNames)[naGeneNameIndices]
+
+
+    # Now remove the Gene.Name column from the data frame.
+    df[[1]] <- NULL
+
+    df[] <- lapply(df, as.numeric)
+
+
+    if(dim(df)[2] > 1) {
+        rowVariances <- rowVars( df )
+    } else {
+        # can't calculate variance of one row, use the FPKM values (alhough the heatmap isn't as valuable then)
+        rowVariances <- df[1]
+    }
+
+    # Get the indices of the top top_n most variable genes.
+    chosenColumnIndices<- order( rowVariances, decreasing = TRUE )[1:top_n]
+    topNgeneExpressions <- df[ chosenColumnIndices , ]
+
+    # Get the gene names for the top top_n gene IDs, to use as labels for the
+    # heatmape rows.
+    topNgeneNames <- geneIDsToGeneNames[ chosenColumnIndices, ]
+
+    # Scale and center the expression levels using Z-score transformation, so they
+    # have mean 0 and standard deviation 1. .
+    topNgeneExpressions <- t( scale( t( topNgeneExpressions )))
+
+    # Get the assay group labels to use as the labels for the heatmap columns.
+    assayGroupLabels <- colnames( topNgeneExpressions )
+
+    # Some nice colours.
+    colours <- colorRampPalette( brewer.pal( 9, heatmap_color ) )( top_n )
+
+    imageWidth <- 8
+    if( ( length( assayGroupLabels ) / 2 ) > 8 ) {
+        imageWidth <- length( assayGroupLabels ) / 2
+    }
+
+    # Get the lengths of the longest assay group label
+    longestLabel <- max(unlist(lapply( assayGroupLabels, function( x ) nchar( x ) )))
+
+    # Changing image and margin height to get the column (assay
+    # group) labels to fit on the page. 
+    if( longestLabel / 3 > 8 ) {
+        imageHeight <- ( longestLabel / 3 )
+        marginHeight <- ( longestLabel / 3 )
+    } else {
+        imageHeight <- 8
+        marginHeight <- 8
+    }
+
+    heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
+
+    pdf(heatmap_file, height=imageHeight, width=imageWidth) 
+
+    title <- paste("Gene Expression for top ", top_n, " Genes.", sep = "")
+
+    # Make the heatmap.
+    heatmap.2(
+        as.matrix( topNgeneExpressions ),
+        col = colours,
+        labRow = topNgeneNames,
+        labCol = assayGroupLabels,
+        key = FALSE,
+        trace = "none",
+        cexRow = 0.4,
+        cexCol = 0.7, # hardcoding for now, may need to make this dynamic but requires thinking about.
+        margins = c( marginHeight, 6 ),
+        main = title
+    )
+
+    invisible( dev.off() )
+}
+
+
 # ----- add visualisation support ----
 
 # at
