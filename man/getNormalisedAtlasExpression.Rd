@@ -27,7 +27,7 @@
     mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" )
 
     # See the entries available
-    dim(results)
+    dim(mtab4045_tpm)
     # Prints out the following:
     # [1] 57147    45
 
