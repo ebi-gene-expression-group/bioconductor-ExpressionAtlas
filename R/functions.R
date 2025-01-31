@@ -548,15 +548,16 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
 }
 
 
-generate_heatmap_from_df <- function(df, 
+heatmapAtlasExperiment <- function(df, 
                                      filename = "heatmap",
-                                     gene_column = "Gene.Name",   
                                      heatmap_color = "Blues",
                                      top_n = 100,
-                                     title = TRUE ) {  
-  
+                                     show_heatmap_title = TRUE ) {  
+
     if (!is.data.frame(df)) stop("Input must be a dataframe.")
-        rownames( df ) <- df[[1]]
+    
+    rownames( df ) <- df[[1]]
+    
     # Remove the gene id column.
     df[[1]] <- NULL
     geneIDsToGeneNames <- data.frame( id = df[[1]], stringsAsFactors=FALSE )
@@ -570,10 +571,10 @@ generate_heatmap_from_df <- function(df,
     # Replace NA values with the corresponding row names (gene IDs)
     geneIDsToGeneNames[naGeneNameIndices, 1] <- rownames(geneIDsToGeneNames)[naGeneNameIndices]
 
-
     # Now remove the Gene.Name column from the data frame.
     df[[1]] <- NULL
 
+    # Converting the data in the data frame to numeric.
     df[] <- lapply(df, as.numeric)
 
 
@@ -637,7 +638,7 @@ generate_heatmap_from_df <- function(df,
         cexRow = 0.4,
         cexCol = 0.7, # hardcoding for now, may need to make this dynamic but requires thinking about.
         margins = c( marginHeight, 6 ),
-        main = title
+        main = ifelse(show_heatmap_title, title, "")
     )
 
     invisible( dev.off() )
