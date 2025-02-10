@@ -549,7 +549,6 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
 
     } else if (normalisation %in% c("cpm")) {
         # Define filenames for TPM and FPKM files.
-        # E-MTAB-4045-raw-counts.tsv.undecorated
 
         experiment_summary <- getAtlasData( c(experimentAccession))[[experimentAccession]]
 
@@ -562,7 +561,8 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         # Adds two columns GeneID and Gene.Name to DataFrame to match TPM and FPKM output format.
         results <- cbind(GeneID = rownames(results), Gene.Name = NA, results)
 
-        # assayData(ex[["A-AFFY-44"]])$exprs this is microarray so not applied here
+        # assayData(ex[["A-AFFY-44"]])$exprs 
+        # this is microarray so not applied here
 
         return(results)
 
