@@ -475,76 +475,101 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         stop("Experiment type not contain normalised expression data.")
     }
 
-    # Ensure the normalisation is valid.
-    fileType <- match.arg(normalisation, c("tpm", "fpkm"))
-
     # Base URL for downloading data.
     urlBase <- "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments"
 
-    # Define filenames for TPM and FPKM files.
-    expressionFile <- paste(experimentAccession, "-", fileType, "s.tsv", sep = "")
+    if (normalisation %in% c("tpm", "fpkm")) {
+        # Ensure the normalisation is valid.
+        fileType <- match.arg(normalisation, c("tpm", "fpkm"))
 
-    # Create full URLs for TPM and FPKM files.
-    expressionUrl <- paste(urlBase, experimentAccession, expressionFile, sep = "/")
+        # Define filenames for TPM and FPKM files.
+        expressionFile <- paste(experimentAccession, "-", fileType, "s.tsv", sep = "")
 
-    # Initialise a list to hold the results.
-    results <- list()
+        # Create full URLs for TPM and FPKM files.
+        expressionUrl <- paste(urlBase, experimentAccession, expressionFile, sep = "/")
 
-    # Download and read TPM file if requested or in "both" mode.
-    message(paste("Downloading expression file from:\n", expressionUrl))
-    results <- tryCatch({
-        read.table(expressionUrl, header = TRUE, sep = "\t", stringsAsFactors = FALSE, na.strings = "", comment.char = "#")
-    }, error = function(e) {
-        warning(paste("Failed to download or read expression file for", experimentAccession, ":", e$message))
-        NULL
-    })
+        # Initialise a list to hold the results.
+        results <- list()
 
-    # Remove NULL results for files that could not be downloaded.
-    results <- Filter(Negate(is.null), results)
+        # Download and read TPM file if requested or in "both" mode.
+        message(paste("Downloading expression file from:\n", expressionUrl))
+        results <- tryCatch({
+            read.table(expressionUrl, header = TRUE, sep = "\t", stringsAsFactors = FALSE, na.strings = "", comment.char = "#")
+        }, error = function(e) {
+            warning(paste("Failed to download or read expression file for", experimentAccession, ":", e$message))
+            NULL
+        })
 
-    # Check if any files were successfully downloaded.
-    if (length(results) == 0) {
-        stop("ERROR - Could not download the requested data. Please check the experiment type is RNAseq baseline or try again later.")
+        # Remove NULL results for files that could not be downloaded.
+        results <- Filter(Negate(is.null), results)
+
+        # Check if any files were successfully downloaded.
+        if (length(results) == 0) {
+            stop("ERROR - Could not download the requested data. Please check the experiment type is RNAseq baseline or try again later.")
+        }
+
+        # Message indicating success.
+        if ("expression" %in% names(results)) {
+            message(paste("Successfully downloaded expression data for", experimentAccession))
+        }
+
+        # TPMs and FPKMs can have multiple values in expression comma-separated columns (min, lower quartile, mean, higher quartile and max)
+        get_mean_value <- function(col) {
+            # Split by commas and return the third value
+            sapply(strsplit(col, ","), function(x) x[3])
+        }
+
+        # the first two columns are GeneID and Gene.Name, fetching 3rd column as it contains mean values. 
+        results[ ,3:ncol(results)] <- lapply(results[ ,3:ncol(results)], get_mean_value)
+
+        # Define filenames for configuration files.
+        configFile <- paste(experimentAccession, "-configuration.xml", sep = "")
+
+        # Define ftpUrl for configuration file.
+        configUrl <- paste(urlBase, experimentAccession, configFile, sep = "/")
+
+        # Read the XML file directly from the FTP URL
+        message("Downloading XML file from FTP...")
+        xmlContent <- tryCatch({
+            read_xml(configUrl)
+        }, error = function(e) {
+            stop("Failed to download or read the XML file: ", e$message)
+        })
+
+        # Extract the assay_group id and label attributes
+        assay_groups <- xml_find_all(xmlContent, ".//assay_group")
+
+        # Create a named vector with id as names and label as values
+        assay_vector <- setNames(xml_attr(assay_groups, "label"), xml_attr(assay_groups, "id"))
+
+        # Replace the columns names in results, excluding 'GeneID' and 'Gene.Name' columns
+        colnames(results)[-c(1, 2)] <- assay_vector[colnames(results)[-c(1, 2)]]
+
+        return(results)
+
+    } else if (normalisation %in% c("cpm")) {
+        # Define filenames for TPM and FPKM files.
+        # E-MTAB-4045-raw-counts.tsv.undecorated
+
+        experiment_summary <- getAtlasData( c(experimentAccession))[[experimentAccession]]
+
+        # Get counts.
+        results_array <- assay(experiment_summary$rnaseq, "counts")
+
+        # Converts to DataFrame to match TPM and FPKM output.
+        results <- as.data.frame(results_array)
+
+        # Adds two columns GeneID and Gene.Name to DataFrame to match TPM and FPKM output format.
+        results <- cbind(GeneID = rownames(results), Gene.Name = NA, results)
+
+        # assayData(ex[["A-AFFY-44"]])$exprs this is microarray so not applied here
+
+        return(results)
+
+    } else {
+        stop("Defined Normalisation type ", normalisation ," is not supported, must be a tpm, fpkm or cpm.")
     }
 
-    # Message indicating success.
-    if ("expression" %in% names(results)) {
-        message(paste("Successfully downloaded expression data for", experimentAccession))
-    }
-
-    # TPMs and FPKMs can have multiple values in expression comma-separated columns (min, lower quartile, mean, higher quartile and max)
-    get_mean_value <- function(col) {
-        # Split by commas and return the third value
-        sapply(strsplit(col, ","), function(x) x[3])
-    }
-
-    # the first two columns are GeneID and Gene.Name, fetching 3rd column as it contains mean values. 
-    results[ ,3:ncol(results)] <- lapply(results[ ,3:ncol(results)], get_mean_value)
-
-    # Define filenames for configuration files.
-    configFile <- paste(experimentAccession, "-configuration.xml", sep = "")
-
-    # Define ftpUrl for configuration file.
-    configUrl <- paste(urlBase, experimentAccession, configFile, sep = "/")
-
-    # Read the XML file directly from the FTP URL
-    message("Downloading XML file from FTP...")
-    xmlContent <- tryCatch({
-        read_xml(configUrl)
-    }, error = function(e) {
-        stop("Failed to download or read the XML file: ", e$message)
-    })
-
-    # Extract the assay_group id and label attributes
-    assay_groups <- xml_find_all(xmlContent, ".//assay_group")
-
-    # Create a named vector with id as names and label as values
-    assay_vector <- setNames(xml_attr(assay_groups, "label"), xml_attr(assay_groups, "id"))
-
-    # Replace the columns names in results, excluding 'GeneID' and 'Gene.Name' columns
-    colnames(results)[-c(1, 2)] <- assay_vector[colnames(results)[-c(1, 2)]]
-
-    return(results)
 }
 
 
