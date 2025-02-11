@@ -23,7 +23,7 @@ Description: This package is for searching for datasets in EMBL-EBI Expression
 biocViews: ExpressionData, ExperimentData, SequencingData,
         MicroarrayData, ArrayExpress
 Depends: R (>= 4.2.0), methods, Biobase, SummarizedExperiment, limma,
-        S4Vectors, xml2, RCurl, jsonlite, BiocStyle, zellkonverter, gplots, HDF5Array, rhdf5, genefilter, RColorBrewer
+        S4Vectors, xml2, RCurl, jsonlite, BiocStyle, zellkonverter, gplots, HDF5Array, rhdf5, genefilter, RColorBrewer, edgeR
 Imports: utils, XML, httr
 Suggests: knitr, testthat, rmarkdown
 VignetteBuilder: knitr

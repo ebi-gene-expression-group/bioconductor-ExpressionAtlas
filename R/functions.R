@@ -478,6 +478,12 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
     # Base URL for downloading data.
     urlBase <- "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments"
 
+    # Define filenames for configuration files.
+    configFile <- paste(experimentAccession, "-configuration.xml", sep = "")
+        
+    # XML URL for downloading config data.
+    xmlUrl <- paste(urlBase, experimentAccession, configFile, sep = "/")
+
     if (normalisation %in% c("tpm", "fpkm")) {
         # Ensure the normalisation is valid.
         fileType <- match.arg(normalisation, c("tpm", "fpkm"))
@@ -522,16 +528,12 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         # the first two columns are GeneID and Gene.Name, fetching 3rd column as it contains mean values. 
         results[ ,3:ncol(results)] <- lapply(results[ ,3:ncol(results)], get_mean_value)
 
-        # Define filenames for configuration files.
-        configFile <- paste(experimentAccession, "-configuration.xml", sep = "")
 
-        # Define ftpUrl for configuration file.
-        configUrl <- paste(urlBase, experimentAccession, configFile, sep = "/")
 
         # Read the XML file directly from the FTP URL
         message("Downloading XML file from FTP...")
         xmlContent <- tryCatch({
-            read_xml(configUrl)
+            read_xml(xmlUrl)
         }, error = function(e) {
             stop("Failed to download or read the XML file: ", e$message)
         })
@@ -553,18 +555,60 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         experiment_summary <- getAtlasData( c(experimentAccession))[[experimentAccession]]
 
         # Get counts.
-        results_array <- assay(experiment_summary$rnaseq, "counts")
+        counts_matrix <- assay(experiment_summary$rnaseq, "counts")
+
+        # Calculates CPM from counts using EdgeR.
+        cpm_matrix <- cpm(counts_matrix)
 
         # Converts to DataFrame to match TPM and FPKM output.
-        results <- as.data.frame(results_array)
+        cpm_df <- as.data.frame(cpm_matrix)
 
         # Adds two columns GeneID and Gene.Name to DataFrame to match TPM and FPKM output format.
-        results <- cbind(GeneID = rownames(results), Gene.Name = NA, results)
+        # cpm_df <- cbind(GeneID = rownames(cpm_df), Gene.Name = NA, cpm_df)
+
+        xmlContent <- tryCatch({
+            read_xml(xmlUrl)
+        }, error = function(e) {
+            stop("Failed to download or read the XML file: ", e$message)
+        })
+
+        assay_groups <- xml_find_all(xmlContent, ".//assay_group")
+
+        subgroups_list <- list()
+
+        # Loop through each assay group and extract label and assays
+        for (group in assay_groups) {
+            # Get the label of the assay group
+            label <- xml_attr(group, "label")
+
+            # Get all assay values in the group
+            assays <- xml_text(xml_find_all(group, "assay"))
+
+            # Add to the list
+            subgroups_list[[label]] <- assays
+        }
+
+        cpm_mean_df <- data.frame(row.names = rownames(cpm_df))
+
+        # Loop through subgroups and calculate the row-wise mean
+        for (group_name in names(subgroups_list)) {
+            group_columns <- subgroups_list[[group_name]]
+
+            # Ensure columns exist in 'results' before proceeding
+            if(all(group_columns %in% colnames(cpm_df))) {
+                # Calculate the row-wise mean for the subgroup columns and assign it to df
+                cpm_mean_df[[group_name]] <- rowMeans(cpm_df[, group_columns, drop = FALSE])
+            } else {
+                print(paste("Error: Columns not found for", group_name))
+            }
+        }
+
+        cpm_mean_df <- cbind(GeneID = rownames(cpm_mean_df), Gene.Name = NA, cpm_mean_df)
 
         # assayData(ex[["A-AFFY-44"]])$exprs 
         # this is microarray so not applied here
 
-        return(results)
+        return(cpm_mean_df)
 
     } else {
         stop("Defined Normalisation type ", normalisation ," is not supported, must be a tpm, fpkm or cpm.")
