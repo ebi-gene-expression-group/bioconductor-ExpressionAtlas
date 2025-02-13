@@ -1,8 +1,17 @@
 ---
 title: "ExpressionAtlas package vignette"
-author: "Maria Keays"
+author:
+  - name: "Maria Keays"
+    affiliation: "EMBL-EBI"
+  - name: "Pedro Madrigal"
+    affiliation: "EMBL-EBI"
+  - name: "Anil Thanki"
+    affiliation: "EMBL-EBI"
+  - name: "Iris Yu"
+    affiliation: "EMBL-EBI"
 date: "`r Sys.Date()`"
 output: html_document
+keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor"]
 vignette: >
     %\VignetteEngine{ knitr::rmarkdown }
     %\VignetteIndexEntry{ ExpressionAtlas }
@@ -199,7 +208,9 @@ A brief outline of how the raw data was normalized is in the *experimentData* sl
 preproc( experimentData( affy126data ) )
 ```
 
-# Downloading a single Expression Atlas experiment summary
+# Downloading and visualising a single Expression Atlas experiment
+
+## Downloading a single Expression Atlas experiment summary
 
 You can also download data for a single Expression Atlas experiment using the
 `getAtlasExperiment()` function:
@@ -211,7 +222,7 @@ mtab3007 <- getAtlasExperiment( "E-MTAB-3007" )
 # Successfully downloaded experiment summary object for E-MTAB-3007
 ```
 
-# Downloading a single Expression Atlas experiment normalised data
+## Downloading a single Expression Atlas experiment normalised data
 
 You can also download normalised data for a single Expression Atlas experiment using the
 `getNormalisedAtlasExpression()` function:
@@ -235,7 +246,7 @@ mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" )
 # Successfully downloaded experiment summary object for E-MTAB-4045
 ```
 
-# Creating heatmap from a single Expression Atlas experiment normalised data
+## Creating heatmap from a single Expression Atlas experiment normalised data
 
 You can create heatmap from downloaded normalised data for a single Expression Atlas experiment using the
 `getNormalisedAtlasExpression()` function:
@@ -252,5 +263,17 @@ mtab3007 <- heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap.pdf",
 # Downloading expression file from:
 #  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-3007/E-MTAB-3007-tpm.tsv
 # Successfully downloaded expression data for E-MTAB-3007
+```
+
+# Downloading and visualising a Single-Cell Expression Atlas experiment
+
+## Downloading a study into a SingleCellExperiment object
+
+You can download data for a Single-Cell Expression Atlas experiment using the 
+`getAtlasSCExperiment()` function:
+
+```{r eval=FALSE}
+enad19 <- getAtlasSCExperiment( "E-ENAD-19" )
+# returns a SingleCellExperiment object
 ```
 

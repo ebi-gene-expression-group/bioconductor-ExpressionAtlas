@@ -601,7 +601,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         counts_matrix <- assay(experiment_summary$rnaseq, "counts")
 
         # Calculates CPM from counts using EdgeR.
-        cpm_matrix <- cpm(counts_matrix)
+        cpm_matrix <- edgeR::cpm(counts_matrix)
 
         # Converts to DataFrame to match TPM and FPKM output.
         cpm_df <- as.data.frame(cpm_matrix)
