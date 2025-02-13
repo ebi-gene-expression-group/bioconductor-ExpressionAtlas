@@ -34,13 +34,35 @@ getAtlasExperiment <- function( experimentAccession ) {
         )
     )
 
-    # Create connection object for downloading data.
-    connection <- url( fullUrl )
+    max_attempts <- 5
+    delay_seconds <- 3
 
-    # Try download, catching any errors
-    loadResult <- try( load( connection ), silent = TRUE )
+    attempt <- 1
+    loadResult <- NULL
 
-    # Quit if we got an error.
+    while (attempt <= max_attempts) {
+        # Create connection object for downloading data.
+        connection <- url(fullUrl)
+
+        # Try download, catching any errors
+        loadResult <- try(load(connection), silent = TRUE)
+
+        # Close the connection after each attempt
+        close(connection)
+
+        # Check if download was successful
+        if (class(loadResult) != "try-error") {
+            break
+        }
+
+        message(paste("Attempt", attempt, "failed. Retrying in", delay_seconds, "seconds..."))
+        Sys.sleep(delay_seconds)
+
+        attempt <- attempt + 1
+    }
+
+
+    # If all attempts failed, display an error message and return
     if( class( loadResult ) == "try-error" ) {
 
         msg <- geterrmessage()
@@ -72,8 +94,6 @@ getAtlasExperiment <- function( experimentAccession ) {
         return( )
     }
 
-    # Close the connection.
-    close( connection )
 
     # Make sure experiment summary object exists before trying to return it.
     getResult <- try( get( "experiment_summary" ) )
@@ -439,11 +459,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
 
     # Read the XML file directly from the FTP URL
     message("Downloading XML file from FTP...")
-    xmlContent <- tryCatch({
-        read_xml(ftpUrl)
-    }, error = function(e) {
-        stop("Failed to download or read the XML file: ", e$message)
-    })
+    xmlContent <- .retryDownload(ftpUrl)
     
     # Extract the <configuration> node and the experimentType attribute
     configurationNode <- xml_find_first(xmlContent, "/configuration")
@@ -459,6 +475,43 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
     
     return(experimentType)
 }
+
+.retryDownload <- function(url, attempts = 5, delay = 3) {
+    for (i in 1:attempts) {
+        result <- tryCatch({
+            read_xml(url)
+        }, error = function(e) {
+            message(paste("Attempt", i, "failed:", e$message))
+            NULL
+        })
+        if (!is.null(result)) return(result)
+        Sys.sleep(delay)
+    }
+    stop("Failed to download XML file after multiple attempts.")
+}
+
+.downloadExpressionFile <- function(expressionUrl, experimentAccession, attempts = 5, delay = 3) {
+    message(paste("Downloading expression file from:\n", expressionUrl))
+    
+    for (i in 1:attempts) {
+        result <- tryCatch({
+            read.table(expressionUrl, header = TRUE, sep = "\t", stringsAsFactors = FALSE, na.strings = "", comment.char = "#")
+        }, error = function(e) {
+            message(paste("Attempt", i, "failed:", e$message))
+            NULL
+        })
+        
+        if (!is.null(result)) {
+            return(result)  # Return successfully downloaded data
+        }
+        
+        Sys.sleep(delay)  # Wait before retrying
+    }
+    
+    warning(paste("Failed to download or read expression file for", experimentAccession, "after", attempts, "attempts."))
+    return(NULL)  # Return NULL if all attempts fail
+}
+
 
 getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "tpm") {
 
@@ -498,13 +551,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         results <- list()
 
         # Download and read TPM file if requested or in "both" mode.
-        message(paste("Downloading expression file from:\n", expressionUrl))
-        results <- tryCatch({
-            read.table(expressionUrl, header = TRUE, sep = "\t", stringsAsFactors = FALSE, na.strings = "", comment.char = "#")
-        }, error = function(e) {
-            warning(paste("Failed to download or read expression file for", experimentAccession, ":", e$message))
-            NULL
-        })
+        results <- .downloadExpressionFile(expressionUrl, experimentAccession)
 
         # Remove NULL results for files that could not be downloaded.
         results <- Filter(Negate(is.null), results)
@@ -532,11 +579,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
 
         # Read the XML file directly from the FTP URL
         message("Downloading XML file from FTP...")
-        xmlContent <- tryCatch({
-            read_xml(xmlUrl)
-        }, error = function(e) {
-            stop("Failed to download or read the XML file: ", e$message)
-        })
+        xmlContent <- .retryDownload(xmlUrl)
 
         # Extract the assay_group id and label attributes
         assay_groups <- xml_find_all(xmlContent, ".//assay_group")
@@ -566,11 +609,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         # Adds two columns GeneID and Gene.Name to DataFrame to match TPM and FPKM output format.
         # cpm_df <- cbind(GeneID = rownames(cpm_df), Gene.Name = NA, cpm_df)
 
-        xmlContent <- tryCatch({
-            read_xml(xmlUrl)
-        }, error = function(e) {
-            stop("Failed to download or read the XML file: ", e$message)
-        })
+        xmlContent <- .retryDownload(xmlUrl)
 
         assay_groups <- xml_find_all(xmlContent, ".//assay_group")
 
@@ -736,7 +775,7 @@ heatmapAtlasExperiment <- function(df,
 
 getAtlasSCExperiment <- function( experimentAccession ) {
 
-    # Make sure the experiment accession is in the correct format.
+    # Make sure the experiment accession is in the correct format
     if( ! .isValidExperimentAccession( experimentAccession ) ) {
 
         stop( "Experiment accession not valid. Cannot continue." )
@@ -762,28 +801,21 @@ getAtlasSCExperiment <- function( experimentAccession ) {
 
     message(
         paste(
-            "Downloading Single Cell Atlas experiment annData into a temp path from:\n",
+            "Downloading Single-Cell Atlas experiment annData into a temp path from:\n",
             fullUrl
         )
     )
 
-    # Create connection object for downloading data.
-    connection <- url( fullUrl )
-
-    # Try download, catching any errors
-    #loadResult <- try( load( connection ), silent = TRUE )
 
     # Download the H5AD file to a temporary location
     tempFile <- tempfile(fileext = ".h5ad")
+
+    on.exit( unlink(tempFile) )  # Ensures the temp file is deleted when the function exits
+
     download.file(fullUrl, tempFile, mode = "wb")
 
-
-    # Load the AnnData object (pkgs 'rhdf5' 'HDF5Array' required)
-    adata <- readH5AD( tempFile, reader="R" )
-    # Reads a H5AD file and returns a SingleCellExperiment object.
-
-    loadResult <- try( readH5AD( tempFile, reader="R" ), silent = TRUE )
-
+    # Read a H5AD file and returns a SingleCellExperiment object
+    loadResult <- try( readH5AD( file = tempFile, reader="R" , use_hdf5 = TRUE ), silent = TRUE )
 
     # Quit if we got an error.
     if( class( loadResult ) == "try-error" ) {
@@ -793,7 +825,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
         warning(
             paste(
                 paste(
-                    "Error encountered while trying to download anndata file for",
+                    "Error encountered while trying to load anndata file for ",
                     experimentAccession,
                     ":"
                 ),
@@ -817,35 +849,35 @@ getAtlasSCExperiment <- function( experimentAccession ) {
         return( )
     }
 
-    # Close the connection.
-    close( connection )
 
+    # Make sure 'normalised' expression exists in the SCE object
+    getResult <- try( assays(loadResult)$normalised )
 
-    # Make sure matrix X exists before trying to return it.
-    getResult <- try( assays(adata)$X )
+    # Here I could check other data needed by plot functions exists,
+    # e.g. reducedDim(loadResult, "X_pca") for PCA plot
 
-    if( class( getResult ) == "try-error" ) {
+    if( class( getResult ) == "NULL" || class( getResult ) == "try-error" ) {
 
         stop(
-            "ERROR - Download appeared successful but no assay X was found."
+            "ERROR - Download and load appeared successful but no assay 'normalised' matrix was found."
         )
     }
 
     # If we're still here, things must have worked ok.
     message(
         paste(
-            "Successfully downloaded assay X object for",
+            "Successfully loaded assay 'normalised' from SingleCellExperiment object for ",
             experimentAccession
         )
     )
 
-    # Return the experiment summary.
-    X <- assays(adata)$X 
+    # Return SingleCellExperiment object
+    return( loadResult )
 
-    return( X )
-    # we need to decide if we a returning here a matrix, of the complete SingleCellExperiment object
-    # or an object from "anndata" package
 }
+
+
+
 
 # iy
 # heatmapSCAtlasExperiment ( experimentAccession , genes=NULL )
