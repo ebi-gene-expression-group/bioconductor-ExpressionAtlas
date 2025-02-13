@@ -275,5 +275,33 @@ You can download data for a Single-Cell Expression Atlas experiment using the
 ```{r eval=FALSE}
 enad19 <- getAtlasSCExperiment( "E-ENAD-19" )
 # returns a SingleCellExperiment object
+
+print("Reduced dimension names:")
+print(reducedDimNames(enad19))
+
+print("Column data names:")
+print(colnames(colData(enad19)))
+
 ```
 
+## Visualise a dimensionality reduction plot of a SingleCellExperiment object
+
+Let's use and example for pluripotency of human early embryos and embryonic stem cells by single cell RNA-seq.
+
+```{r}
+egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+# returns a SingleCellExperiment object
+
+print("Reduced dimension names:")
+print(reducedDimNames(egeod6552))
+
+print("Column data names:")
+print(colnames(colData(egeod6552)))
+
+plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_pca", colorby = "time" )
+
+plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type")
+
+plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_grey() + theme(legend.position = "left")
+
+```

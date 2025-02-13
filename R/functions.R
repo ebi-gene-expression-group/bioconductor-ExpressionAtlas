@@ -877,11 +877,44 @@ getAtlasSCExperiment <- function( experimentAccession ) {
 }
 
 
+plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
+    
+    # Check if the provided dimRed exists in reducedDimNames
+    if (!(dimRed %in% reducedDimNames(sceObject))) {
+        stop(paste("Error: Dimension reduction method", dimRed, "not found in the object!"))
+    }
+    
+    # Extract dimension reduction coordinates
+    dim_coords <- reducedDim(sceObject, dimRed)
+
+    # Check if colorby exists in colData
+    if (!(colorby %in% colnames(colData(sceObject)))) {
+        stop(paste("Error: Color attribute", colorby, "not found in colData!"))
+    }
+
+    # Convert to a data frame
+    dimred_df <- data.frame(
+        axis1 = dim_coords[, 1], 
+        axis2 = dim_coords[, 2], 
+        colorBy = as.character( colData(sceObject)[, colorby] )
+    )
+
+    # Plot using ggplot2
+    ggplot(dimred_df, aes(x = axis1, y = axis2, color = colorBy)) +
+        geom_point() +
+        labs(
+            title = paste("Dimensionality Reduction Plot:", dimRed), 
+            x = "Component 1", 
+            y = "Component 2",
+            color = colorby
+        ) +
+        theme_minimal()
+}
+
 
 
 # iy
 # heatmapSCAtlasExperiment ( experimentAccession , genes=NULL )
 #  input here would be output of 'getAtlasSCExperiment', aka a SingleCellExperiment object
-#  The goal is to plot a Heatmap, from user-defined genes
+#  The goal is to plot a Heatmap, for user-defined genes
 
-# dimreadSCAtlasExperiment ( experimentAccession , dim='umap' ) {  }
