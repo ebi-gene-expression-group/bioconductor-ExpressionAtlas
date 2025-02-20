@@ -205,219 +205,6 @@ getAtlasData <- function( experimentAccessions ) {
 }
 
 
-# searchAtlasExperiments
-#   - Search (currently against BioStudies API) for datasets in Atlas matching given terms.
-searchAtlasExperiments <- function( properties, species = NULL ) {
-
-    # Quit if we don't have any search terms
-    if( missing( properties ) ) {
-        stop( "Please provide at least one search term." )
-    }
-
-    # If we've got something other than a character vector of properties, also quit.
-    if( typeof( properties ) != "character" ) {
-        stop( "Please provide search term(s) as a character vector." )
-    }
-
-    # Make properties URL friendly (e.g. replace spaces with %20
-    properties <- sapply( properties, URLencode )
-
-    # If we weren't passed a species, log this.
-    if( missing( species ) ) {
-
-        message( "No species was provided. Will search for data from all available species." )
-
-    } else if( typeof( species ) != "character" ) {
-
-        # Quit if the species isn't a character vector.
-        stop( "Please provide species as a character vector." )
-
-    } else if( length( species ) > 1 ) {
-
-        # Only allow one species to be specified.
-        stop( "More than one species found. You may only specify one species at a time." )
-    }
-
-    # BioStudies API base URL.
-    bioAPIbase <- "http://www.ebi.ac.uk/biostudies/api/v1/search?query="
-
-    # Construct the query URL
-    queryURL <- paste(
-        bioAPIbase,
-        paste( properties, collapse = "" ),
-        "&gxa=TRUE",  #"&link_type=gxa"
-        sep = ""
-    )
-
-    # Add the species to the URL if we were passed one.
-    if( !missing( species ) ) {
-
-        species <- URLencode( species )
-
-        queryURL <- paste(
-            queryURL,
-            "&organism=",
-            species,
-            sep = ""
-        )
-    }
-
-    # Add page size limit to BioStudies API query.
-    page_size = 100
-    queryURL <- paste(
-        queryURL,
-        "&pageSize=",
-        page_size,
-        sep = ""
-    )
-
-
-    # Log search is beginning.
-    message( "Searching for Expression Atlas experiments matching your query ..." )
-
-    # Check the query works with httr
-    response <- GET( queryURL )
-
-    # Make sure the HTTP request worked.
-    if( status_code( response ) != 200 ) {
-        stop(
-            paste(
-                "Error running query. Received HTTP error code",
-                status_code( response ),
-                "from server. Please try again later. If you continue to experience problems please contact us at https://www.ebi.ac.uk/about/contact/support/gxa"
-            )
-        )
-    } else {
-        message( "Query successful." )
-    }
-
-    ## Parse the JSON document.
-    parsedJSON <- fromJSON( txt = queryURL )
-
-    ## Get the number of experiments we found.
-    numExps <- as.numeric( parsedJSON$totalHits )
-
-    # If there were no results, quit here.
-    if( numExps == 0 ) {
-        return( message( "No results found. Cannot continue." ) )
-
-    } else {
-        message( paste( "Found", numExps, "experiments matching your query." ) )
-    }
-
-    # check that page size is correct, otherwise quit here.
-    if( as.numeric( parsedJSON$pageSize ) != page_size ) {
-        return( message( "No results found. Cannot continue." ) )
-    }
-    # check if total hits is exact number
-    if( parsedJSON$isTotalHitsExact != TRUE ) {
-        message( "WARNING: Total number of hits reported by BioStudies is not exact" )
-    } 
-
-    # traverse BioStudies pages to get the list of experiments
-    allExperiments <- c()
-    if ( numExps < page_size || numExps%%page_size != 0 ){
-        modulus <- 1
-    } else {
-        modulus <- 0
-    }
-
-    number_pages <- floor( numExps/page_size ) + modulus
-    for ( page_number in  1:number_pages ){
-
-        pageQueryURL <- paste(
-            queryURL,
-            "&page=",
-            page_number,
-            sep = ""
-        )
-        page_acc <- fromJSON( txt = pageQueryURL )$hits$accession
-        allExperiments <- append(allExperiments, page_acc)
-    }
-
-    # check the number of experiments is correct, otherwise quit here.
-    if( numExps != length(allExperiments) ) {
-        return( message( "Number of experiments obtained is not correct. Cannot continue." ) )
-    }
-
-
-    # Create vectors of all accessions, experiment types, species, titles and conect errors.
-    allSpecies <- rep( NA, numExps )
-    allExpTypes <- rep( NA, numExps )
-    allTitles <- rep( NA, numExps )
-    allConnErr <- rep( FALSE, numExps )
-
-
-    # Pull out the title, accession, type and species of each experiment.
-    message( paste( "Retrieving information from", length( allExperiments ), "experiments..." ) )
-    for ( acc in 1:length( allExperiments ) ) {
-
-        accQueryURL <- paste(
-            "http://www.ebi.ac.uk/biostudies/api/v1/studies/",
-            allExperiments[ acc ],
-            sep = ""
-        )
-        # Make sure the HTTP request works
-        if( status_code( GET( accQueryURL ) ) != 200 ) {
-        
-            allConnErr[ acc ] <- TRUE
-        }
-        else{ 
-            accQuery <- fromJSON( txt = accQueryURL )
-
-            # get indexes of title, the experiment type and species
-
-            pos_title <-  which( accQuery$section$attributes$name %in% "Title" )
-            if ( length( pos_title ) == 1 ){
-                allTitles[ acc ] <- accQuery$section$attributes$value[ pos_title ]
-            } else if ( length( pos_title ) > 1  ) {
-                allTitles[ acc ] <- accQuery$section$attributes$value[ pos_title[1] ]
-            } 
-
-            pos_exp_type <-  which( accQuery$section$attributes$name %in% "Study type" )
-            if ( length( pos_exp_type ) == 1 ){
-                allExpTypes[ acc ] <- accQuery$section$attributes$value[ pos_exp_type ]
-            } else if ( length( pos_exp_type) > 1  ) {
-                # attept to match to a valid Atlas Experiment Type
-                allExpTypes[ acc ] <- getEligibleAtlasExperiment( accQuery$section$attributes$value[ pos_exp_type ] )
-            } 
-
-            pos_species <-  which( accQuery$section$attributes$name %in% "Organism" )
-            if ( length( pos_species ) == 1 ){
-                allSpecies[ acc ] <- accQuery$section$attributes$value[ pos_species ]
-            } else if ( length( pos_species ) > 1  ) {
-                # return the first species
-                allSpecies[ acc ] <- accQuery$section$attributes$value[ pos_species[1] ]  
-            } 
-        }
-
-    }
-
-    message( "Retrieving information completed."  )
-
-    # Create DataFrame containing the above results as columns.
-    resultsSummary <- DataFrame(
-        Accession = allExperiments,
-        Species = allSpecies,
-        Type = allExpTypes,
-        Title = allTitles,
-        ConnectionError = allConnErr
-    )
-
-    # Remove experiments with connection errors.
-    if ( any( resultsSummary$ConnectionError ) ) {
-        message( "WARNING: One or more studies removed due to Error running query - received HTTP error code" )
-        resultsSummary <- resultsSummary[ !resultsSummary$ConnectionError, ]
-    }
-  
-    # Sort the columns by species, type, then accession.
-    resultsSummary <- resultsSummary[ order( resultsSummary$Species, resultsSummary$Type, resultsSummary$Accession ), ]
-
-    # Return the DataFrame.
-    return( resultsSummary[ c( 'Accession', 'Species', 'Type', 'Title' ) ] )
-}
-
-
 eligibleAtlasExperiments <- c (
     "transcription profiling by array",
     "microRNA profiling by array",
@@ -770,8 +557,175 @@ heatmapAtlasExperiment <- function(df,
 
 # ----- add single-cell support ----
 
-# pm
-#searchSCAtlasExperiments <- function( properties, species = NULL ) { }
+.ebiAPIsearch <- function (resource, query, secondaryFilter = NULL) {
+    # Search the EBI RESTful Web Services API for experiment accessions
+    # We will aim to return an output of similar format to the searchAtlasExperiments function:
+    #   DataFrame with columns (Accession, Species, Type, Title), all <character>
+    # For that we will query Atlas , SCE atlas API
+
+    if (resource == "scxa") {
+        domain_source <- "filter=domain_source:(sc-experiments)"
+        atlas_api <- "https://www.ebi.ac.uk/gxa/sc/json/experiments"
+        atlas_exp_type <- "technologyType"
+    } else if (resource == "gxa") {
+        domain_source <- "filter=domain_source:(atlas-experiments)"
+        atlas_api <- "https://www.ebi.ac.uk/gxa/json/experiments"
+        atlas_exp_type <- "experimentType"
+    } else {
+        stop("Resource not supported")
+    }
+
+    # Quit if we don't have any query search terms
+    if( missing( query ) ) {
+        stop( "Please provide at least one query search term." )
+    }
+
+    # If we've got something other than a character vector of query, also quit.
+    if( typeof( query ) != "character" ) {
+        stop( "Please provide query search term(s) as a character vector." )
+    }
+
+    # Make 'query' URL friendly (e.g. replace spaces with %20
+    query <- sapply( query, URLencode )
+
+    # If we weren't passed a secondaryFilter, log this.
+    if( missing( secondaryFilter ) ) {
+
+        message( "No secondaryFilter was provided." )
+
+    } else if( typeof( secondaryFilter ) != "character" ) {
+
+        # Quit if the secondaryFilter isn't a character vector.
+        stop( "Please provide secondaryFilter as a character vector." )
+
+    } else if( length( secondaryFilter ) > 1 ) {
+
+        # Only allow one secondaryFilter to be specified.
+        stop( "More than one secondaryFilter found. You may only specify one secondaryFilter at a time." )
+    }
+
+    # EBI RESTful Web Services API base URL
+    ebiAPIbase <- "https://www.ebi.ac.uk/ebisearch/ws/rest/geneExpression?query="
+
+   # Construct the query URL
+    queryURL <- paste(
+        ebiAPIbase,
+        paste( query, collapse = "" ),
+        "&size=1000",  
+        paste("&", domain_source, sep = ""),
+        "&fields=acc",
+        sep = ""
+    )
+    if( ! missing( secondaryFilter ) ) {
+        queryURL <- paste(
+            queryURL,
+            "&filter=",
+            paste( secondaryFilter, collapse = "" ),
+            sep = ""
+        )
+    }
+    # Log search is beginning.
+    message( "Searching for experiments matching your query ..." )
+
+    # Check the query works with httr
+    response <- GET( queryURL )
+
+    # Make sure the HTTP request worked.
+    if( status_code( response ) != 200 ) {
+        stop(
+            paste(
+                "Error running query. Received HTTP error code",
+                status_code( response ),
+                "from server. Please try again later. If you continue to experience problems please contact us at https://www.ebi.ac.uk/about/contact/support/gxa"
+            )
+        )
+    } else {
+        message( "Query successful." )
+    }
+
+    ## Parse the JSON document.
+    parsedJSON <- fromJSON( txt = queryURL )
+
+    ## Get the number of experiments we found.
+    numExps <- as.numeric( parsedJSON$hitCount )
+
+    # If there were no results, quit here.
+    if( numExps == 0 ) {
+        return( message( "No results found. Cannot continue." ) )
+
+    } else {
+        message( paste( "Found", numExps, "experiments matching your query." ) )
+    }
+    # Bioconductor's S4Vectors::DataFrame
+    ebiResult <- DataFrame(
+        Accession = as.character(parsedJSON$entries$id),
+        Species   = "NA",
+        Type      = "NA",
+        Title     = "NA"
+    )
+
+
+    # now we need to query Atlas API to get the species, type and title
+    atlasAPIresponse <- GET( atlas_api )
+
+    # Make sure the HTTP request worked.
+    if( status_code( atlasAPIresponse ) != 200 ) {
+        stop(
+            paste(
+                "Error running query. Received HTTP error code from ATLAS API",
+                status_code( atlasAPIresponse ),
+                "from server. Please try again later. If you continue to experience problems please contact us at https://www.ebi.ac.uk/about/contact/support/gxa"
+            )
+        )
+    } else {
+        message( "Query successful." )
+    }
+
+    ## Parse the JSON document.
+    parsedJSON <- fromJSON(content(atlasAPIresponse, "text"))
+
+    experiment_data <- DataFrame(
+        Accession = unlist(parsedJSON$experiments[["experimentAccession"]]),
+        Species = unlist(parsedJSON$experiments[["species"]]),
+        Type = sapply(parsedJSON$experiments[[atlas_exp_type]], paste, collapse = ", "),
+        Title = unlist(parsedJSON$experiments[["experimentDescription"]])
+    )
+
+    filtered_data <- subset(experiment_data, Accession %in% ebiResult$Accession )
+
+
+    return( filtered_data)
+
+}
+
+
+# single cell atlas
+searchSCAtlasExperiments <- function( query, secondaryFilter = NULL ) { 
+    # wrapper function to search for Single Cell Atlas experiments
+     if( missing( secondaryFilter ) ) {
+        scExperiments <- .ebiAPIsearch(resource = "scxa", query)
+    } else {
+        scExperiments <- .ebiAPIsearch(resource = "scxa", query, secondaryFilter)
+    }
+
+    return( scExperiments )
+}
+# bulk atlas
+searchAtlasExperiments <- function( query, secondaryFilter = NULL ) { 
+    # wrapper function to search for Single Cell Atlas experiments
+     if( missing( secondaryFilter ) ) {
+        scExperiments <- .ebiAPIsearch(resource = "gxa", query)
+    } else {
+        scExperiments <- .ebiAPIsearch(resource = "gxa", query, secondaryFilter)
+    }
+
+    return( scExperiments )
+}
+
+
+
+
+
 
 getAtlasSCExperiment <- function( experimentAccession ) {
 

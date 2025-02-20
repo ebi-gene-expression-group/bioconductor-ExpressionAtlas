@@ -10,9 +10,15 @@ Authors@R:
       ),
         person(given = "Pedro",
            family = "Madrigal",
-           role = c("cre"),
+           role = c("aut", "cre"),
            email = "pmadrigal@ebi.ac.uk",
            comment = c(ORCID = "0000-0003-1959-8199")
+      ),
+        person(given = "Anil",
+           family = "Thanki",
+           role = c("aut"),
+           email = "anilthanki@ebi.ac.uk",
+           comment = c(ORCID = "0000-0002-8941-444X")
       )
     )
 Description: This package is for searching for datasets in EMBL-EBI Expression

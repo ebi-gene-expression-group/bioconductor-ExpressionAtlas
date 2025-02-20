@@ -47,18 +47,18 @@ function. This function returns a *DataFrame* (see
 [S4Vectors](http://bioconductor.org/packages/release/bioc/html/S4Vectors.html))
 containing the results of your search. The first argument to
 `searchAtlasExperiments()` should be a character vector of sample properties,
-e.g. biological sample attributes and/or experimental treatments. You may also
-optionally provide a species to limit your search to, as a second argument.
+e.g. biological sample attributes, experimental treatments nad/or species. You may also
+optionally provide a secondary filter yo your query to limit your search to, as a second argument.
 
 ```{r}
 suppressMessages( library( ExpressionAtlas ) )
 ```
 
 ```{r eval=FALSE}
-atlasRes <- searchAtlasExperiments( properties = "salt", species = "oryza" )
-# Searching for Expression Atlas experiments matching your query ...
+atlasRes <- searchAtlasExperiments( query = "salt", secondaryFilter = "oryza" )
+# Searching for experiments matching your query ...
 # Query successful.
-# Found 16 experiments matching your query.
+# Found 4 experiments matching your query.
 ```
 
 ```{r, echo=FALSE}
