@@ -656,14 +656,13 @@ heatmapAtlasExperiment <- function(df,
     } else {
         message( paste( "Found", numExps, "experiments matching your query." ) )
     }
-    # Bioconductor's S4Vectors::DataFrame
+
     ebiResult <- DataFrame(
         Accession = as.character(parsedJSON$entries$id),
         Species   = "NA",
         Type      = "NA",
         Title     = "NA"
     )
-
 
     # now we need to query Atlas API to get the species, type and title
     atlasAPIresponse <- GET( atlas_api )
@@ -681,7 +680,7 @@ heatmapAtlasExperiment <- function(df,
         message( "Query successful." )
     }
 
-    ## Parse the JSON document.
+    # Parse the JSON document
     parsedJSON <- fromJSON(content(atlasAPIresponse, "text"))
 
     experiment_data <- DataFrame(
@@ -693,13 +692,11 @@ heatmapAtlasExperiment <- function(df,
 
     filtered_data <- subset(experiment_data, Accession %in% ebiResult$Accession )
 
-
     return( filtered_data)
 
 }
 
 
-# single cell atlas
 searchSCAtlasExperiments <- function( query, secondaryFilter = NULL ) { 
     # wrapper function to search for Single Cell Atlas experiments
      if( missing( secondaryFilter ) ) {
@@ -710,9 +707,9 @@ searchSCAtlasExperiments <- function( query, secondaryFilter = NULL ) {
 
     return( scExperiments )
 }
-# bulk atlas
+
 searchAtlasExperiments <- function( query, secondaryFilter = NULL ) { 
-    # wrapper function to search for Single Cell Atlas experiments
+    # wrapper function to search for Expression Atlas experiments
      if( missing( secondaryFilter ) ) {
         scExperiments <- .ebiAPIsearch(resource = "gxa", query)
     } else {
