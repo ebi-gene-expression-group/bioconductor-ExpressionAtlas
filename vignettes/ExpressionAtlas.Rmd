@@ -208,7 +208,7 @@ A brief outline of how the raw data was normalized is in the *experimentData* sl
 preproc( experimentData( affy126data ) )
 ```
 
-# Downloading and visualising a single Expression Atlas experiment
+# Downloading and visualising a bulk Expression Atlas experiment
 
 ## Downloading a single Expression Atlas experiment summary
 
@@ -265,7 +265,30 @@ mtab3007 <- heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap.pdf",
 # Successfully downloaded expression data for E-MTAB-3007
 ```
 
-# Downloading and visualising a Single-Cell Expression Atlas experiment
+# Searching, downloading and visualising Single-Cell Expression Atlas experiments
+
+## Search Single Expression Atlas experiments
+
+You can search for experiments in Atlas using the `searchSCAtlasExperiments()`
+function.
+
+```{r}
+search_1 <- searchSCAtlasExperiments( query = "endoderm" )
+print(search_1)
+
+search_2 <- searchSCAtlasExperiments( query = "endoderm", secondaryFilter = "human" )
+print(search_2)
+
+search_3 <- searchSCAtlasExperiments( query = "endoderm", secondaryFilter = "mouse" )
+print(search_3)
+
+search_4 <- searchSCAtlasExperiments( query = "arabidopsis" )
+print(search_4)
+
+search_5 <- searchSCAtlasExperiments( query = "pluripotency" )
+print(search_5)
+
+```
 
 ## Downloading a study into a SingleCellExperiment object
 
