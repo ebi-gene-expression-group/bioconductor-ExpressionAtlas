@@ -246,6 +246,18 @@ mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" )
 # Successfully downloaded experiment summary object for E-MTAB-4045
 ```
 
+## Downloading a single Expression Atlas differential experiment analytics data
+
+You can also download analytics data for a single Expression Atlas deifferential experiment using the
+`getAnalysticsDifferentialAtlasExpression()` function:
+
+```{r eval=FALSE}
+mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
+# Downloading expression file from:
+# ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-10104/E-MTAB-10104-analytics.tsv
+```
+
+
 ## Creating heatmap from a single Expression Atlas experiment normalised data
 
 You can create heatmap from downloaded normalised data for a single Expression Atlas experiment using the

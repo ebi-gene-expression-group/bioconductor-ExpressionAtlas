@@ -539,6 +539,58 @@ heatmapAtlasExperiment <- function(df,
     invisible( dev.off() )
 }
 
+
+
+getAnalysticsDifferentialAtlasExpression <- function(experimentAccession) {
+
+    # Ensure the experiment accession is in the correct format.
+    if (!.isValidExperimentAccession(experimentAccession)) {
+        stop("Experiment accession not valid. Cannot continue.")
+    }
+
+    expType <- .getExperimentType(experimentAccession)
+
+    if (expType %in% c("rnaseq_mrna_differential" )){ # add prot differential and microarray later
+        message(paste(experimentAccession," is ", expType , ", will continue downloading data"))
+    } else {
+        stop("Experiment type not contain normalised expression data.")
+    }
+
+    # Base URL for downloading data.
+    urlBase <- "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments"
+
+    # Define filenames for configuration files.
+    configFile <- paste(experimentAccession, "-configuration.xml", sep = "")
+        
+    # XML URL for downloading config data.
+    xmlUrl <- paste(urlBase, experimentAccession, configFile, sep = "/")
+
+    fileType <- "analytics.tsv"
+
+    # Define filenames for analytics file.
+    analyticsFile <- paste(experimentAccession, "-", fileType, sep = "")
+
+    # Create full URLs for analytics file.
+    analyticsUrl <- paste(urlBase, experimentAccession, analyticsFile, sep = "/")
+
+    # Initialise a list to hold the results.
+    results <- list()
+
+    # Download and read analytics file.
+    results <- .downloadTabularFile(analyticsUrl, experimentAccession)
+
+    # Remove NULL results for files that could not be downloaded.
+    results <- Filter(Negate(is.null), results)
+
+    # Check if any files were successfully downloaded.
+    if (length(results) == 0) {
+        stop("ERROR - Could not download the requested data. Please check the experiment type is RNAseq differential or try again later.")
+    }
+
+    return(results)
+
+}
+
 # ----- add visualisation support ----
 
 # at
