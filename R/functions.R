@@ -246,7 +246,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
 
     # Read the XML file directly from the FTP URL
     message("Downloading XML file from FTP...")
-    xmlContent <- .retryDownload(ftpUrl)
+    xmlContent <- .downloadXMLFile(ftpUrl)
     
     # Extract the <configuration> node and the experimentType attribute
     configurationNode <- xml_find_first(xmlContent, "/configuration")
@@ -263,7 +263,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
     return(experimentType)
 }
 
-.retryDownload <- function(url, attempts = 5, delay = 3) {
+.downloadXMLFile <- function(url, attempts = 5, delay = 3) {
     for (i in 1:attempts) {
         result <- tryCatch({
             read_xml(url)
@@ -277,12 +277,12 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
     stop("Failed to download XML file after multiple attempts.")
 }
 
-.downloadExpressionFile <- function(expressionUrl, experimentAccession, attempts = 5, delay = 3) {
-    message(paste("Downloading expression file from:\n", expressionUrl))
+.downloadTabularFile <- function(fileUrl, experimentAccession, attempts = 5, delay = 3) {
+    message(paste("Downloading expression file from:\n", fileUrl))
     
     for (i in 1:attempts) {
         result <- tryCatch({
-            read.table(expressionUrl, header = TRUE, sep = "\t", stringsAsFactors = FALSE, na.strings = "", comment.char = "#")
+            read.table(fileUrl, header = TRUE, sep = "\t", stringsAsFactors = FALSE, na.strings = "", comment.char = "#")
         }, error = function(e) {
             message(paste("Attempt", i, "failed:", e$message))
             NULL
@@ -295,7 +295,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
         Sys.sleep(delay)  # Wait before retrying
     }
     
-    warning(paste("Failed to download or read expression file for", experimentAccession, "after", attempts, "attempts."))
+    warning(paste("Failed to download or read file for", experimentAccession, "after", attempts, "attempts."))
     return(NULL)  # Return NULL if all attempts fail
 }
 
@@ -338,7 +338,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         results <- list()
 
         # Download and read TPM file if requested or in "both" mode.
-        results <- .downloadExpressionFile(expressionUrl, experimentAccession)
+        results <- .downloadTabularFile(expressionUrl, experimentAccession)
 
         # Remove NULL results for files that could not be downloaded.
         results <- Filter(Negate(is.null), results)
@@ -366,7 +366,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
 
         # Read the XML file directly from the FTP URL
         message("Downloading XML file from FTP...")
-        xmlContent <- .retryDownload(xmlUrl)
+        xmlContent <- .downloadXMLFile(xmlUrl)
 
         # Extract the assay_group id and label attributes
         assay_groups <- xml_find_all(xmlContent, ".//assay_group")
@@ -396,7 +396,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         # Adds two columns GeneID and Gene.Name to DataFrame to match TPM and FPKM output format.
         # cpm_df <- cbind(GeneID = rownames(cpm_df), Gene.Name = NA, cpm_df)
 
-        xmlContent <- .retryDownload(xmlUrl)
+        xmlContent <- .downloadXMLFile(xmlUrl)
 
         assay_groups <- xml_find_all(xmlContent, ".//assay_group")
 
@@ -538,7 +538,6 @@ heatmapAtlasExperiment <- function(df,
 
     invisible( dev.off() )
 }
-
 
 # ----- add visualisation support ----
 
