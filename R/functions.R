@@ -773,7 +773,7 @@ searchAtlasExperiments <- function( query, secondaryFilter = NULL ) {
 
 
 
-download_anndata_with_retry <- function(url, destfile, max_attempts = 5) {
+.download_anndata_with_retry <- function(url, destfile, max_attempts = 5) {
   for (attempt in 1:max_attempts) {
     tryCatch(
       {
@@ -832,7 +832,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
 
     on.exit( unlink(tempFile) )  # Ensures the temp file is deleted when the function exits
 
-    download_anndata_with_retry(fullUrl, tempFile)
+    .download_anndata_with_retry(fullUrl, tempFile)
 
     # Read a H5AD file and returns a SingleCellExperiment object
     loadResult <- try( readH5AD( file = tempFile, reader="R" , use_hdf5 = TRUE ), silent = TRUE )
