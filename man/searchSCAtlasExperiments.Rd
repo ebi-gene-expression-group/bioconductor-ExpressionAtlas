@@ -4,7 +4,9 @@
 \description{
     This function accepts a query, and optionally a
     secondary filter, and then searches for matching Single-Cell 
-    Expression Atlas experiments in the EBI RESTful Web Services API.
+    Expression Atlas experiments in the EBI RESTful Web Services API. 
+    The function also performs ontology-based query search against the 
+    Single Cell Expression Atlas cell-type wheel.
 }
 \usage{
     searchSCAtlasExperiments( query, secondaryFilter = NULL  )
@@ -15,7 +17,8 @@
         biological characteristics, experimental treatments, species, etc.
     }
     \item{ secondaryFilter }{
-        Optional, a second filter. 
+        Optional, a second filter. For instance, if the query is "lung", the
+        secondary filter can be "human" to search for human lung experiments.
     }
 }
 \value{
@@ -28,5 +31,4 @@
 
     # Search for human lung experiments
     atlasRes_human_lung <- searchSCAtlasExperiments( query="lung", secondaryFilter = "human")
-
 }

@@ -618,6 +618,8 @@ getAnalysticsDifferentialAtlasExpression <- function(experimentAccession) {
         domain_source <- "filter=domain_source:(sc-experiments)"
         atlas_api <- "https://www.ebi.ac.uk/gxa/sc/json/experiments"
         atlas_exp_type <- "technologyType"
+        # performs additional ontology-based search
+        cell_type_wheel <- "https://www.ebi.ac.uk/gxa/sc/json/cell-type-wheel/"
     } else if (resource == "gxa") {
         domain_source <- "filter=domain_source:(atlas-experiments)"
         atlas_api <- "https://www.ebi.ac.uk/gxa/json/experiments"
@@ -700,16 +702,57 @@ getAnalysticsDifferentialAtlasExpression <- function(experimentAccession) {
     ## Get the number of experiments we found.
     numExps <- as.numeric( parsedJSON$hitCount )
 
+
+
+    # search cell type wheel
+    if (resource == "scxa") {
+        # first search with the 'query' and retrieve accessions
+        query_ctw1 <- paste( cell_type_wheel,query, sep = "" )
+        response_ctw1 <- GET( query_ctw1 )
+         # Make sure the HTTP request worked.
+        if( status_code( response_ctw1 ) != 200 ) {
+            stop( paste( "Error running query to cell-type wheel, Received HTTP error code", status_code( response_ctw1 )) )
+        } else {
+            message( "Query to cell-type wheel successful." )
+        }
+        parsedJSON_ctw1 <- fromJSON( txt = query_ctw1 )
+        
+        # second, search with the 'secondaryFilter' and retrieve accessions
+        if( missing(secondaryFilter) || is.null(secondaryFilter) ) {
+            additionalExps <- unique(unlist(parsedJSON_ctw1$experimentAccessions))    
+
+        } else {
+            query_ctw2 <- paste( cell_type_wheel,secondaryFilter, sep = "" )
+            response_ctw2 <- GET( query_ctw2 )
+            if( status_code( response_ctw2 ) != 200 ) { 
+                stop( paste( "Error running query to cell-type wheel, Received HTTP error code", status_code( response_ctw2 )) )
+            } else { 
+                message( "Query to cell-type wheel successful." )
+            }
+            parsedJSON_ctw2 <- fromJSON( txt = query_ctw2 )
+            additionalExps <- intersect( unique(unlist(parsedJSON_ctw1$experimentAccessions))  ,   unique(unlist(parsedJSON_ctw2$experimentAccessions))   )
+        }
+        additionalNumExps <- length( additionalExps )
+
+    }
+
+    if (resource == "gxa") {
+        additionalExps <- 0
+        additionalNumExps <- length( additionalExps )
+    }
+
+
+
     # If there were no results, quit here.
-    if( numExps == 0 ) {
+    if( numExps == 0 && additionalNumExps == 0 ) {
         return( message( "No results found. Cannot continue." ) )
 
     } else {
-        message( paste( "Found", numExps, "experiments matching your query." ) )
+        message( paste( "Found", numExps+additionalNumExps, "experiments matching your query." ) )
     }
 
     ebiResult <- DataFrame(
-        Accession = as.character(parsedJSON$entries$id),
+        Accession = unique( as.character(parsedJSON$entries$id) , additionalExps ),
         Species   = "NA",
         Type      = "NA",
         Title     = "NA"
@@ -743,7 +786,7 @@ getAnalysticsDifferentialAtlasExpression <- function(experimentAccession) {
 
     filtered_data <- subset(experiment_data, Accession %in% ebiResult$Accession )
 
-    return( filtered_data)
+    return( filtered_data )
 
 }
 
@@ -937,4 +980,3 @@ plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
 # heatmapSCAtlasExperiment ( experimentAccession , genes=NULL )
 #  input here would be output of 'getAtlasSCExperiment', aka a SingleCellExperiment object
 #  The goal is to plot a Heatmap, for user-defined genes
-
