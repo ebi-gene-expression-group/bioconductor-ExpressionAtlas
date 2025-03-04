@@ -581,6 +581,32 @@ getAnalysticsDifferentialAtlasExpression <- function(experimentAccession) {
 
     # Remove NULL results for files that could not be downloaded.
     results <- Filter(Negate(is.null), results)
+    
+    xmlContent <- .downloadXMLFile(xmlUrl)
+
+    contrasts <- xml_find_all(xmlContent, ".//contrasts")
+
+    # # Extract contrast IDs and names
+    contrast_ids <- xmlContent %>% 
+        xml_find_all("//contrast") %>% 
+        xml_attr("id")
+
+    contrast_names <- xmlContent %>% 
+        xml_find_all("//contrast/name") %>% 
+        xml_text()
+
+    # Combine into a data frame
+    contrast_df <- data.frame(id = contrast_ids, name = contrast_names, stringsAsFactors = FALSE)
+
+    # Replace the columns names in results, excluding 'GeneID' and 'Gene.Name' columns
+    colnames(results) <- sapply(colnames(results), function(col) {
+        for (i in seq_len(nrow(contrast_df))) {
+            if (grepl(contrast_df$id[i], col)) {
+            col <- sub(contrast_df$id[i], contrast_df$name[i], col)
+            }
+        }
+        return(col)
+        })
 
     # Check if any files were successfully downloaded.
     if (length(results) == 0) {

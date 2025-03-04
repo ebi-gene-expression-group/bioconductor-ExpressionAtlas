@@ -31,7 +31,7 @@ biocViews: ExpressionData, ExperimentData, SequencingData,
         MicroarrayData, ArrayExpress
 Depends: R (>= 4.2.0), methods, Biobase, SummarizedExperiment, limma, SingleCellExperiment,
         S4Vectors, xml2, RCurl, jsonlite, BiocStyle, zellkonverter, gplots, 
-        HDF5Array, rhdf5, genefilter, RColorBrewer, edgeR, ggplot2
+        HDF5Array, rhdf5, genefilter, RColorBrewer, edgeR, ggplot2, dplyr
 Imports: utils, XML, httr
 Suggests: knitr, testthat, rmarkdown
 VignetteBuilder: knitr
