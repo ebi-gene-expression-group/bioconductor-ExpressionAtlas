@@ -617,6 +617,64 @@ getAnalysticsDifferentialAtlasExpression <- function(experimentAccession) {
 
 }
 
+.sanitize_filename <- function(filename) {
+  # Replace invalid characters with an underscore
+  sanitized <- gsub("[<>:\"/\\\\|?*]", "_", filename)
+  
+  # Optionally, trim leading and trailing whitespace
+  sanitized <- trimws(sanitized)
+  
+  # Return sanitized filename
+  return(sanitized)
+}
+
+volcanoDifferentialAtlasExperiment <- function(df, 
+                                     filename_prefix = "volcano-plot",
+                                     low_fc_colour = "gray",
+                                     high_fc_colour = "blue",
+                                     cutoff = 1,
+                                     show_volcanoplot_title = TRUE ) {  
+
+    # replace NA string with <NA> and remove rows with <NA>, reset rownames
+    df[df == "NA"] <- NA
+    clean_df <- stats::na.omit(df)
+    rownames(clean_df) <- NULL
+
+    for (i in seq(3, ncol(clean_df) - 1, by = 2)) {
+        pval_col <- names(clean_df)[i]
+        logFC_col <- names(clean_df)[i + 1]
+
+        clean_df[[pval_col]] <- as.numeric(clean_df[[pval_col]])
+
+        # Add a new column as low and high foldchange for colour
+        clean_df$color <- ifelse(abs(clean_df[[logFC_col]]) < cutoff, "low", "high")
+
+        title <- paste("Volcano Plot:", logFC_col, "vs", pval_col)
+        # Create the plot
+        p <- ggplot(clean_df, aes(x = .data[[logFC_col]], y = -log10(.data[[pval_col]]), color = color)) +
+            geom_point(alpha = 0.6) +
+            geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
+            geom_vline(xintercept = c(-cutoff, cutoff), linetype = "dashed", color = high_fc_colour) +
+            scale_color_manual(values = c("low" = low_fc_colour, "high" = high_fc_colour), guide = "none") +
+            labs(
+            title = ifelse(show_volcanoplot_title, title, ""),
+            x = logFC_col,
+            y = "-log10(p-value)"
+            ) +
+            theme_minimal()
+
+        # Save each plot as a separate image
+        plot_name <- gsub(".log2foldchange", "", logFC_col)
+        filename <- .sanitize_filename(paste0(filename_prefix, "_", plot_name, ".png"))
+        message(filename)
+        ggsave(filename, plot = p, width = 8, height = 6, bg = "white")
+
+        # Optional: Print the plot in the R console
+        print(p)
+    }
+}
+
+
 # ----- add visualisation support ----
 
 # at

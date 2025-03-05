@@ -275,6 +275,25 @@ mtab3007 <- heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap.pdf",
 #  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-3007/E-MTAB-3007-tpm.tsv
 # Successfully downloaded expression data for E-MTAB-3007
 ```
+## Creating heatmap from a single Expression Atlas experiment normalised data
+
+You can create heatmap from downloaded normalised data for a single Expression Atlas experiment using the
+`getNormalisedAtlasExpression()` function:
+
+```{r eval=FALSE}
+mtab3007 <- volcanoDifferentialAtlasExperiment( mtab10104_dea )
+# Downloading expression file from:
+#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-10104/E-MTAB-10104-tpm.tsv
+# Successfully downloaded expression data for E-MTAB-3007
+```
+
+```{r eval=FALSE}
+mtab3007 <- volcanoDifferentialAtlasExperiment( mtab10104_dea, "E-MTAB-10104", "Gray", "Blue", 1, TRUE )
+# Downloading expression file from:
+#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-10104/E-MTAB-10104-tpm.tsv
+# Successfully downloaded expression data for E-MTAB-3007
+```
+
 
 # Searching, downloading and visualising Single-Cell Expression Atlas experiments
 
