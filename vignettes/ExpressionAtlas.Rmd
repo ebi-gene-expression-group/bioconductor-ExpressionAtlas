@@ -1,9 +1,13 @@
 ---
 title: "ExpressionAtlas package vignette"
-author: "Maria Keays, Pedro Madrigal, Anil Thanki, Iris Yu"
+author: "Maria Keays, Pedro Madrigal, Anil Thanki"
 affiliation: "EMBL-EBI"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
 bibliography: references.bib
 keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor"]
 vignette: >
@@ -19,7 +23,7 @@ resources consist of carefully selected high-quality datasets
 from [ArrayExpress](https://www.ebi.ac.uk/biostudies/arrayexpress) and 
 other data sources that have been manually 
 curated and re-analyzed via the Functional Genomics Team analysis pipelines [@George2023]. Since October 
-2022, ArrayExpress is a collection of functional genomics data in [BioStudies]
+2022, ArrayExpress is a collection of functional genomics data in BioStudies
 (https://www.ebi.ac.uk/biostudies). The 
 Expression Atlas website allows users to search these datasets for genes and/or
 experimental conditions, to discover which genes are expressed in which
@@ -262,29 +266,28 @@ mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
 You can create heatmap from downloaded normalised data for a single Expression Atlas experiment using the
 `getNormalisedAtlasExpression()` function:
 
+```{r eval=TRUE, fig.width=10, fig.height=8}
+geod74322_tpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "tpm" )
+geod74322 <- heatmapAtlasExperiment( geod74322_tpm, "E-GEOD-74322-tpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
+```
+
 ```{r eval=FALSE}
-mtab3007 <- heatmapAtlasExperiment( mtab4045_tpm, "E-MTAB-4045-tpm-heatmap.pdf", "Blues", 100, TRUE )
+mtab3007 <- heatmapAtlasExperiment( mtab3007_cpm, "E-MTAB-3007-cpm-heatmap.pdf",TRUE, FALSE,  "Blues", 100, TRUE )
 # Downloading expression file from:
 #  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-3007/E-MTAB-3007-tpm.tsv
 # Successfully downloaded expression data for E-MTAB-3007
 ```
+## Creating a Volcano plot from a differential Expression Atlas experiment normalised data
 
-```{r eval=FALSE}
-mtab3007 <- heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap.pdf", "Blues", 100, TRUE )
-# Downloading expression file from:
-#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-3007/E-MTAB-3007-tpm.tsv
-# Successfully downloaded expression data for E-MTAB-3007
-```
-## Creating heatmap from a single Expression Atlas experiment normalised data
-
-You can create heatmap from downloaded normalised data for a single Expression Atlas experiment using the
-`getNormalisedAtlasExpression()` function:
+You can create volcano plot from downloaded normalised data for a single Expression Atlas experiment using the
+`volcanoDifferentialAtlasExperiment()` function:
 
 ```{r eval=FALSE}
 mtab3007 <- volcanoDifferentialAtlasExperiment( mtab10104_dea )
 # Downloading expression file from:
 #  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-10104/E-MTAB-10104-tpm.tsv
 # Successfully downloaded expression data for E-MTAB-3007
+head(mtab3007)
 ```
 
 ```{r eval=FALSE}

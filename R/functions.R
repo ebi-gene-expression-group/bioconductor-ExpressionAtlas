@@ -445,6 +445,8 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
 
 heatmapAtlasExperiment <- function(df, 
                                      filename = "heatmap",
+                                     save_pdf = FALSE,
+                                     show_plot = TRUE,
                                      heatmap_color = "Blues",
                                      top_n = 100,
                                      show_heatmap_title = TRUE ) {  
@@ -516,15 +518,18 @@ heatmapAtlasExperiment <- function(df,
         marginHeight <- 8
     }
 
-    heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
 
-    pdf(heatmap_file, height=imageHeight, width=imageWidth) 
+    # PDF Output (Only if save_pdf = TRUE)
+    if (save_pdf) {
+        heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
+        pdf(heatmap_file, height=8, width=8)
+    }
 
     title <- paste("Gene Expression for top ", top_n, " Genes.", sep = "")
 
     # Make the heatmap.
     heatmap.2(
-        as.matrix( topNgeneExpressions ),
+        as.matrix(topNgeneExpressions),
         col = colours,
         labRow = topNgeneNames,
         labCol = assayGroupLabels,
@@ -536,7 +541,12 @@ heatmapAtlasExperiment <- function(df,
         main = ifelse(show_heatmap_title, title, "")
     )
 
-    invisible( dev.off() )
+    # Close PDF if it was opened
+    if (save_pdf) invisible(dev.off())
+
+    # Show plot on screen if requested
+    if (show_plot) print("Plotting on screen") 
+
 }
 
 
