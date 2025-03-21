@@ -537,6 +537,7 @@ heatmapAtlasExperiment <- function(df,
         trace = "none",
         cexRow = 0.4,
         cexCol = 0.7, # hardcoding for now, may need to make this dynamic but requires thinking about.
+        cex.main = 0.6,
         margins = c( marginHeight, 6 ),
         main = ifelse(show_heatmap_title, title, "")
     )
@@ -640,6 +641,8 @@ getAnalysticsDifferentialAtlasExpression <- function(experimentAccession) {
 
 volcanoDifferentialAtlasExperiment <- function(df, 
                                      filename_prefix = "volcano-plot",
+                                     save_pdf = FALSE,
+                                     show_plot = TRUE,
                                      low_fc_colour = "gray",
                                      high_fc_colour = "blue",
                                      cutoff = 1,
@@ -673,14 +676,17 @@ volcanoDifferentialAtlasExperiment <- function(df,
             ) +
             theme_minimal()
 
-        # Save each plot as a separate image
-        plot_name <- gsub(".log2foldchange", "", logFC_col)
-        filename <- .sanitize_filename(paste0(filename_prefix, "_", plot_name, ".png"))
-        message(filename)
-        ggsave(filename, plot = p, width = 8, height = 6, bg = "white")
+        # PDF Output (Only if save_pdf = TRUE)
+        if (save_pdf) {
+            # Save each plot as a separate image
+            plot_name <- gsub(".log2foldchange", "", logFC_col)
+            filename <- .sanitize_filename(paste0(filename_prefix, "_", plot_name, ".png"))
+            message(filename)
+            ggsave(filename, plot = p, width = 8, height = 6, bg = "white")
+        }
 
         # Optional: Print the plot in the R console
-        print(p)
+        if (show_plot) print(p)
     }
 }
 

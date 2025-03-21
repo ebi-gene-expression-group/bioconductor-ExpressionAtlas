@@ -15,7 +15,7 @@ vignette: >
     %\VignetteIndexEntry{ ExpressionAtlas }
 ---
 
-# Expression Atlas resources
+# Expression Atlas resources at EMBL-EBI
 
 The [EMBL-EBI](http://www.ebi.ac.uk) [Expression
 Atlas](http://www.ebi.ac.uk/gxa) and [Single Cell Expression Atlas](http://www.ebi.ac.uk/gxa/sc) 
@@ -227,7 +227,7 @@ mtab3007 <- getAtlasExperiment( "E-MTAB-3007" )
 
 ## Downloading a single Expression Atlas experiment normalised data
 
-You can also download normalised data for a single Expression Atlas experiment using the
+You can download normalised data for a single Expression Atlas experiment using the
 `getNormalisedAtlasExpression()` function:
 
 ```{r eval=FALSE}
@@ -266,35 +266,28 @@ mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
 You can create heatmap from downloaded normalised data for a single Expression Atlas experiment using the
 `getNormalisedAtlasExpression()` function:
 
-```{r eval=TRUE, fig.width=10, fig.height=8}
+```{r eval=TRUE, fig.width=6, fig.height=5}
 geod74322_tpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "tpm" )
 geod74322 <- heatmapAtlasExperiment( geod74322_tpm, "E-GEOD-74322-tpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
 ```
 
-```{r eval=FALSE}
-mtab3007 <- heatmapAtlasExperiment( mtab3007_cpm, "E-MTAB-3007-cpm-heatmap.pdf",TRUE, FALSE,  "Blues", 100, TRUE )
-# Downloading expression file from:
-#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-3007/E-MTAB-3007-tpm.tsv
-# Successfully downloaded expression data for E-MTAB-3007
+And now using CPM data, instead of TPM:
+```{r eval=TRUE, fig.width=6, fig.height=5}
+geod74322_cpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "cpm" )
+geod74322 <- heatmapAtlasExperiment( geod74322_cpm, "E-GEOD-74322-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
 ```
 ## Creating a Volcano plot from a differential Expression Atlas experiment normalised data
 
 You can create volcano plot from downloaded normalised data for a single Expression Atlas experiment using the
 `volcanoDifferentialAtlasExperiment()` function:
 
-```{r eval=FALSE}
-mtab3007 <- volcanoDifferentialAtlasExperiment( mtab10104_dea )
-# Downloading expression file from:
-#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-10104/E-MTAB-10104-tpm.tsv
-# Successfully downloaded expression data for E-MTAB-3007
-head(mtab3007)
-```
+```{r eval=TRUE, fig.width=7, fig.height=5}
+mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
 
-```{r eval=FALSE}
-mtab3007 <- volcanoDifferentialAtlasExperiment( mtab10104_dea, "E-MTAB-10104", "Gray", "Blue", 1, TRUE )
-# Downloading expression file from:
-#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-10104/E-MTAB-10104-tpm.tsv
-# Successfully downloaded expression data for E-MTAB-3007
+head(mtab10104_dea)
+
+mtab10104 <- volcanoDifferentialAtlasExperiment( mtab10104_dea, "E-MTAB-10104",FALSE, TRUE, "Gray", "Blue", 1, TRUE )
+
 ```
 
 
@@ -363,3 +356,5 @@ plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20
 ```
 
 # References
+
+
