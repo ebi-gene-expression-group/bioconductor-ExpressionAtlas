@@ -525,7 +525,7 @@ heatmapAtlasExperiment <- function(df,
         pdf(heatmap_file, height=8, width=8)
     }
 
-    title <- paste("Gene Expression for top ", top_n, " Genes.", sep = "")
+    title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
 
     # Make the heatmap.
     heatmap.2(
@@ -691,19 +691,6 @@ volcanoDifferentialAtlasExperiment <- function(df,
 }
 
 
-# ----- add visualisation support ----
-
-# at
-# getNormalisedAtlasExpression ( experimentAccession , normalisation='TPM' ) { }
-# heatmapAtlasExperiment ( experimentAccession  )
-#    input is the output of 'getAtlasExperiment' OR 'getNormalisedAtlasExpression'
-#    in the first case it will normalise the raw counts to CPM
-#    the heatmpa should show Expression Units
-# possible packages -> complexHeatmap , or ggpplot2
-
-# getAnalysticsDifferentialAtlasExpression ( experimentAccession ) {}
-# volcanoDifferentialAtlasExperiment ( experimentAccession  )
-# input is the output of 'getAnalysticsDifferentialAtlasExpression'
 
 
 # ----- add single-cell support ----
@@ -1286,5 +1273,5 @@ dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, sc
         theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
         labs(title = "Dot Plot of Average Gene Expression", x = "Cluster", y = "Gene", size = "Expression", color = "Expression")
     
-    #print(p)
+    print(p)
 }
