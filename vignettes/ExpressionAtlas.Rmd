@@ -266,13 +266,13 @@ mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
 You can create heatmap from downloaded normalised data for a single Expression Atlas experiment using the
 `getNormalisedAtlasExpression()` function:
 
-```{r eval=TRUE, fig.width=6, fig.height=5}
+```{r eval=TRUE, fig.width=7, fig.height=6}
 geod74322_tpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "tpm" )
 geod74322 <- heatmapAtlasExperiment( geod74322_tpm, "E-GEOD-74322-tpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
 ```
 
 And now using CPM data, instead of TPM:
-```{r eval=TRUE, fig.width=6, fig.height=5}
+```{r eval=TRUE, fig.width=7, fig.height=6}
 geod74322_cpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "cpm" )
 geod74322 <- heatmapAtlasExperiment( geod74322_cpm, "E-GEOD-74322-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
 ```
@@ -352,6 +352,30 @@ plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_pca", colorby = "time" )
 plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type")
 
 plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_grey() + theme(legend.position = "left")
+
+```
+
+## Plot a gene expression heatmap from a SingleCellExperiment object
+
+For the default cluster or selected clusters with Expression Atlas marker genes, you can use the `heatmapSCAtlasExperiment()` function:
+```{r}
+egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+
+heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=NULL, scaleNormExp=FALSE, show_row_names=FALSE ) 
+
+heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE ) 
+
+heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=6, scaleNormExp=TRUE, show_row_names=FALSE ) 
+
+```
+
+For user selected genes:
+```{r}
+egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+
+heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE ) 
+
+heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
 
 ```
 

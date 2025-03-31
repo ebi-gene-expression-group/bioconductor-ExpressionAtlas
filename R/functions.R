@@ -884,7 +884,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
         Title = unlist(parsedJSON$experiments[["experimentDescription"]])
     )
 
-    filtered_data <- subset(experiment_data, Accession %in% ebiResult$Accession )
+    filtered_data <- S4Vectors::subset(experiment_data, Accession %in% ebiResult$Accession )
 
     return( filtered_data )
 
@@ -978,7 +978,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
     .download_anndata_with_retry(fullUrl, tempFile)
 
     # Read a H5AD file and returns a SingleCellExperiment object
-    loadResult <- try( readH5AD( file = tempFile, reader="R" , use_hdf5 = TRUE ), silent = TRUE )
+    loadResult <- try( readH5AD( file = tempFile, reader="R" , use_hdf5 = FALSE ), silent = TRUE )
 
     # Quit if we got an error.
     if( class( loadResult ) == "try-error" ) {
@@ -1035,6 +1035,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
     )
 
     # Return SingleCellExperiment object
+    mainExpName(loadResult) <- experimentAccession
     return( loadResult )
 
 }
@@ -1076,7 +1077,120 @@ plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
 
 
 
-# iy
-# heatmapSCAtlasExperiment ( experimentAccession , genes=NULL )
-#  input here would be output of 'getAtlasSCExperiment', aka a SingleCellExperiment object
-#  The goal is to plot a Heatmap, for user-defined genes
+
+
+heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NULL, scaleNormExp=FALSE, show_row_names=FALSE ) {
+
+    if (!is(singleCellExperiment, "SingleCellExperiment")) {
+        stop("The provided object is not a SingleCellExperiment.")
+    }
+    if (!"normalised" %in% assayNames(singleCellExperiment)) {
+        stop("The 'normalised' assay is not available in the SingleCellExperiment object.")
+    }
+
+    normalised_matrix <- assay(singleCellExperiment, "normalised", withDimnames=FALSE, use.names=FALSE)
+
+    # Check dimensions
+    if (nrow(normalised_matrix) == 0 || ncol(normalised_matrix) == 0) {
+        stop("The normalised matrix has zero rows or columns.")
+    }
+
+
+    # get experiment name form SingleCellExperiment object
+    expName <-  mainExpName(singleCellExperiment)
+
+    if (!.isValidExperimentAccession(expName)) {
+        stop("Invalid experiment accession in SingleCellExperiment object.")
+    }
+
+    base_url_path <- "http://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/sc_experiments"
+    # Define the URL for the experiment
+    exp_url_path <- paste(base_url_path, expName, expName, sep = "/")
+
+
+    # Define the URL
+    url_path <- "http://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/sc_experiments/E-GEOD-36552/E-GEOD-36552.aggregated_filtered_normalised_counts.mtx_rows"
+
+    genes_exp <- read.table(paste0(exp_url_path,".aggregated_filtered_normalised_counts.mtx_rows" ), header = FALSE, sep = "\t")
+    rownames(normalised_matrix) <- genes_exp[[1]]
+
+    samples_exp <- read.table(paste0(exp_url_path,".aggregated_filtered_normalised_counts.mtx_cols" ), header = FALSE, sep = "\t")
+    colnames(normalised_matrix) <- samples_exp[[1]]
+
+    # read clusters
+    clusters_exp <- read.table(paste0(exp_url_path,".clusters.tsv" ), header = TRUE, sep = "\t")
+
+    if ( is.null(sel.K) == TRUE ) {
+        sel.K <- clusters_exp$K[ which (clusters_exp$sel.K ==TRUE ) ] 
+    } else {
+        # check if sel.K is in the clusters
+        if ( ! sel.K %in% clusters_exp$K ) {
+            stop("The selected K is not in the clusters.")
+        }
+    }
+
+
+    if ( is.null(genes) == TRUE ) {
+        # then we plot all markers genes for this K
+        markers_exp <- read.table(paste0(exp_url_path, paste0(".marker_genes_", sel.K, ".tsv") ), header = TRUE, sep = "\t")
+
+        # Create a named vector for sample clusters
+        sample_clusters <- setNames(markers_exp$cluster, markers_exp$genes)
+    } else {
+        # if genes are provided, then we plot only those genes
+        genes <- unique(genes)
+        genes <- intersect(genes, genes_exp[[1]])
+        if (length(genes) == 0) {
+            stop("None of the provided genes were found in the experiment.")
+        }
+        sample_clusters <- setNames(rep("selected_genes", length(genes)), genes)
+    }
+
+
+    # Convert sparse matrix to dense
+    dense_matrix <- as.matrix(normalised_matrix)
+    if ( scaleNormExp == TRUE ) {
+        dense_matrix <- t(scale(t(dense_matrix)))
+    }
+
+    # Keep only genes that are present in sample_clusters
+    genes_to_plot <- intersect(rownames(dense_matrix), names(sample_clusters))
+    dense_matrix <- dense_matrix[genes_to_plot, , drop=FALSE]
+
+    # Create a named vector for gene clusters
+    gene_clusters <- sample_clusters[genes_to_plot]
+
+    # Generate a color mapping for clusters
+    cluster_levels <- unique(gene_clusters)
+    cluster_colors <- setNames(rainbow(length(cluster_levels)), cluster_levels)
+
+    # Define row annotation (for genes, not samples)
+    if ( is.null(genes) == TRUE ) {
+        row_annotation <- rowAnnotation(
+            cluster = gene_clusters, 
+            col = list(cluster = cluster_colors)
+        )
+    } else {
+        row_annotation <- rowAnnotation(
+            selected_genes = gene_clusters, 
+            col = list(selected_genes = cluster_colors),
+            show_legend = FALSE
+        )
+    }
+
+    # Plot heatmap
+    ComplexHeatmap::Heatmap(
+        dense_matrix , 
+        name = "Expression", 
+        left_annotation = row_annotation,
+        show_row_names = show_row_names, 
+        show_column_names = FALSE, 
+        cluster_columns = TRUE, 
+        cluster_rows = TRUE,
+        show_row_dend = FALSE,
+        show_column_dend = FALSE,
+        row_split = gene_clusters
+    )
+
+}
+
