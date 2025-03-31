@@ -1194,3 +1194,97 @@ heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NU
 
 }
 
+
+
+dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, scaleNormExp=FALSE) {
+    
+    if (!is(singleCellExperiment, "SingleCellExperiment")) {
+        stop("The provided object is not a SingleCellExperiment.")
+    }
+    if (!"normalised" %in% assayNames(singleCellExperiment)) {
+        stop("The 'normalised' assay is not available in the SingleCellExperiment object.")
+    }
+    
+    normalised_matrix <- assay(singleCellExperiment, "normalised", withDimnames=FALSE, use.names=FALSE)
+    
+    if (nrow(normalised_matrix) == 0 || ncol(normalised_matrix) == 0) {
+        stop("The normalised matrix has zero rows or columns.")
+    }
+    
+    expName <- mainExpName(singleCellExperiment)
+    
+    if (!.isValidExperimentAccession(expName)) {
+        stop("Invalid experiment accession in SingleCellExperiment object.")
+    }
+    
+    base_url_path <- "http://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/sc_experiments"
+    exp_url_path <- paste(base_url_path, expName, expName, sep = "/")
+    
+    genes_exp <- read.table(paste0(exp_url_path, ".aggregated_filtered_normalised_counts.mtx_rows"), header = FALSE, sep = "\t")
+    rownames(normalised_matrix) <- genes_exp[[1]]
+    
+    samples_exp <- read.table(paste0(exp_url_path, ".aggregated_filtered_normalised_counts.mtx_cols"), header = FALSE, sep = "\t")
+    colnames(normalised_matrix) <- samples_exp[[1]]
+    
+    clusters_exp <- read.table(paste0(exp_url_path, ".clusters.tsv"), header = TRUE, sep = "\t")
+    
+    if (is.null(sel.K)) {
+        sel.K <- clusters_exp$K[which(clusters_exp$sel.K == TRUE)]
+    } else {
+        if (!sel.K %in% clusters_exp$K) {
+            stop("The selected K is not in the clusters.")
+        }
+    }
+    
+    markers_exp <- read.table(paste0(exp_url_path, paste0(".marker_genes_", sel.K, ".tsv")), header = TRUE, sep = "\t")
+
+    
+    genes <- intersect(unique(genes), genes_exp[[1]])
+    if (length(genes) == 0) {
+        stop("None of the provided genes were found in the experiment.")
+    }
+    
+    dense_matrix <- as.matrix(normalised_matrix)
+    if (scaleNormExp) {
+        dense_matrix <- t(scale(t(dense_matrix)))
+    }
+    
+    dense_matrix <- dense_matrix[genes, , drop = FALSE]
+    
+
+    # Transpose and reshape cluster data
+    cluster_data <- as.data.frame(t(clusters_exp[clusters_exp$K == sel.K, -c(1, 2)]))
+
+    # Add sample IDs as a column
+    cluster_data$SampleID <- rownames(cluster_data)
+
+    # Rename cluster assignment column
+    colnames(cluster_data)[1] <- "Cluster"
+
+    # Reset row names
+    rownames(cluster_data) <- NULL
+
+
+    df <- reshape2::melt(dense_matrix)
+    colnames(df) <- c("Gene", "SampleID", "Expression")
+    df <- merge(df, cluster_data, by = "SampleID")
+
+    df$Expression <- as.numeric(as.character(df$Expression))
+    df$Gene <- as.character(df$Gene)
+    df$Cluster <- as.character(df$Cluster)
+    df$Cluster <- as.numeric(as.character(df$Cluster))
+
+    # Compute average expression per gene per cluster
+    df_avg <- df %>%
+        group_by(Gene, Cluster) %>%
+        summarise(Average_Expression = mean(Expression, na.rm = TRUE), .groups = "drop")
+
+    p <- ggplot(df_avg, aes(x = Cluster, y = Gene, size = Average_Expression, color = Average_Expression)) +
+        geom_point() +
+        scale_color_viridis_c() +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+        labs(title = "Dot Plot of Average Gene Expression", x = "Cluster", y = "Gene", size = "Expression", color = "Expression")
+    
+    print(p)
+}

@@ -16,7 +16,7 @@
         Vector of gene IDs to include in the heatmap. If NULL, all genes will be shown for the default clustering. Default is NULL.
     }
     \item{sel.K}{
-        Number of clusters for Single Cell Expression Atlas Experiment. If NULL, a gene list must be provided. If both \code{sel.K} and \code{genes} are \code{NULL}, the function will use default clustering for all markers genes for this clustering.
+        Number of clusters for Single Cell Expression Atlas Experiment. If NULL, a gene list must be provided. If both \code{sel.K} and \code{genes} are \code{NULL}, the function will use default clustering for all markers genes for this experiment.
     }
     \item{scaleNormExp}{
         Logical indicating whether to scale normalized expression values, which adjusts the data to have a mean of zero and a standard deviation of one. Default is FALSE.

@@ -379,6 +379,18 @@ heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577'
 
 ```
 
+## Dot-plot for a SingleCellExperiment object
+
+For example, if we chose one marker gene from each of the clusters (k = 4) in the previous example, we can use the `dotPlotSCAtlasExperiment()` function to plot the average expression of these genes across the clusters:
+
+```{r, fig.width=7, fig.height=4}
+egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+
+dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
+
+dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
+```
+
 # References
 
 
