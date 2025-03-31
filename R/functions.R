@@ -1286,5 +1286,5 @@ dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, sc
         theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
         labs(title = "Dot Plot of Average Gene Expression", x = "Cluster", y = "Gene", size = "Expression", color = "Expression")
     
-    print(p)
+    #print(p)
 }

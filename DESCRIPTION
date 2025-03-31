@@ -32,7 +32,7 @@ biocViews: ExpressionData, ExperimentData, SequencingData,
 Depends: R (>= 4.2.0), methods, Biobase, SummarizedExperiment, limma, SingleCellExperiment,
         S4Vectors, xml2, RCurl, jsonlite, BiocStyle, zellkonverter, gplots,
         HDF5Array, rhdf5, genefilter, RColorBrewer, edgeR, ggplot2, dplyr, ComplexHeatmap
-Imports: utils, XML, httr
+Imports: utils, XML, httr, reshape2
 Suggests: knitr, testthat, rmarkdown
 VignetteBuilder: knitr
 Collate: functions.R
