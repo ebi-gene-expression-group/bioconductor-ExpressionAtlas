@@ -1,8 +1,10 @@
 CHANGES IN VERSION 1.35.1
 ------------------------
 
-    o Enable support for Single-cell expression Atlas.
-    o Add visualisation functions
+    o Enable support for Single-cell Expression Atlas.
+    o Improve data searches.
+    o Add visualisation functions.
+    o Add two new vignettes.
 
 
 CHANGES IN VERSION 1.25.6

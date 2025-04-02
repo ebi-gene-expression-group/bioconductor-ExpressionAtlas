@@ -19,7 +19,7 @@
         Number of clusters for Single Cell Expression Atlas Experiment. If both \code{sel.K} is \code{NULL}, the function will use default clustering for this experiment.
     }
     \item{scaleNormExp}{
-        Logical indicating whether to scale normalized expression values, which adjusts the data to have a mean of zero and a standard deviation of one. Default is FALSE.
+        Logical indicating whether to scale normalized expression values, which adjusts the data to have a mean of zero and a standard deviation of one. Default is \code{FALSE}.
     }
 }
 \value{

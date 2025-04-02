@@ -10,7 +10,7 @@
 }
 \arguments{
     \item{ experimentAccession }{
-    Single-cell experiment accession e.g. "E-ENAD-19"
+        Single-cell experiment accession e.g. "E-ENAD-19"
     }
 }
 \value{
@@ -27,7 +27,6 @@
         \item{ Column data (cell-level metadata) }
         \item{ Different dimensionality reductions (e.g. PCA, t-SNE, UMAP) }
     }
-
 
 }
 \examples{

@@ -9,16 +9,16 @@
 }
 \arguments{
     \item{ df }{
-        Dataframe in the output format of getAnalysticsDifferentialAtlasExpression.
+        Dataframe in the output format of \code{getAnalysticsDifferentialAtlasExpression}.
     }
     \item{ filename_prefix }{
         Filename for the output volcano plot images. Default is "volcano".
     }
     \item{ save_pdf  }{
-        Save PDF file with the heatmap. Default is FALSE.
+        Save PDF file with the heatmap. Default is \code{FALSE}.
     }
     \item{ show_plot }{
-        Show plot in the R console. Default is TRUE.
+        Show plot in the R console. Default is \code{TRUE}.
     }
     \item{ low_fc_colour }{
         Colour palette for the low foldchange. Default is "gray".
@@ -30,7 +30,7 @@
         cutoff for the foldchange. Default is 1.
     }
     \item{ show_volcanoplot_title }{
-        Whether to show a title in the volcano plot. Default is TRUE.
+        Whether to show a title in the volcano plot. Default is \code{TRUE}.
     }
 }
 \value{
@@ -52,8 +52,5 @@
 
     # Check if the image files were created
     # file.exists("E-MTAB-4045-cpm-heatmap.pdf")
-
-    # Prints out the following:
-    # TRUE
 
 }

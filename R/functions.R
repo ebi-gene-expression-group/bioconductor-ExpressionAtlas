@@ -263,7 +263,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
     return(experimentType)
 }
 
-.downloadXMLFile <- function(url, attempts = 5, delay = 3) {
+.downloadXMLFile <- function(url, attempts = 7, delay = 3) {
     for (i in 1:attempts) {
         result <- tryCatch({
             read_xml(url)
@@ -825,7 +825,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
 
     if (resource == "gxa") {
         additionalExps <- 0
-        additionalNumExps <- length( additionalExps )
+        additionalNumExps <- additionalExps #length( additionalExps )
     }
 
 
@@ -1266,12 +1266,12 @@ dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, sc
         group_by(Gene, Cluster) %>%
         summarise(Average_Expression = mean(Expression, na.rm = TRUE), .groups = "drop")
 
-    p <- ggplot(df_avg, aes(x = Cluster, y = Gene, size = Average_Expression, color = Average_Expression)) +
+    ggplot(df_avg, aes(x = Cluster, y = Gene, size = Average_Expression, color = Average_Expression)) +
         geom_point() +
         scale_color_viridis_c() +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
         labs(title = "Dot Plot of Average Gene Expression", x = "Cluster", y = "Gene", size = "Expression", color = "Expression")
     
-    print(p)
+    #print(p)
 }

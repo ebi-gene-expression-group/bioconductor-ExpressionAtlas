@@ -1,0 +1,64 @@
+---
+title: "Accessing data from Single-Cell Expression Atlas"
+author: "Pedro Madrigal"
+affiliation: "EMBL-EBI"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: false
+    toc_depth: 3
+    number_sections: false
+bibliography: references.bib
+keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor", "single-cell"]
+vignette: >
+    %\VignetteEngine{ knitr::rmarkdown }
+    %\VignetteIndexEntry{ Accessing data from Single-Cell Expression Atlas }
+---
+
+
+This vignette demonstrates how to access and visualise data from the Single-Cell Expression Atlas using the `ExpressionAtlas` package. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE)
+knitr::opts_chunk$set(warning=FALSE)
+```
+```{r}
+library( ExpressionAtlas ) 
+```
+
+```{r eval=TRUE}
+sc_search_results <- searchSCAtlasExperiments( query = "hematopoietic", secondaryFilter = "old" )
+print(sc_search_results)
+
+geod87631 <- getAtlasSCExperiment( "E-GEOD-87631" )
+geod87631
+
+print("Reduced dimension names:")
+print(reducedDimNames(geod87631 ))
+
+print("Column data names:")
+print(colnames(colData(geod87631 )))
+
+plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_0.1") + theme_classic() 
+
+plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type") + theme_classic() 
+
+plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "age") + theme_classic() 
+
+plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "genotype") + theme_classic() 
+
+
+heatmapSCAtlasExperiment(geod87631, genes=NULL, sel.K=5, scaleNormExp=FALSE, show_row_names=FALSE ) 
+
+heatmapSCAtlasExperiment(geod87631, genes=NULL, sel.K=5, scaleNormExp=TRUE, show_row_names=FALSE ) 
+
+# random genes
+dotPlotSCAtlasExperiment(geod87631, genes=c('ENSMUSG00000056758', 'ENSMUSG00000076867', 'ENSMUSG00000022584', 'ENSMUSG00000048442'), sel.K=5, scaleNormExp=TRUE) + theme_classic()
+
+# random genes
+dotPlotSCAtlasExperiment(geod87631, genes=c('ENSMUSG00000056758', 'ENSMUSG00000076867', 'ENSMUSG00000022584', 'ENSMUSG00000048442'), sel.K=9, scaleNormExp=FALSE) + theme_classic()
+
+
+
+```
+

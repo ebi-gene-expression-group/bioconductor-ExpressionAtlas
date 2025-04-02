@@ -10,9 +10,9 @@
 }
 
 \arguments{
-    \item{ sceObject }{ Single-cell experiment object, representing a Single-Cell Expression Atlas experiment, obtained with the function getAtlasSCExperiment(). }
+    \item{ sceObject }{ Single-cell experiment object, representing a Single-Cell Expression Atlas experiment, obtained with the function \code{getAtlasSCExperiment}. }
     \item{ dimRed }{ Dimensionality reduction to plot. Options are: "X_pca", "X_tsne_perplexity_10", "X_umap_neighbors_20", etc. }
-    \item{ colorby }{ Column name in colData to color the cells by. }
+    \item{ colorby }{ Column name in \code{colData} to color the cells by. }
 }
 
 \value{

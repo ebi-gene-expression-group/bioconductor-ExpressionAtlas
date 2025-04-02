@@ -11,11 +11,11 @@
 }
 \arguments{
     \item{ experimentAccession }{
-    ArrayExpress experiment accession e.g. "E-MTAB-10104"
+        ArrayExpress experiment accession e.g. "E-MTAB-10104"
     }
 }
 \value{
-    A dataframe with p.value and log2foldchange values of the genes for each assay group contrast.
+    A dataframe with \code{p.value} and \code{log2foldchange} values of the genes for each assay group contrast.
 }
 \examples{
     

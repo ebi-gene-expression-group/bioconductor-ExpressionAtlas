@@ -11,10 +11,10 @@
 }
 \arguments{
     \item{ experimentAccession }{
-    ArrayExpress experiment accession e.g. "E-MTAB-4045"
+        ArrayExpress experiment accession e.g. "E-MTAB-4045"
     }
     \item{ normalisation }{
-    normalisation method type e.g. "tpm", "fpkm", "cpm"
+        Normalisation method type e.g. "tpm", "fpkm", "cpm"
     }
 }
 \value{

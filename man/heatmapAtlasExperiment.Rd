@@ -15,10 +15,10 @@
         Filename for the output heatmap file. Default is "heatmap.pdf".
     }
     \item{ save_pdf  }{
-        Save PDF file with the heatmap. Default is FALSE.
+        Save PDF file with the heatmap. Default is \code{FALSE}.
     }
     \item{ show_plot }{
-        Show plot in the R console. Default is TRUE.
+        Show plot in the R console. Default is \code{TRUE}.
     }
     \item{ heatmap_color }{
         Colour palette for the heatmap. Default is "Blues".
@@ -27,7 +27,7 @@
         Number of top most variable genes to be shown in the heatmap. Default is 100.
     }
     \item{ show_heatmap_title }{
-        Whether to show a title in the heatmap. Default is TRUE.
+        Whether to show a title in the heatmap. Default is \code{TRUE}.
     }
 }
 \value{
@@ -44,7 +44,6 @@
     # Check if the PDF file was created
     file.exists("heatmap.pdf")
 
-
     # Download the CPM Expression values for experiment E-MTAB-4045 with custom parameters
     mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" )
 
@@ -53,9 +52,5 @@
 
     # Check if the PDF file was created
     file.exists("E-MTAB-4045-cpm-heatmap.pdf")
-
-
-    # Prints out the following:
-    # TRUE
 
 }
