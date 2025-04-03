@@ -1,6 +1,6 @@
 Package: ExpressionAtlas
 Version: 1.99.1
-Date: 2025/03/31
+Date: 2025-03-31
 Title: Search, download and visualise datasets from EMBL-EBI Expression Atlas and Single-Cell Expression Atlas
 Authors@R: 
     c(person(given = "Maria",
@@ -29,12 +29,13 @@ Description: This package is for searching for datasets in EMBL-EBI Expression
     object is used for Single-Cell Expression Atlas datasets.
 biocViews: ExpressionData, ExperimentData, SequencingData,
         MicroarrayData, ArrayExpress
-Depends: R (>= 4.2.0), methods, Biobase, SummarizedExperiment, limma, SingleCellExperiment,
+Depends: R (>= 4.4.0), methods, Biobase, SummarizedExperiment, limma, SingleCellExperiment,
         S4Vectors, xml2, RCurl, jsonlite, BiocStyle, zellkonverter, gplots,
         HDF5Array, rhdf5, genefilter, RColorBrewer, edgeR, ggplot2, dplyr, ComplexHeatmap
-Imports: utils, XML, httr, reshape2
+Imports: utils, XML, httr, reshape2, tidyr, yaml
 Suggests: knitr, testthat, rmarkdown
 VignetteBuilder: knitr
+VignetteEngine: knitr::rmarkdown
 Collate: functions.R
 License: GPL (>= 3)
 LazyLoad: yes

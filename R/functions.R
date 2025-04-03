@@ -695,11 +695,97 @@ volcanoDifferentialAtlasExperiment <- function(df,
 
 # ----- add single-cell support ----
 
-.ebiAPIsearch <- function (resource, query, secondaryFilter = NULL) {
+   # function to extract all nested elements as a flat string
+   # used by .search_gxa_experiments_yaml
+
+.flatten_experiment <- function(exp) {
+    # extract top-level details
+    details_list <- list(
+        accession = exp$accession,
+        experiment_type = exp$experiment_type,
+        organism = exp$organism
+    )
+  
+    # extract data from assay_groups if present
+    if (!is.null(exp$assay_groups)) {
+        for (group in exp$assay_groups) {
+            details_list <- append(details_list, unlist(group, use.names = FALSE))
+        }
+    }
+  
+    # concatenate all extracted values into a single searchable string
+    return(paste(details_list, collapse = " | "))
+}
+
+.search_gxa_experiments_yaml <- function( query_yaml ){
+    yaml_gxa <- "https://raw.githubusercontent.com/ebi-gene-expression-group/atlas-experiment-fetcher/main/gxa-studies.yaml"
+    # load YAML from URL
+    yaml_response <- GET(yaml_gxa)
+
+    # check if the request was successful
+    if (status_code(yaml_response) == 200) {
+        yaml_text <- content(yaml_response, "text", encoding = "UTF-8")
+
+        yaml_data <- tryCatch(
+            suppressWarnings( read_yaml(text = yaml_text)),
+            error = function(e) {
+                message("Error loading YAML: ", e$message)
+                NULL
+            }
+        )
+
+        # ensure all elements remain in their original format
+        yaml_data <- lapply(yaml_data, function(x) {
+            if (is.list(x)) {
+                return(lapply(x, function(y) {
+                    if (is.character(y)) {
+                        return(y)  # Keep as character
+                    } else if (is.numeric(y)) {
+                        return(as.numeric(y))  # Keep as numeric
+                    } else {
+                        return(y)  # Preserve other types
+                    }
+                }))
+            } else {
+                return(x)
+            }
+        })
+  
+     } else {
+        stop("Failed to retrieve YAML file. HTTP status: ", status_code(yaml_response))
+    }
+
+
+    # convert experiments into a data frame
+    experiments_df <- tidyr::tibble(
+        accession = sapply( yaml_data$experiments, function(x) x$accession),
+        details = sapply( yaml_data$experiments, .flatten_experiment)  # Flatten all details
+    )
+    
+    # define search term
+    search_term <- as.character(query_yaml) 
+
+    # search across all details
+    matching_accessions <- experiments_df %>%
+        dplyr::filter(grepl(search_term, details, ignore.case = TRUE)) %>%
+        dplyr::pull(accession)
+
+    return(matching_accessions)
+
+}
+
+
+
+.ebiAPIsearch <- function (resource, query, secondaryFilter = NULL, detailed = FALSE) {
     # Search the EBI RESTful Web Services API for experiment accessions
     # We will aim to return an output of similar format to the searchAtlasExperiments function:
     #   DataFrame with columns (Accession, Species, Type, Title), all <character>
     # For that we will query Atlas , SCE atlas API
+
+
+    if (!is.logical(detailed)) {
+        stop("'detailed' parameter must be TRUE or FALSE")
+    }
 
     if (resource == "scxa") {
         domain_source <- "filter=domain_source:(sc-experiments)"
@@ -794,7 +880,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
     # search cell type wheel
     if (resource == "scxa") {
         # first search with the 'query' and retrieve accessions
-        query_ctw1 <- paste( cell_type_wheel,query, sep = "" )
+        query_ctw1 <- paste( cell_type_wheel,as.character(query), sep = "" )
         response_ctw1 <- GET( query_ctw1 )
          # Make sure the HTTP request worked.
         if( status_code( response_ctw1 ) != 200 ) {
@@ -806,10 +892,10 @@ volcanoDifferentialAtlasExperiment <- function(df,
         
         # second, search with the 'secondaryFilter' and retrieve accessions
         if( missing(secondaryFilter) || is.null(secondaryFilter) ) {
-            additionalExps <- unique(unlist(parsedJSON_ctw1$experimentAccessions))    
+            additionalExps <- unique(unlist(parsedJSON_ctw1$experimentAccessions))
 
         } else {
-            query_ctw2 <- paste( cell_type_wheel,secondaryFilter, sep = "" )
+            query_ctw2 <- paste( cell_type_wheel,as.character(secondaryFilter), sep = "" )
             response_ctw2 <- GET( query_ctw2 )
             if( status_code( response_ctw2 ) != 200 ) { 
                 stop( paste( "Error running query to cell-type wheel, Received HTTP error code", status_code( response_ctw2 )) )
@@ -823,9 +909,19 @@ volcanoDifferentialAtlasExperiment <- function(df,
 
     }
 
+    # search using yaml file in github - slow
     if (resource == "gxa") {
-        additionalExps <- 0
-        additionalNumExps <- additionalExps #length( additionalExps )
+        if ( detailed == FALSE ) {
+            additionalExps <- 0
+            additionalNumExps <- additionalExps #length( additionalExps )
+        } else {
+            if( missing(secondaryFilter) || is.null(secondaryFilter) ) {
+                additionalExps <- .search_gxa_experiments_yaml( as.character(query) )
+            } else {
+                additionalExps <- intersect ( .search_gxa_experiments_yaml( as.character(query) ) , .search_gxa_experiments_yaml( as.character(secondaryFilter) ) )
+            }
+            additionalNumExps <- length( additionalExps )
+        }
     }
 
 
@@ -839,7 +935,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
     }
 
     ebiResult <- DataFrame(
-        Accession = unique( as.character(parsedJSON$entries$id) , additionalExps ),
+        Accession = unique(c(as.character(parsedJSON$entries$id), as.character(additionalExps) )),
         Species   = "NA",
         Type      = "NA",
         Title     = "NA"
@@ -889,18 +985,16 @@ searchSCAtlasExperiments <- function( query, secondaryFilter = NULL ) {
     return( scExperiments )
 }
 
-searchAtlasExperiments <- function( query, secondaryFilter = NULL ) { 
+searchAtlasExperiments <- function( query, secondaryFilter = NULL, detailed = FALSE ) { 
     # wrapper function to search for Expression Atlas experiments
      if( missing( secondaryFilter ) ) {
-        scExperiments <- .ebiAPIsearch(resource = "gxa", query)
+        scExperiments <- .ebiAPIsearch(resource = "gxa", query = query, detailed = detailed)
     } else {
-        scExperiments <- .ebiAPIsearch(resource = "gxa", query, secondaryFilter)
+        scExperiments <- .ebiAPIsearch(resource = "gxa", query = query, secondaryFilter = secondaryFilter, detailed = detailed )
     }
 
     return( scExperiments )
 }
-
-
 
 
 .download_anndata_with_retry <- function(url, destfile, max_attempts = 5) {

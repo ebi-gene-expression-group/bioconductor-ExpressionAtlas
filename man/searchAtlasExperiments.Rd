@@ -7,7 +7,7 @@
     in the EBI RESTful Web Services API
 }
 \usage{
-    searchAtlasExperiments( query, secondaryFilter = NULL  )
+    searchAtlasExperiments( query, secondaryFilter = NULL, detailed = FALSE  )
 }
 \arguments{
     \item{ query }{
@@ -16,6 +16,10 @@
     }
     \item{ secondaryFilter }{
         Optional, a second filter. 
+    }
+    \item{ detailed }{
+        If \code{TRUE}, it will perform a detailed search through Atlas experiment 
+        metadata information, and it might take 10-20 seconds. Default: \code{FALSE}.
     }
 }
 \value{

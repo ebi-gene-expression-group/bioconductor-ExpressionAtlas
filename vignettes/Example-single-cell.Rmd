@@ -13,6 +13,7 @@ keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor", "sin
 vignette: >
     %\VignetteEngine{ knitr::rmarkdown }
     %\VignetteIndexEntry{ Accessing data from Single-Cell Expression Atlas }
+    %\VignetteEncoding{UTF-8}
 ---
 
 

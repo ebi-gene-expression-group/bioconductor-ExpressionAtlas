@@ -13,6 +13,7 @@ keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor"]
 vignette: >
     %\VignetteEngine{ knitr::rmarkdown }
     %\VignetteIndexEntry{ ExpressionAtlas }
+    %\VignetteEncoding{UTF-8}
 ---
 
 # Expression Atlas resources at EMBL-EBI
@@ -85,6 +86,28 @@ atlasRes
 The *Accession* column contains the ArrayExpress accession of each dataset --
 the unique identifier assigned to it. The species, experiment type (e.g.
 microarray or RNA-seq), and title of each dataset are also listed.
+
+## Detailed search through experiment metadata
+
+```{r}
+searchAtlasExperiments( query = "lung" , detailed = FALSE )
+```
+
+The `detailed` argument can be set to `TRUE` to return a more detailed search through Atlas experiment metadata information:
+
+```{r}
+searchAtlasExperiments( query = "lung" , detailed = TRUE )
+```
+
+It can work with a secondary filter as well:
+
+```{r}
+searchAtlasExperiments( query = "lung", secondaryFilter = "human", detailed = FALSE )
+
+searchAtlasExperiments( query = "lung", secondaryFilter = "human", detailed = TRUE )
+```
+
+As we can see, a detailed search returns a *DataFrame* with more Atlas studies.
 
 ## Downloading the data
 
@@ -391,6 +414,12 @@ egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
 
 dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
+```
+
+# sessionInfo()
+
+```{r}
+sessionInfo()
 ```
 
 # References
