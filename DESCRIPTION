@@ -1,7 +1,7 @@
 Package: ExpressionAtlas
-Version: 1.25.7
-Date: 2022/10/22
-Title: Download datasets from EMBL-EBI Expression Atlas
+Version: 1.99.1
+Date: 2025-03-31
+Title: Search, download and visualise datasets from EMBL-EBI Expression Atlas and Single-Cell Expression Atlas
 Authors@R: 
     c(person(given = "Maria",
            family = "Keays",
@@ -10,23 +10,32 @@ Authors@R:
       ),
         person(given = "Pedro",
            family = "Madrigal",
-           role = c("cre"),
+           role = c("aut", "cre"),
            email = "pmadrigal@ebi.ac.uk",
            comment = c(ORCID = "0000-0003-1959-8199")
+      ),
+        person(given = "Anil",
+           family = "Thanki",
+           role = c("aut"),
+           email = "anilthanki@ebi.ac.uk",
+           comment = c(ORCID = "0000-0002-8941-444X")
       )
     )
 Description: This package is for searching for datasets in EMBL-EBI Expression
     Atlas, and downloading them into R for further analysis. Each Expression Atlas
     dataset is represented as a SimpleList object with one element per platform.
     Sequencing data is contained in a SummarizedExperiment object, while microarray
-    data is contained in an ExpressionSet or MAList object.
+    data is contained in an ExpressionSet or MAList object. SingleCellExperiment 
+    object is used for Single-Cell Expression Atlas datasets.
 biocViews: ExpressionData, ExperimentData, SequencingData,
         MicroarrayData, ArrayExpress
-Depends: R (>= 4.2.0), methods, Biobase, SummarizedExperiment, limma,
-        S4Vectors, xml2, RCurl, jsonlite, BiocStyle
-Imports: utils, XML, httr
+Depends: R (>= 4.4.0), methods, Biobase, SummarizedExperiment, limma, SingleCellExperiment,
+        S4Vectors, xml2, RCurl, jsonlite, BiocStyle, zellkonverter, gplots,
+        HDF5Array, rhdf5, genefilter, RColorBrewer, edgeR, ggplot2, dplyr, ComplexHeatmap
+Imports: utils, XML, httr, reshape2, tidyr, yaml
 Suggests: knitr, testthat, rmarkdown
 VignetteBuilder: knitr
+VignetteEngine: knitr::rmarkdown
 Collate: functions.R
 License: GPL (>= 3)
 LazyLoad: yes

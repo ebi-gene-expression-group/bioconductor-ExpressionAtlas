@@ -11,7 +11,7 @@
 }
 \arguments{
     \item{ experimentAccessions }{
-    Vector of ArrayExpress/BioStudies accessions for experiments to be downloaded.
+        Vector of ArrayExpress/BioStudies accessions for experiments to be downloaded.
     }
 }
 \value{

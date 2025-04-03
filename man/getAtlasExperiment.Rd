@@ -11,7 +11,7 @@
 }
 \arguments{
     \item{ experimentAccession }{
-    ArrayExpress experiment accession e.g. "E-GEOD-11175"
+        ArrayExpress experiment accession e.g. "E-GEOD-11175"
     }
 }
 \value{

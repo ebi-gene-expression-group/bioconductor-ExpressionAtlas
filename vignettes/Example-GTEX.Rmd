@@ -1,0 +1,98 @@
+---
+title: "Accessing GTEX RNA-seq data from Expression Atlas"
+author: "Pedro Madrigal"
+affiliation: "EMBL-EBI"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: false
+    toc_depth: 3
+    number_sections: false
+bibliography: references.bib
+keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor"]
+vignette: >
+    %\VignetteEngine{ knitr::rmarkdown }
+    %\VignetteIndexEntry{ Accessing GTEX RNA-seq data from Expression Atlas }
+    %\VignetteEncoding{UTF-8}
+---
+
+
+This vignette demonstrates how to access and analyze GTEX RNA-seq data from Expression Atlas. The example shows how to:
+
+1. Search and retrieve GTEX data.
+2. Get raw counts and normalized expression data (TPM and FPKM).
+3. Create heatmaps for visualization of gene expression patterns.
+4. Filter and analyze specific genes of interest across GTEX tissues.
+
+
+The following example uses the `ExpressionAtlas` package to access `E-GTEX-8` dataset (17350 samples).
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE)
+knitr::opts_chunk$set(warning=FALSE)
+```
+
+```{r}
+suppressMessages( library( ExpressionAtlas ) )
+```
+
+```{r eval=TRUE}
+
+atlasRes <- searchAtlasExperiments( query = "gtex" )
+atlasRes
+
+gtex <- getAtlasExperiment( experimentAccession = "E-GTEX-8" )
+gtex
+gtex$rnaseq
+assays( gtex$rnaseq )$counts[1:5,1:5]
+dim( assays( gtex$rnaseq )$counts )
+colData( gtex$rnaseq )
+metadata( gtex$rnaseq )
+
+gtex_tpm <- getNormalisedAtlasExpression( experimentAccession = "E-GTEX-8", normalisation = "tpm" )
+head(gtex_tpm)
+
+gtex_fpkm <- getNormalisedAtlasExpression( experimentAccession = "E-GTEX-8", normalisation = "fpkm" )
+head(gtex_fpkm)
+
+gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, filename = "E-GTEX-8-tpm-heatmap.pdf", save_pdf= FALSE, show_plot = TRUE, heatmap_color = "Reds", top_n = 50, show_heatmap_title = TRUE )
+
+
+library(ComplexHeatmap)
+library(dplyr)
+library(RColorBrewer)
+
+plot_gene_heatmap <- function(gtex_fpkm, selected_genes, color_scheme = "Reds") {
+
+    gtex_filtered <- gtex_fpkm %>% filter(Gene.Name %in% selected_genes)
+
+    if (nrow(gtex_filtered) == 0) {
+        stop("None of the selected genes were found in the dataset.")
+    }
+
+    expr_matrix <- as.matrix(gtex_filtered[, -c(1, 2)])
+    rownames(expr_matrix) <- gtex_filtered$Gene.Name
+
+    # ensure matrix is numeric
+    expr_matrix <- apply(expr_matrix, 2, as.numeric)
+
+    col_fun <- colorRampPalette(brewer.pal(9, color_scheme))(100)
+
+    Heatmap(
+        t(scale(t( expr_matrix ))),
+        name = "Expression",
+        col = col_fun,
+        cluster_rows = TRUE,
+        cluster_columns = TRUE,
+        show_row_names = TRUE,
+        show_column_names = TRUE
+    )
+}
+
+selected_genes <- c("CTCF", "TSPAN6", "TNMD", "DPM1", "SCYL3", "CBLIF", "CTCF", "DDX4", "STATH")
+plot_gene_heatmap(gtex_fpkm, selected_genes, "RdBu")
+
+
+```
+

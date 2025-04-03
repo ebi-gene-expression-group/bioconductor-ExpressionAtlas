@@ -13,7 +13,6 @@ keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor"]
 vignette: >
     %\VignetteEngine{ knitr::rmarkdown }
     %\VignetteIndexEntry{ ExpressionAtlas }
-    %\VignetteEncoding{UTF-8}
 ---
 
 # Expression Atlas resources at EMBL-EBI
@@ -25,14 +24,14 @@ from [ArrayExpress](https://www.ebi.ac.uk/biostudies/arrayexpress) and
 other data sources that have been manually 
 curated and re-analyzed via the Functional Genomics Team analysis pipelines [@George2023]. Since October 
 2022, ArrayExpress is a collection of functional genomics data in BioStudies
-(https://www.ebi.ac.uk/biostudies).
-
-The Expression Atlas website allows users to search these datasets for genes and/or
+(https://www.ebi.ac.uk/biostudies). The 
+Expression Atlas website allows users to search these datasets for genes and/or
 experimental conditions, to discover which genes are expressed in which
 tissues, cell types, developmental stages, and hundreds of other experimental
 conditions.
 
-The *ExpressionAtlas* R package allows you to search and download pre-packaged data from Expression Atlas inside an R session. Raw counts
+The *ExpressionAtlas* R package allows you to search for - via the EBI RESTful Web 
+Services API - and download pre-packaged data from Expression Atlas inside an R session. Raw counts
 are provided for RNA-seq datasets, while normalized intensities are available
 for microarray experiments. Protocols describing how the data was generated are
 contained within the downloaded R objects, with more detailed information
@@ -40,12 +39,9 @@ available on the [Expression Atlas website](http://www.ebi.ac.uk/gxa).
 Sample annotations are also included in the R object.
 
 Single-cell datasets are downloaded in annData format, and loaded into a 
-SingleCellExperiment object for access and customised visualisation.
+SingleCellExperiment object.
 
 # Searching and downloading Expression Atlas data
-
-The package communicates with the EBI RESTful Web Services API and Expression Atlas
-API to enable efficient data searching and retrieval.
 
 ## Searching
 
@@ -57,17 +53,12 @@ containing the results of your search. The first argument to
 e.g. biological sample attributes, experimental treatments nad/or species. You may also
 optionally provide a secondary filter yo your query to limit your search to, as a second argument.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(message=FALSE)
-knitr::opts_chunk$set(warning=FALSE)
-```
-
 ```{r}
 suppressMessages( library( ExpressionAtlas ) )
 ```
 
 ```{r eval=FALSE}
-atlas_res <- searchAtlasExperiments( query = "salt", secondaryFilter = "oryza" )
+atlasRes <- searchAtlasExperiments( query = "salt", secondaryFilter = "oryza" )
 # Searching for experiments matching your query ...
 # Query successful.
 # Found 4 experiments matching your query.
@@ -86,28 +77,6 @@ atlasRes
 The *Accession* column contains the ArrayExpress accession of each dataset --
 the unique identifier assigned to it. The species, experiment type (e.g.
 microarray or RNA-seq), and title of each dataset are also listed.
-
-## Detailed search through experiment metadata
-
-```{r}
-searchAtlasExperiments( query = "lung" , detailed = FALSE )
-```
-
-The `detailed` argument can be set to `TRUE` to return a more detailed search through Atlas experiment metadata information:
-
-```{r}
-searchAtlasExperiments( query = "lung" , detailed = TRUE )
-```
-
-It can work with a secondary filter as well:
-
-```{r}
-searchAtlasExperiments( query = "lung", secondaryFilter = "human", detailed = FALSE )
-
-searchAtlasExperiments( query = "lung", secondaryFilter = "human", detailed = TRUE )
-```
-
-As we can see, a detailed search returns a *DataFrame* with more Atlas studies.
 
 ## Downloading the data
 
@@ -246,7 +215,7 @@ preproc( experimentData( affy126data ) )
 
 ## Downloading a single Expression Atlas experiment summary
 
-You can download data for a single Expression Atlas experiment using the
+You can also download data for a single Expression Atlas experiment using the
 `getAtlasExperiment()` function:
 
 ```{r eval=FALSE}
@@ -292,7 +261,7 @@ mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
 ```
 
 
-## Creating heatmap from normalised data of a Expression Atlas experiment
+## Creating heatmap from a single Expression Atlas experiment normalised data
 
 You can create heatmap from downloaded normalised data for a single Expression Atlas experiment using the
 `getNormalisedAtlasExpression()` function:
@@ -307,7 +276,7 @@ And now using CPM data, instead of TPM:
 geod74322_cpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "cpm" )
 geod74322 <- heatmapAtlasExperiment( geod74322_cpm, "E-GEOD-74322-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
 ```
-## Creating a Volcano plot using normalised data from a differential Expression Atlas experiment
+## Creating a Volcano plot from a differential Expression Atlas experiment normalised data
 
 You can create volcano plot from downloaded normalised data for a single Expression Atlas experiment using the
 `volcanoDifferentialAtlasExperiment()` function:
@@ -356,6 +325,12 @@ You can download data for a Single-Cell Expression Atlas experiment using the
 enad19 <- getAtlasSCExperiment( "E-ENAD-19" )
 # returns a SingleCellExperiment object
 
+print("Reduced dimension names:")
+print(reducedDimNames(enad19))
+
+print("Column data names:")
+print(colnames(colData(enad19)))
+
 ```
 
 ## Visualise a dimensionality reduction plot of a SingleCellExperiment object
@@ -376,7 +351,7 @@ plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_pca", colorby = "time" )
 
 plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type")
 
-plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_classic() + theme(legend.position = "left")
+plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_grey() + theme(legend.position = "left")
 
 ```
 
@@ -414,12 +389,6 @@ egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
 
 dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
-```
-
-# sessionInfo()
-
-```{r}
-sessionInfo()
 ```
 
 # References
