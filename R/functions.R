@@ -532,12 +532,12 @@ heatmapAtlasExperiment <- function(df,
         topNgeneExpressions,
         name = "Gene Expression",
         col = colours,  
-        cluster_rows = TRUE,  # matching heatmap.2's default unless explicitly clustered
+        cluster_rows = TRUE,  
         cluster_columns = TRUE,
         show_row_names = TRUE,
         show_column_names = TRUE,
-        row_names_gp = gpar(fontsize = 0.4 * 12),       # matching cexRow
-        column_names_gp = gpar(fontsize = 0.7 * 12),    # matching cexCol
+        row_names_gp = gpar(fontsize = 0.4 * 12),       
+        column_names_gp = gpar(fontsize = 0.7 * 12),    
         column_title = ifelse(show_heatmap_title, title, ""),
         column_title_gp = gpar(fontsize = 0.6 * 12),
         show_heatmap_legend = TRUE,
