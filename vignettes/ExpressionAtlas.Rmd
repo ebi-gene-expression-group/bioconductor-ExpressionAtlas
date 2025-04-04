@@ -304,8 +304,8 @@ geod74322 <- heatmapAtlasExperiment( geod74322_tpm, "E-GEOD-74322-tpm-heatmap.pd
 
 And now using CPM data, instead of TPM:
 ```{r eval=TRUE, fig.width=7, fig.height=6}
-geod74322_cpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "cpm" )
-geod74322 <- heatmapAtlasExperiment( geod74322_cpm, "E-GEOD-74322-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
+geod74322_cpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "cpm" ) 
+geod74322 <- heatmapAtlasExperiment( geod74322_cpm, "E-GEOD-74322-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE ) 
 ```
 ## Creating a Volcano plot using normalised data from a differential Expression Atlas experiment
 
