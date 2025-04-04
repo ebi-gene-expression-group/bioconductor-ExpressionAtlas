@@ -298,7 +298,7 @@ You can create heatmap from downloaded normalised data for a single Expression A
 `getNormalisedAtlasExpression()` function:
 
 ```{r eval=TRUE, fig.width=7, fig.height=6}
-geod74322_tpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "tpm" )
+geod74322_tpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "tpm" ) 
 geod74322 <- heatmapAtlasExperiment( geod74322_tpm, "E-GEOD-74322-tpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
 ```
 
