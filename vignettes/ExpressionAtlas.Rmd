@@ -363,20 +363,20 @@ enad19 <- getAtlasSCExperiment( "E-ENAD-19" )
 Let's use and example for pluripotency of human early embryos and embryonic stem cells by single cell RNA-seq.
 
 ```{r}
-egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 # returns a SingleCellExperiment object
 
 print("Reduced dimension names:")
-print(reducedDimNames(egeod6552))
+print(reducedDimNames(egeod36552))
 
 print("Column data names:")
-print(colnames(colData(egeod6552)))
+print(colnames(colData(egeod36552)))
 
-plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_pca", colorby = "time" )
+plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_pca", colorby = "time" )
 
-plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type")
+plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type")
 
-plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_classic() + theme(legend.position = "left")
+plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_classic() + theme(legend.position = "left")
 
 ```
 
@@ -384,23 +384,23 @@ plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20
 
 For the default cluster or selected clusters with Expression Atlas marker genes, you can use the `heatmapSCAtlasExperiment()` function:
 ```{r}
-egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=NULL, scaleNormExp=FALSE, show_row_names=FALSE ) 
+heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=FALSE, show_row_names=FALSE ) 
 
-heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE ) 
+heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE ) 
 
-heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=6, scaleNormExp=TRUE, show_row_names=FALSE ) 
+heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=6, scaleNormExp=TRUE, show_row_names=FALSE ) 
 
 ```
 
 For user selected genes:
 ```{r}
-egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE ) 
+heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE ) 
 
-heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
+heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
 
 ```
 
@@ -409,11 +409,11 @@ heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577'
 For example, if we chose one marker gene from each of the clusters (k = 4) in the previous example, we can use the `dotPlotSCAtlasExperiment()` function to plot the average expression of these genes across the clusters:
 
 ```{r, fig.width=7, fig.height=4}
-egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
+dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
 
-dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
+dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
 ```
 
 # sessionInfo()
