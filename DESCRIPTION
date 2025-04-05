@@ -1,6 +1,6 @@
 Package: ExpressionAtlas
 Title: Search, download and visualise datasets from EMBL-EBI Expression Atlas and Single-Cell Expression Atlas
-Version: 1.99.2
+Version: 1.99.3
 Date: 2025-03-31
 Authors@R: 
     c(person(given = "Maria",
@@ -28,7 +28,7 @@ Description: This package is for searching for datasets in EMBL-EBI Expression
     data is contained in an ExpressionSet or MAList object. SingleCellExperiment 
     object is used for Single-Cell Expression Atlas datasets.
 biocViews: ExpressionData, ExperimentData, SequencingData,
-        MicroarrayData, ArrayExpress
+        MicroarrayData, ArrayExpress, SingleCellData
 Depends: R (>= 4.4.0), methods, Biobase
 Imports: utils, XML, httr, reshape2, tidyr, yaml, rhdf5, SummarizedExperiment, 
         limma, SingleCellExperiment,
@@ -42,3 +42,5 @@ Encoding: UTF-8
 License: GPL (>= 3)
 LazyLoad: yes
 NeedsCompilation: no
+URL: https://github.com/ebi-gene-expression-group/bioconductor-ExpressionAtlas
+BugReports: https://github.com/ebi-gene-expression-group/bioconductor-ExpressionAtlas/issues
