@@ -1360,8 +1360,8 @@ dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, sc
 
     # Compute average expression per gene per cluster
     df_avg <- df %>%
-        group_by(Gene, Cluster) %>%
-        summarise(Average_Expression = mean(Expression, na.rm = TRUE), .groups = "drop")
+        group_by(.data$Gene, .data$Cluster) %>%
+        summarise(Average_Expression = mean(.data$Expression, na.rm = TRUE), .groups = "drop")
 
     ggplot(df_avg, aes(x = Cluster, y = Gene, size = Average_Expression, color = Average_Expression)) +
         geom_point() +
