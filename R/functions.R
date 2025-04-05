@@ -519,40 +519,43 @@ heatmapAtlasExperiment <- function(df,
     }
 
 
-    # PDF Output (Only if save_pdf = TRUE)
-    if (save_pdf) {
-        heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
-        pdf(heatmap_file, height=8, width=8)
-    }
-
     title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
 
-    # Make the heatmap.
-    heatmap.2(
-        as.matrix(topNgeneExpressions),
-        col = colours,
-        labRow = topNgeneNames,
-        labCol = assayGroupLabels,
-        key = FALSE,
-        trace = "none",
-        cexRow = 0.4,
-        cexCol = 0.7, # hardcoding for now, may need to make this dynamic but requires thinking about.
-        cex.main = 0.6,
-        margins = c( marginHeight, 6 ),
-        main = ifelse(show_heatmap_title, title, "")
+    heatmap_vis <- ComplexHeatmap::Heatmap(
+        topNgeneExpressions,
+        name = "Gene Expression",
+        col = colours,  
+        cluster_rows = TRUE,  
+        cluster_columns = TRUE,
+        show_row_names = TRUE,
+        show_column_names = TRUE,
+        row_names_gp = gpar(fontsize = 0.4 * 12),       
+        column_names_gp = gpar(fontsize = 0.7 * 12),    
+        column_title = ifelse(show_heatmap_title, title, ""),
+        column_title_gp = gpar(fontsize = 0.6 * 12),
+        show_heatmap_legend = TRUE,
+        heatmap_width = unit(6 + marginHeight, "cm"),
+        row_names_max_width = unit(6, "cm")
     )
 
-    # Close PDF if it was opened
-    if (save_pdf) invisible(dev.off())
+    if (show_plot){ 
+        print("Plotting on screen")
+        ComplexHeatmap::draw(heatmap_vis)
+    }
 
-    # Show plot on screen if requested
-    if (show_plot) print("Plotting on screen") 
+    if (save_pdf) {
+        ComplexHeatmap::draw(heatmap_vis)
+        heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
+        ggsave(heatmap_file, height=8, width=8)
+    }
+
+
 
 }
 
 
 
-getAnalysticsDifferentialAtlasExpression <- function(experimentAccession) {
+getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
 
     # Ensure the experiment accession is in the correct format.
     if (!.isValidExperimentAccession(experimentAccession)) {

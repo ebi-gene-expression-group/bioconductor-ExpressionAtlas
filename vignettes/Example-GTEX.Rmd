@@ -35,9 +35,10 @@ knitr::opts_chunk$set(warning=FALSE)
 
 ```{r}
 suppressMessages( library( ExpressionAtlas ) )
+suppressMessages( library( SummarizedExperiment ) )
 ```
 
-```{r eval=TRUE}
+```{r}
 
 atlasRes <- searchAtlasExperiments( query = "gtex" )
 atlasRes
@@ -55,10 +56,13 @@ head(gtex_tpm)
 
 gtex_fpkm <- getNormalisedAtlasExpression( experimentAccession = "E-GTEX-8", normalisation = "fpkm" )
 head(gtex_fpkm)
+```
 
+```{r, fig.width=5, fig.height=8}
 gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, filename = "E-GTEX-8-tpm-heatmap.pdf", save_pdf= FALSE, show_plot = TRUE, heatmap_color = "Reds", top_n = 50, show_heatmap_title = TRUE )
+```
 
-
+```{r}
 library(ComplexHeatmap)
 library(dplyr)
 library(RColorBrewer)
