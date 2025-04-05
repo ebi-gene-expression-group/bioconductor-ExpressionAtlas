@@ -97,6 +97,10 @@ plot_gene_heatmap <- function(gtex_fpkm, selected_genes, color_scheme = "Reds") 
 selected_genes <- c("CTCF", "TSPAN6", "TNMD", "DPM1", "SCYL3", "CBLIF", "CTCF", "DDX4", "STATH")
 plot_gene_heatmap(gtex_fpkm, selected_genes, "RdBu")
 
-
 ```
 
+# sessionInfo
+
+```{r}
+sessionInfo()
+```

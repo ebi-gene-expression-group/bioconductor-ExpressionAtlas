@@ -61,7 +61,11 @@ dotPlotSCAtlasExperiment(geod87631, genes=c('ENSMUSG00000056758', 'ENSMUSG000000
 # random genes
 dotPlotSCAtlasExperiment(geod87631, genes=c('ENSMUSG00000056758', 'ENSMUSG00000076867', 'ENSMUSG00000022584', 'ENSMUSG00000048442'), sel.K=9, scaleNormExp=FALSE) + theme_classic()
 
+```
 
+# sessionInfo
 
+```{r}
+sessionInfo()
 ```
 

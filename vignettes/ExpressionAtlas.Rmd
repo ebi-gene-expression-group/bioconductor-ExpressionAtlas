@@ -419,7 +419,7 @@ dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928'
 dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
 ```
 
-# sessionInfo()
+# sessionInfo
 
 ```{r}
 sessionInfo()
