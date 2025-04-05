@@ -63,7 +63,10 @@ knitr::opts_chunk$set(warning=FALSE)
 ```
 
 ```{r}
-suppressMessages( library( ExpressionAtlas ) )
+invisible(lapply(
+  c("ExpressionAtlas", "SummarizedExperiment", "SingleCellExperiment", "ggplot2"),
+  function(pkg) suppressMessages(library(pkg, character.only = TRUE))
+))
 ```
 
 ```{r eval=FALSE}
@@ -283,10 +286,10 @@ mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" )
 ## Downloading a single Expression Atlas differential experiment analytics data
 
 You can also download analytics data for a single Expression Atlas deifferential experiment using the
-`getAnalysticsDifferentialAtlasExpression()` function:
+`getAnalyticsDifferentialAtlasExpression()` function:
 
 ```{r eval=FALSE}
-mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
+mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 # Downloading expression file from:
 # ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-10104/E-MTAB-10104-analytics.tsv
 ```
@@ -305,7 +308,7 @@ geod74322 <- heatmapAtlasExperiment( geod74322_tpm, "E-GEOD-74322-tpm-heatmap.pd
 And now using CPM data, instead of TPM:
 ```{r eval=TRUE, fig.width=7, fig.height=6}
 geod74322_cpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "cpm" ) 
-geod74322 <- heatmapAtlasExperiment( geod74322_cpm, "E-GEOD-74322-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE ) 
+geod74322 <- heatmapAtlasExperiment( geod74322_cpm, "E-GEOD-74322-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
 ```
 ## Creating a Volcano plot using normalised data from a differential Expression Atlas experiment
 
@@ -313,7 +316,7 @@ You can create volcano plot from downloaded normalised data for a single Express
 `volcanoDifferentialAtlasExperiment()` function:
 
 ```{r eval=TRUE, fig.width=7, fig.height=5}
-mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
+mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 
 head(mtab10104_dea)
 

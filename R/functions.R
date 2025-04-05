@@ -519,16 +519,9 @@ heatmapAtlasExperiment <- function(df,
     }
 
 
-    # PDF Output (Only if save_pdf = TRUE)
-    if (save_pdf) {
-        heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
-        pdf(heatmap_file, height=8, width=8)
-    }
-
     title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
 
-    # Make the heatmap.
-    Heatmap(
+    heatmap_vis <- ComplexHeatmap::Heatmap(
         topNgeneExpressions,
         name = "Gene Expression",
         col = colours,  
@@ -545,17 +538,24 @@ heatmapAtlasExperiment <- function(df,
         row_names_max_width = unit(6, "cm")
     )
 
-    # Close PDF if it was opened
-    if (save_pdf) invisible(dev.off())
+    if (show_plot){ 
+        print("Plotting on screen")
+        ComplexHeatmap::draw(heatmap_vis)
+    }
 
-    # Show plot on screen if requested
-    if (show_plot) print("Plotting on screen") 
+    if (save_pdf) {
+        ComplexHeatmap::draw(heatmap_vis)
+        heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
+        ggsave(heatmap_file, height=8, width=8)
+    }
+
+
 
 }
 
 
 
-getAnalysticsDifferentialAtlasExpression <- function(experimentAccession) {
+getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
 
     # Ensure the experiment accession is in the correct format.
     if (!.isValidExperimentAccession(experimentAccession)) {

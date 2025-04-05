@@ -35,6 +35,7 @@ knitr::opts_chunk$set(warning=FALSE)
 
 ```{r}
 suppressMessages( library( ExpressionAtlas ) )
+suppressMessages( library( SummarizedExperiment ) )
 ```
 
 ```{r}
