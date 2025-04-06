@@ -301,14 +301,14 @@ You can create heatmap from downloaded normalised data for a single Expression A
 `getNormalisedAtlasExpression()` function:
 
 ```{r eval=TRUE, fig.width=7, fig.height=6}
-geod74322_tpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "tpm" ) 
-geod74322 <- heatmapAtlasExperiment( geod74322_tpm, "E-GEOD-74322-tpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
+mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" ) 
+mtab4045 <- heatmapAtlasExperiment( mtab4045_tpm, "E-MTAB-4045-tpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
 ```
 
 And now using CPM data, instead of TPM:
 ```{r eval=TRUE, fig.width=7, fig.height=6}
-geod74322_cpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "cpm" ) 
-geod74322 <- heatmapAtlasExperiment( geod74322_cpm, "E-GEOD-74322-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
+mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" ) 
+mtab4045 <- heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
 ```
 ## Creating a Volcano plot using normalised data from a differential Expression Atlas experiment
 
