@@ -310,6 +310,8 @@ And now using CPM data, instead of TPM:
 mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" ) 
 mtab4045 <- heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
 ```
+
+
 ## Creating a Volcano plot using normalised data from a differential Expression Atlas experiment
 
 You can create volcano plot from downloaded normalised data for a single Expression Atlas experiment using the
