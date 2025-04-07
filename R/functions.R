@@ -767,8 +767,8 @@ volcanoDifferentialAtlasExperiment <- function(df,
 
     # search across all details
     matching_accessions <- experiments_df %>%
-        dplyr::filter(grepl(search_term, details, ignore.case = TRUE)) %>%
-        dplyr::pull(accession)
+        dplyr::filter(grepl(search_term, .data$details, ignore.case = TRUE)) %>%
+        dplyr::pull(.data$accession)
 
     return(matching_accessions)
 
