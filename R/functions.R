@@ -1124,6 +1124,12 @@ getAtlasSCExperiment <- function( experimentAccession ) {
         )
     )
 
+    # check if colData has the same number of rows as the normalised matrix
+    if (ncol(colData(loadResult)) == 0 ) {
+        # here we could fill the colData with data from the ftp site
+        message("No colData found in the SingleCellExperiment object.")
+    }
+
     # Return SingleCellExperiment object
     SingleCellExperiment::mainExpName(loadResult) <- experimentAccession
     return( loadResult )

@@ -18,7 +18,8 @@ vignette: >
 ---
 
 
-This vignette demonstrates how to access and visualise data from the Single-Cell Expression Atlas using the `ExpressionAtlas` package. 
+This vignette demonstrates how to access and visualise dataset [E-GEOD-81383](https://www.ebi.ac.uk/gxa/sc/experiments/E-GEOD-81383) from the 
+Single-Cell Expression Atlas using the `ExpressionAtlas` package. 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message=FALSE)
@@ -34,33 +35,31 @@ library( ggplot2 )
 sc_search_results <- searchSCAtlasExperiments( query = "hematopoietic", secondaryFilter = "old" )
 print(sc_search_results)
 
-geod87631 <- getAtlasSCExperiment( "E-GEOD-87631" )
-geod87631
+geod81383 <- getAtlasSCExperiment( "E-GEOD-81383" )
+geod81383
 
 print("Reduced dimension names:")
-print(reducedDimNames(geod87631 ))
+print(reducedDimNames(geod81383 ))
 
 print("Column data names:")
-print(colnames(colData(geod87631 )))
+print(colnames(colData(geod81383 )))
 
-plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_0.1") + theme_classic() 
+plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_0.1") + theme_classic() 
 
-# plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type") + theme_classic() 
+# plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "genotype") + theme_classic() 
 
-plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "age") + theme_classic() 
+plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "age") + theme_classic() 
 
-plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "genotype") + theme_classic() 
+plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_line") + theme_classic() 
 
 
-# heatmapSCAtlasExperiment(geod87631, genes=NULL, sel.K=5, scaleNormExp=FALSE, show_row_names=FALSE ) 
+# heatmapSCAtlasExperiment(geod81383, genes=NULL, sel.K=5, scaleNormExp=FALSE, show_row_names=FALSE ) 
 
-heatmapSCAtlasExperiment(geod87631, genes=NULL, sel.K=5, scaleNormExp=TRUE, show_row_names=FALSE ) 
+heatmapSCAtlasExperiment(geod81383, genes=NULL, sel.K=3, scaleNormExp=TRUE, show_row_names=FALSE ) 
 
-# random genes
-dotPlotSCAtlasExperiment(geod87631, genes=c('ENSMUSG00000056758', 'ENSMUSG00000076867', 'ENSMUSG00000022584', 'ENSMUSG00000048442'), sel.K=5, scaleNormExp=TRUE) + theme_classic()
+dotPlotSCAtlasExperiment(geod81383, genes=c('ENSG00000185664', 'ENSG00000205777', 'ENSG00000135218'), sel.K=3, scaleNormExp=TRUE) + theme_classic()
 
-# random genes
-# dotPlotSCAtlasExperiment(geod87631, genes=c('ENSMUSG00000056758', 'ENSMUSG00000076867', 'ENSMUSG00000022584', 'ENSMUSG00000048442'), sel.K=9, scaleNormExp=FALSE) + theme_classic()
+# dotPlotSCAtlasExperiment(geod81383, genes=c('ENSG00000185664', 'ENSG00000205777', 'ENSG00000135218', 'ENSMUSG00000048442'), sel.K=6, scaleNormExp=FALSE) + theme_classic()
 
 ```
 

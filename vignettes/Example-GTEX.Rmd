@@ -1,6 +1,6 @@
 ---
 title: "Accessing GTEX RNA-seq data from Expression Atlas"
-author: "Pedro Madrigal"
+author: "Pedro Madrigal, Anil Thanki"
 affiliation: "EMBL-EBI"
 date: "`r Sys.Date()`"
 output:
