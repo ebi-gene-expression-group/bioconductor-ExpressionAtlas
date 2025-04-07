@@ -508,24 +508,6 @@ heatmapAtlasExperiment <- function(df,
     # Some nice colours.
     colours <- colorRampPalette( brewer.pal( 9, heatmap_color ) )( top_n )
 
-    imageWidth <- 8
-    if( ( length( assayGroupLabels ) / 2 ) > 8 ) {
-        imageWidth <- length( assayGroupLabels ) / 2
-    }
-
-    # Get the lengths of the longest assay group label
-    longestLabel <- max(unlist(lapply( assayGroupLabels, function( x ) nchar( x ) )))
-
-    # Changing image and margin height to get the column (assay
-    # group) labels to fit on the page. 
-    if( longestLabel / 3 > 8 ) {
-        imageHeight <- ( longestLabel / 3 )
-        marginHeight <- ( longestLabel / 3 )
-    } else {
-        imageHeight <- 8
-        marginHeight <- 8
-    }
-
 
     title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
 
@@ -542,7 +524,6 @@ heatmapAtlasExperiment <- function(df,
         column_title = ifelse(show_heatmap_title, title, ""),
         column_title_gp = gpar(fontsize = 0.6 * 12),
         show_heatmap_legend = TRUE,
-        heatmap_width = unit(6 + marginHeight, "cm"),
         row_names_max_width = unit(6, "cm")
     )
 
