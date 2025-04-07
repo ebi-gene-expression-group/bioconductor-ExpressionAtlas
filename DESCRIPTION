@@ -33,7 +33,7 @@ Depends: R (>= 4.4.0), Biobase
 Imports: utils, XML, httr, reshape2, tidyr, yaml, rhdf5, SummarizedExperiment, 
         limma, SingleCellExperiment, viridis,
         S4Vectors, xml2, jsonlite, BiocStyle, zellkonverter, gplots,
-        genefilter, edgeR, ggplot2, dplyr, ComplexHeatmap
+        genefilter, edgeR, ggplot2, dplyr, ComplexHeatmap, circlize
 Suggests: knitr, testthat, rmarkdown
 VignetteBuilder: knitr
 VignetteEngine: knitr::rmarkdown

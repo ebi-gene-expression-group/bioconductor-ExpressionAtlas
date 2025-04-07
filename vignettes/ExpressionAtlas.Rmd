@@ -303,7 +303,8 @@ You can create heatmap from downloaded normalised data for a single Expression A
 
 ```{r eval=TRUE, fig.width=7, fig.height=8}
 mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" ) 
-mtab4045 <- heatmapAtlasExperiment( df = mtab4045_tpm, save_pdf = FALSE, show_plot = TRUE,  palette = "viridis",top_n = 20, scaled = FALSE, show_heatmap_title = TRUE )
+mtab4045 <- heatmapAtlasExperiment( df = mtab4045_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", top_n = 20, scaled = FALSE, show_heatmap_title = TRUE )
+
 ```
 
 And now using CPM data, instead of TPM:
@@ -322,7 +323,6 @@ You can create volcano plot from downloaded normalised data for a single Express
 mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 
 head(mtab10104_dea)
-
 mtab10104 <-  volcanoDifferentialAtlasExperiment( df = mtab10104_dea, save_pdf = FALSE, show_plot = TRUE, low_fc_colour = "Gray", high_fc_colour = "Blue", cutoff = 1, show_volcanoplot_title = TRUE )
 
 ```

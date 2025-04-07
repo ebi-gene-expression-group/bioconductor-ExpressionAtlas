@@ -59,6 +59,7 @@ gtex_fpkm <- getNormalisedAtlasExpression( experimentAccession = "E-GTEX-8", nor
 head(gtex_fpkm)
 ```
 
+
 ```{r, fig.width=7, fig.height=8}
 gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, save_pdf= FALSE, show_plot = TRUE, palette = "viridis", top_n = 40, scaled = TRUE, show_heatmap_title = TRUE )
 ```

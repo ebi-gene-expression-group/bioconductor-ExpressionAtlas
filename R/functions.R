@@ -481,7 +481,6 @@ heatmapAtlasExperiment <- function(df,
 
 
     if(dim(df)[2] > 1) {
-        #rowVariances <- rowVars( df )
         rowVariances <- genefilter::rowVars( df )
     } else {
         # can't calculate variance of one row, use the FPKM values (alhough the heatmap isn't as valuable then)
@@ -506,11 +505,16 @@ heatmapAtlasExperiment <- function(df,
     # Get the assay group labels to use as the labels for the heatmap columns.
     assayGroupLabels <- colnames( topNgeneExpressions )
 
-    ## Some nice colours.
-    #colours <- colorRampPalette( brewer.pal( 9, heatmap_color ) )( top_n )
-    # Use viridis as default color palette
-    
-    #colours <- viridis::viridis(top_n)
+    min_val <- min(topNgeneExpressions, na.rm = TRUE)
+    max_val <- max(topNgeneExpressions, na.rm = TRUE)
+    mid_val <- (min_val + max_val) / 2
+
+    # viridis colours.
+    colours <- circlize::colorRamp2(
+        breaks = c(min_val, mid_val, max_val),
+        colors = viridis(3, option = palette)
+    )
+
 
     min_val <- min(topNgeneExpressions, na.rm = TRUE)
     max_val <- max(topNgeneExpressions, na.rm = TRUE)
