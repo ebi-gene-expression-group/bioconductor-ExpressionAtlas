@@ -5,7 +5,7 @@
     This function generates a heatmap for an Expression Atlas experiment, from normalised expression data.
 }
 \usage{
-    heatmapAtlasExperiment( df, filename = "heatmap", save_pdf = FALSE, show_plot = TRUE, heatmap_color = "Blues", top_n = 100, scaled=FALSE, show_heatmap_title = TRUE )
+    heatmapAtlasExperiment( df, filename = "heatmap", save_pdf = FALSE, show_plot = TRUE, palette = "viridis", top_n = 100, scaled=FALSE, show_heatmap_title = TRUE )
 }
 \arguments{
     \item{ df }{
@@ -20,8 +20,9 @@
     \item{ show_plot }{
         Show plot in the R console. Default is \code{TRUE}.
     }
-    \item{ heatmap_color }{
-        Colour palette for the heatmap. Default is "Blues".
+    \item{ palette }{
+        Viridis colour palette for the heatmap. Default is "viridis".
+        Other options are: magma, plasma, inferno, cividis, rocket, mako, turbo
     }
     \item{ top_n }{
         Number of top most variable genes to be shown in the heatmap. Default is 100.
@@ -42,7 +43,7 @@
     mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" )
 
     # Generate heatmap with default parameters
-    heatmapAtlasExperiment( mtab4045_tpm, "heatmap", TRUE, FALSE, "Blues", 100, FALSE, TRUE )
+    heatmapAtlasExperiment( mtab4045_tpm, "heatmap", TRUE, FALSE, "viridis", 100, FALSE, TRUE )
 
     # Check if the PDF file was created
     file.exists("heatmap.pdf")
@@ -51,7 +52,7 @@
     mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" )
 
     # Generate heatmap with default parameters
-    heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap", TRUE, FALSE, "Blues", 100, FALSE, TRUE )
+    heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap", TRUE, FALSE, "viridis", 100, FALSE, TRUE )
 
     # Check if the PDF file was created
     file.exists("E-MTAB-4045-cpm-heatmap.pdf")

@@ -59,7 +59,7 @@ head(gtex_fpkm)
 ```
 
 ```{r, fig.width=5, fig.height=8}
-gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, filename = "E-GTEX-8-tpm-heatmap.pdf", save_pdf= FALSE, show_plot = TRUE, heatmap_color = "Reds", top_n = 50, scaled = TRUE, show_heatmap_title = TRUE )
+gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, save_pdf= FALSE, show_plot = TRUE, palette = "viridis", top_n = 50, scaled = TRUE, show_heatmap_title = TRUE )
 ```
 
 ```{r}

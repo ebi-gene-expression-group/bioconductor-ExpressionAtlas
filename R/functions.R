@@ -447,7 +447,7 @@ heatmapAtlasExperiment <- function(df,
                                      filename = "heatmap",
                                      save_pdf = FALSE,
                                      show_plot = TRUE,
-                                     heatmap_color = "Blues",
+                                     palette = "viridis",
                                      top_n = 100,
                                      scaled = FALSE,
                                      show_heatmap_title = TRUE ) {  
@@ -481,7 +481,7 @@ heatmapAtlasExperiment <- function(df,
 
 
     if(dim(df)[2] > 1) {
-        rowVariances <- rowVars( df )
+        rowVariances <- genefilter::rowVars( df )
     } else {
         # can't calculate variance of one row, use the FPKM values (alhough the heatmap isn't as valuable then)
         rowVariances <- df[1]
@@ -505,8 +505,16 @@ heatmapAtlasExperiment <- function(df,
     # Get the assay group labels to use as the labels for the heatmap columns.
     assayGroupLabels <- colnames( topNgeneExpressions )
 
-    # Some nice colours.
-    colours <- colorRampPalette( brewer.pal( 9, heatmap_color ) )( top_n )
+    
+    min_val <- min(topNgeneExpressions, na.rm = TRUE)
+    max_val <- max(topNgeneExpressions, na.rm = TRUE)
+    mid_val <- (min_val + max_val) / 2
+
+    # viridis colours.
+    colours <- circlize::colorRamp2(
+        breaks = c(min_val, mid_val, max_val),
+        colors = viridis(3, option = palette)
+    )
 
 
     title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
@@ -759,8 +767,8 @@ volcanoDifferentialAtlasExperiment <- function(df,
 
     # search across all details
     matching_accessions <- experiments_df %>%
-        dplyr::filter(grepl(search_term, .data$details, ignore.case = TRUE)) %>%
-        dplyr::pull(.data$accession)
+        dplyr::filter(grepl(search_term, details, ignore.case = TRUE)) %>%
+        dplyr::pull(accession)
 
     return(matching_accessions)
 

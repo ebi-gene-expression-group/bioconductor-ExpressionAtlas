@@ -302,13 +302,13 @@ You can create heatmap from downloaded normalised data for a single Expression A
 
 ```{r eval=TRUE, fig.width=7, fig.height=6}
 mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" ) 
-mtab4045 <- heatmapAtlasExperiment( mtab4045_tpm, "E-MTAB-4045-tpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, FALSE, TRUE )
+mtab4045 <- heatmapAtlasExperiment( df = mtab4045_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", top_n = 20, scaled = FALSE, show_heatmap_title = TRUE )
 ```
 
 And now using CPM data, instead of TPM:
 ```{r eval=TRUE, fig.width=7, fig.height=6}
 mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" ) 
-mtab4045 <- heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE, TRUE )
+mtab4045 <- heatmapAtlasExperiment( df = mtab4045_cpm, save_pdf = FALSE, show_plot = TRUE,  palette = "viridis", top_n = 20, scaled = TRUE, show_heatmap_title = TRUE )
 ```
 
 
@@ -322,7 +322,7 @@ mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 
 head(mtab10104_dea)
 
-mtab10104 <- volcanoDifferentialAtlasExperiment( mtab10104_dea, "E-MTAB-10104",FALSE, TRUE, "Gray", "Blue", 1, TRUE )
+mtab10104 <- volcanoDifferentialAtlasExperiment( df = mtab10104_dea, save_pdf = FALSE, show_plot = TRUE, low_fc_colour = "Gray", high_fc_colour = "Blue", cutoff = 1, show_volcanoplot_title = TRUE )
 
 ```
 
