@@ -447,7 +447,7 @@ heatmapAtlasExperiment <- function(df,
                                      filename = "heatmap",
                                      save_pdf = FALSE,
                                      show_plot = TRUE,
-                                     heatmap_color = "Blues",
+                                     palette = "viridis",
                                      top_n = 100,
                                      scaled = FALSE,
                                      show_heatmap_title = TRUE ) {  
@@ -481,7 +481,8 @@ heatmapAtlasExperiment <- function(df,
 
 
     if(dim(df)[2] > 1) {
-        rowVariances <- rowVars( df )
+        #rowVariances <- rowVars( df )
+        rowVariances <- genefilter::rowVars( df )
     } else {
         # can't calculate variance of one row, use the FPKM values (alhough the heatmap isn't as valuable then)
         rowVariances <- df[1]
@@ -505,9 +506,21 @@ heatmapAtlasExperiment <- function(df,
     # Get the assay group labels to use as the labels for the heatmap columns.
     assayGroupLabels <- colnames( topNgeneExpressions )
 
-    # Some nice colours.
-    colours <- colorRampPalette( brewer.pal( 9, heatmap_color ) )( top_n )
+    ## Some nice colours.
+    #colours <- colorRampPalette( brewer.pal( 9, heatmap_color ) )( top_n )
+    # Use viridis as default color palette
+    
+    #colours <- viridis::viridis(top_n)
 
+    min_val <- min(topNgeneExpressions, na.rm = TRUE)
+    max_val <- max(topNgeneExpressions, na.rm = TRUE)
+    mid_val <- (min_val + max_val) / 2
+
+    # viridis colours.
+    colours <- circlize::colorRamp2(
+        breaks = c(min_val, mid_val, max_val),
+        colors = viridis(30, option = palette)
+    )
 
     title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
 
@@ -1222,7 +1235,7 @@ heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NU
 
     # Convert sparse matrix to dense
     dense_matrix <- as.matrix(normalised_matrix)
-    if ( scaleNormExp == TRUE ) {
+    if ( isTRUE(scaleNormExp) ) {
         dense_matrix <- t(scale(t(dense_matrix)))
     }
 
@@ -1236,6 +1249,8 @@ heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NU
     # Generate a color mapping for clusters
     cluster_levels <- unique(gene_clusters)
     cluster_colors <- setNames(rainbow(length(cluster_levels)), cluster_levels)
+    #cluster_colors <- setNames(viridis::viridis(length(cluster_levels)), cluster_levels)
+
 
     # Define row annotation (for genes, not samples)
     if ( is.null(genes) == TRUE ) {
@@ -1254,7 +1269,8 @@ heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NU
     # Plot heatmap
     ComplexHeatmap::Heatmap(
         dense_matrix , 
-        name = "Expression", 
+        name = "Expression",
+        col = viridis::viridis(400),
         left_annotation = row_annotation,
         show_row_names = show_row_names, 
         show_column_names = FALSE, 
@@ -1318,7 +1334,7 @@ dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, sc
     }
     
     dense_matrix <- as.matrix(normalised_matrix)
-    if (scaleNormExp) {
+    if ( isTRUE(scaleNormExp) ) {
         dense_matrix <- t(scale(t(dense_matrix)))
     }
     

@@ -12,6 +12,7 @@ bibliography: references.bib
 keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor", "single-cell"]
 vignette: >
     %\VignetteEngine{ knitr::rmarkdown }
+    %\VignetteBuilder{ knitr }
     %\VignetteIndexEntry{ Accessing data from Single-Cell Expression Atlas }
     %\VignetteEncoding{UTF-8}
 ---
@@ -44,14 +45,14 @@ print(colnames(colData(geod87631 )))
 
 plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_0.1") + theme_classic() 
 
-plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type") + theme_classic() 
+# plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type") + theme_classic() 
 
 plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "age") + theme_classic() 
 
 plotDimRedSCAtlasExperiment(geod87631, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "genotype") + theme_classic() 
 
 
-heatmapSCAtlasExperiment(geod87631, genes=NULL, sel.K=5, scaleNormExp=FALSE, show_row_names=FALSE ) 
+# heatmapSCAtlasExperiment(geod87631, genes=NULL, sel.K=5, scaleNormExp=FALSE, show_row_names=FALSE ) 
 
 heatmapSCAtlasExperiment(geod87631, genes=NULL, sel.K=5, scaleNormExp=TRUE, show_row_names=FALSE ) 
 
@@ -59,7 +60,7 @@ heatmapSCAtlasExperiment(geod87631, genes=NULL, sel.K=5, scaleNormExp=TRUE, show
 dotPlotSCAtlasExperiment(geod87631, genes=c('ENSMUSG00000056758', 'ENSMUSG00000076867', 'ENSMUSG00000022584', 'ENSMUSG00000048442'), sel.K=5, scaleNormExp=TRUE) + theme_classic()
 
 # random genes
-dotPlotSCAtlasExperiment(geod87631, genes=c('ENSMUSG00000056758', 'ENSMUSG00000076867', 'ENSMUSG00000022584', 'ENSMUSG00000048442'), sel.K=9, scaleNormExp=FALSE) + theme_classic()
+# dotPlotSCAtlasExperiment(geod87631, genes=c('ENSMUSG00000056758', 'ENSMUSG00000076867', 'ENSMUSG00000022584', 'ENSMUSG00000048442'), sel.K=9, scaleNormExp=FALSE) + theme_classic()
 
 ```
 

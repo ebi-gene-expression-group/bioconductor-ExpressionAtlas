@@ -12,6 +12,7 @@ bibliography: references.bib
 keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor"]
 vignette: >
     %\VignetteEngine{ knitr::rmarkdown }
+    %\VignetteBuilder{ knitr }
     %\VignetteIndexEntry{ Accessing GTEX RNA-seq data from Expression Atlas }
     %\VignetteEncoding{UTF-8}
 ---
@@ -58,14 +59,14 @@ gtex_fpkm <- getNormalisedAtlasExpression( experimentAccession = "E-GTEX-8", nor
 head(gtex_fpkm)
 ```
 
-```{r, fig.width=5, fig.height=8}
-gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, filename = "E-GTEX-8-tpm-heatmap.pdf", save_pdf= FALSE, show_plot = TRUE, heatmap_color = "Reds", top_n = 50, scaled = TRUE, show_heatmap_title = TRUE )
+```{r, fig.width=7, fig.height=8}
+gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, save_pdf= FALSE, show_plot = TRUE, palette = "viridis", top_n = 40, scaled = TRUE, show_heatmap_title = TRUE )
 ```
 
 ```{r}
 library(ComplexHeatmap)
 library(dplyr)
-library(RColorBrewer)
+library(viridis)
 
 plot_gene_heatmap <- function(gtex_fpkm, selected_genes, color_scheme = "Reds") {
 
@@ -81,7 +82,8 @@ plot_gene_heatmap <- function(gtex_fpkm, selected_genes, color_scheme = "Reds") 
     # ensure matrix is numeric
     expr_matrix <- apply(expr_matrix, 2, as.numeric)
 
-    col_fun <- colorRampPalette(brewer.pal(9, color_scheme))(100)
+    #col_fun <- colorRampPalette(brewer.pal(9, color_scheme))(100)
+    col_fun <- viridis::viridis(100)
 
     Heatmap(
         t(scale(t( expr_matrix ))),
