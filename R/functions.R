@@ -523,7 +523,7 @@ heatmapAtlasExperiment <- function(df,
     # viridis colours.
     colours <- circlize::colorRamp2(
         breaks = c(min_val, mid_val, max_val),
-        colors = viridis(30, option = palette)
+        colors = viridis(3, option = palette)
     )
 
     title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
@@ -1125,7 +1125,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
     )
 
     # Return SingleCellExperiment object
-    mainExpName(loadResult) <- experimentAccession
+    SingleCellExperiment::mainExpName(loadResult) <- experimentAccession
     return( loadResult )
 
 }
@@ -1134,12 +1134,12 @@ getAtlasSCExperiment <- function( experimentAccession ) {
 plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
     
     # Check if the provided dimRed exists in reducedDimNames
-    if (!(dimRed %in% reducedDimNames(sceObject))) {
+    if (!(dimRed %in% SingleCellExperiment::reducedDimNames(sceObject))) {
         stop(paste("Error: Dimension reduction method", dimRed, "not found in the object!"))
     }
     
     # Extract dimension reduction coordinates
-    dim_coords <- reducedDim(sceObject, dimRed)
+    dim_coords <- SingleCellExperiment::reducedDim(sceObject, dimRed)
 
     # Check if colorby exists in colData
     if (!(colorby %in% colnames(colData(sceObject)))) {
