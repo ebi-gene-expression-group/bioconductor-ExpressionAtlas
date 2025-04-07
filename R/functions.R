@@ -449,7 +449,12 @@ heatmapAtlasExperiment <- function(df,
                                      show_plot = TRUE,
                                      heatmap_color = "Blues",
                                      top_n = 100,
+                                     scaled = FALSE,
                                      show_heatmap_title = TRUE ) {  
+
+    if (!is.logical(scaled)) {
+        stop("'scaled' parameter must be TRUE or FALSE")
+    }
 
     if (!is.data.frame(df)) stop("Input must be a dataframe.")
     
@@ -492,7 +497,10 @@ heatmapAtlasExperiment <- function(df,
 
     # Scale and center the expression levels using Z-score transformation, so they
     # have mean 0 and standard deviation 1. .
-    topNgeneExpressions <- t( scale( t( topNgeneExpressions )))
+    if (isTRUE(scaled)) {
+        topNgeneExpressions <- t( scale( t( topNgeneExpressions )))
+    }
+
 
     # Get the assay group labels to use as the labels for the heatmap columns.
     assayGroupLabels <- colnames( topNgeneExpressions )
@@ -770,8 +778,8 @@ volcanoDifferentialAtlasExperiment <- function(df,
 
     # search across all details
     matching_accessions <- experiments_df %>%
-        dplyr::filter(grepl(search_term, details, ignore.case = TRUE)) %>%
-        dplyr::pull(accession)
+        dplyr::filter(grepl(search_term, .data$details, ignore.case = TRUE)) %>%
+        dplyr::pull(.data$accession)
 
     return(matching_accessions)
 

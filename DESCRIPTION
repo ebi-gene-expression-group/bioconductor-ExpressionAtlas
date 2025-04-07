@@ -27,8 +27,8 @@ Description: This package is for searching for datasets in EMBL-EBI Expression
     Sequencing data is contained in a SummarizedExperiment object, while microarray
     data is contained in an ExpressionSet or MAList object. SingleCellExperiment 
     object is used for Single-Cell Expression Atlas datasets.
-biocViews: ExpressionData, ExperimentData, SequencingData,
-        MicroarrayData, ArrayExpress, SingleCellData
+biocViews: GeneExpression, ExperimentData, SequencingData, FunctionalGenomics,
+        MicroarrayData, ArrayExpress, Transcriptomics, SingleCell, Visualization
 Depends: R (>= 4.4.0), methods, Biobase
 Imports: utils, XML, httr, reshape2, tidyr, yaml, rhdf5, SummarizedExperiment, 
         limma, SingleCellExperiment,
