@@ -48,9 +48,9 @@ plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20
 
 # plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "genotype") + theme_classic() 
 
-plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "age") + theme_classic() 
+plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "age") + theme_classic() + scale_colour_brewer(palette = "Set2")
 
-plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_line") + theme_classic() 
+plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_line") + theme_classic() + scale_colour_brewer(palette = "Accent")
 
 
 # heatmapSCAtlasExperiment(geod81383, genes=NULL, sel.K=5, scaleNormExp=FALSE, show_row_names=FALSE ) 
