@@ -530,6 +530,7 @@ heatmapAtlasExperiment <- function(df,
 
     heatmap_vis <- ComplexHeatmap::Heatmap(
         topNgeneExpressions,
+        row_labels = topNgeneNames,
         name = "Gene Expression",
         col = colours,  
         cluster_rows = TRUE,  
