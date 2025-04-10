@@ -1,5 +1,6 @@
 Package: ExpressionAtlas
-Version: 2025/04/10
+Version: 1.99.6
+Date: 2025/04/10
 Title: Download datasets from EMBL-EBI Expression Atlas
 Authors@R: 
     c(person(given = "Maria",
