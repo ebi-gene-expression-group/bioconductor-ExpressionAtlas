@@ -59,8 +59,6 @@ heatmapSCAtlasExperiment(geod81383, genes=NULL, sel.K=3, scaleNormExp=TRUE, show
 
 dotPlotSCAtlasExperiment(geod81383, genes=c('ENSG00000185664', 'ENSG00000205777', 'ENSG00000135218'), sel.K=3, scaleNormExp=TRUE) + theme_classic()
 
-# dotPlotSCAtlasExperiment(geod81383, genes=c('ENSG00000185664', 'ENSG00000205777', 'ENSG00000135218', 'ENSMUSG00000048442'), sel.K=6, scaleNormExp=FALSE) + theme_classic()
-
 ```
 
 # sessionInfo
