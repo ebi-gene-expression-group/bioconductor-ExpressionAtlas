@@ -26,7 +26,7 @@
     A Heatmap-class object from the ComplexHeatmap package. This object can be further customized or combined with other heatmaps using the ComplexHeatmap package's functions.
 }
 \examples{
-    
+
     egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
     dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)

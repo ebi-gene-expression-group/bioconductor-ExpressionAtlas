@@ -1,5 +1,5 @@
-\name{ getAnalysticsDifferentialAtlasExpression }
-\alias{ getAnalysticsDifferentialAtlasExpression }
+\name{ getAnalyticsDifferentialAtlasExpression }
+\alias{ getAnalyticsDifferentialAtlasExpression }
 \title{ Download differential expression analytics data for an Expression Atlas experiment }
 \description{
     This function downloads and returns differential expression analytics data for an 
@@ -7,7 +7,7 @@
     the experiment.
 }
 \usage{
-    getAnalysticsDifferentialAtlasExpression( experimentAccession )
+    getAnalyticsDifferentialAtlasExpression( experimentAccession )
 }
 \arguments{
     \item{ experimentAccession }{
@@ -20,7 +20,7 @@
 \examples{
     
     # Download the differential expression analytics data for experiment E-MTAB-10104
-    mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
+    mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 
     # See the entries available
     dim(mtab10104_dea)

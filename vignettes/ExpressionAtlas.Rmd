@@ -12,6 +12,7 @@ bibliography: references.bib
 keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor"]
 vignette: >
     %\VignetteEngine{ knitr::rmarkdown }
+    %\VignetteBuilder{ knitr }
     %\VignetteIndexEntry{ ExpressionAtlas }
     %\VignetteEncoding{UTF-8}
 ---
@@ -63,7 +64,10 @@ knitr::opts_chunk$set(warning=FALSE)
 ```
 
 ```{r}
-suppressMessages( library( ExpressionAtlas ) )
+invisible(lapply(
+  c("ExpressionAtlas", "SummarizedExperiment", "SingleCellExperiment", "ggplot2"),
+  function(pkg) suppressMessages(library(pkg, character.only = TRUE))
+))
 ```
 
 ```{r eval=FALSE}
@@ -282,11 +286,11 @@ mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" )
 
 ## Downloading a single Expression Atlas differential experiment analytics data
 
-You can also download analytics data for a single Expression Atlas deifferential experiment using the
-`getAnalysticsDifferentialAtlasExpression()` function:
+You can also download analytics data for a single Expression Atlas differential experiment using the
+`getAnalyticsDifferentialAtlasExpression()` function:
 
 ```{r eval=FALSE}
-mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
+mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 # Downloading expression file from:
 # ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-10104/E-MTAB-10104-analytics.tsv
 ```
@@ -297,27 +301,29 @@ mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
 You can create heatmap from downloaded normalised data for a single Expression Atlas experiment using the
 `getNormalisedAtlasExpression()` function:
 
-```{r eval=TRUE, fig.width=7, fig.height=6}
-geod74322_tpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "tpm" )
-geod74322 <- heatmapAtlasExperiment( geod74322_tpm, "E-GEOD-74322-tpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
+```{r eval=TRUE, fig.width=7, fig.height=8}
+mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" ) 
+mtab4045 <- heatmapAtlasExperiment( df = mtab4045_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", top_n = 20, scaled = FALSE, show_heatmap_title = TRUE )
+
 ```
 
 And now using CPM data, instead of TPM:
-```{r eval=TRUE, fig.width=7, fig.height=6}
-geod74322_cpm <- getNormalisedAtlasExpression( "E-GEOD-74322", "cpm" )
-geod74322 <- heatmapAtlasExperiment( geod74322_cpm, "E-GEOD-74322-cpm-heatmap.pdf", FALSE, TRUE,  "Blues", 20, TRUE )
+```{r eval=TRUE, fig.width=7, fig.height=8}
+mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" ) 
+mtab4045 <- heatmapAtlasExperiment( df = mtab4045_cpm, save_pdf = FALSE, show_plot = TRUE,  palette = "viridis", top_n = 20, scaled = TRUE, show_heatmap_title = TRUE )
 ```
+
+
 ## Creating a Volcano plot using normalised data from a differential Expression Atlas experiment
 
 You can create volcano plot from downloaded normalised data for a single Expression Atlas experiment using the
 `volcanoDifferentialAtlasExperiment()` function:
 
 ```{r eval=TRUE, fig.width=7, fig.height=5}
-mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
+mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 
 head(mtab10104_dea)
-
-mtab10104 <- volcanoDifferentialAtlasExperiment( mtab10104_dea, "E-MTAB-10104",FALSE, TRUE, "Gray", "Blue", 1, TRUE )
+mtab10104 <-  volcanoDifferentialAtlasExperiment( df = mtab10104_dea, save_pdf = FALSE, show_plot = TRUE, low_fc_colour = "Gray", high_fc_colour = "Blue", cutoff = 1, show_volcanoplot_title = TRUE )
 
 ```
 
@@ -363,20 +369,20 @@ enad19 <- getAtlasSCExperiment( "E-ENAD-19" )
 Let's use and example for pluripotency of human early embryos and embryonic stem cells by single cell RNA-seq.
 
 ```{r}
-egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 # returns a SingleCellExperiment object
 
 print("Reduced dimension names:")
-print(reducedDimNames(egeod6552))
+print(reducedDimNames(egeod36552))
 
 print("Column data names:")
-print(colnames(colData(egeod6552)))
+print(colnames(colData(egeod36552)))
 
-plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_pca", colorby = "time" )
+plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_pca", colorby = "time" )
 
-plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type")
+plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type")
 
-plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_classic() + theme(legend.position = "left")
+plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_classic() + theme(legend.position = "left")
 
 ```
 
@@ -384,23 +390,21 @@ plotDimRedSCAtlasExperiment(egeod6552, dimRed = "X_umap_neighbors_n_neighbors_20
 
 For the default cluster or selected clusters with Expression Atlas marker genes, you can use the `heatmapSCAtlasExperiment()` function:
 ```{r}
-egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=NULL, scaleNormExp=FALSE, show_row_names=FALSE ) 
+heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE ) 
 
-heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE ) 
-
-heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=6, scaleNormExp=TRUE, show_row_names=FALSE ) 
+heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=6, scaleNormExp=TRUE, show_row_names=FALSE ) 
 
 ```
 
 For user selected genes:
 ```{r}
-egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE ) 
+heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE ) 
 
-heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
+# heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
 
 ```
 
@@ -409,14 +413,14 @@ heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577'
 For example, if we chose one marker gene from each of the clusters (k = 4) in the previous example, we can use the `dotPlotSCAtlasExperiment()` function to plot the average expression of these genes across the clusters:
 
 ```{r, fig.width=7, fig.height=4}
-egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
+# dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
 
-dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
+dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
 ```
 
-# sessionInfo()
+# sessionInfo
 
 ```{r}
 sessionInfo()

@@ -39,7 +39,7 @@
 \examples{
     
     # Download the differential expression analytics data for experiment E-MTAB-10104
-    mtab10104_dea <- getAnalysticsDifferentialAtlasExpression( "E-MTAB-10104" )
+    mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 
     # Generate volcano plots with default parameters
     volcanoDifferentialAtlasExperiment( mtab10104_dea )

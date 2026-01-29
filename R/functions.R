@@ -447,9 +447,14 @@ heatmapAtlasExperiment <- function(df,
                                      filename = "heatmap",
                                      save_pdf = FALSE,
                                      show_plot = TRUE,
-                                     heatmap_color = "Blues",
+                                     palette = "viridis",
                                      top_n = 100,
+                                     scaled = FALSE,
                                      show_heatmap_title = TRUE ) {  
+
+    if (!is.logical(scaled)) {
+        stop("'scaled' parameter must be TRUE or FALSE")
+    }
 
     if (!is.data.frame(df)) stop("Input must be a dataframe.")
     
@@ -476,7 +481,7 @@ heatmapAtlasExperiment <- function(df,
 
 
     if(dim(df)[2] > 1) {
-        rowVariances <- rowVars( df )
+        rowVariances <- genefilter::rowVars( df )
     } else {
         # can't calculate variance of one row, use the FPKM values (alhough the heatmap isn't as valuable then)
         rowVariances <- df[1]
@@ -492,67 +497,61 @@ heatmapAtlasExperiment <- function(df,
 
     # Scale and center the expression levels using Z-score transformation, so they
     # have mean 0 and standard deviation 1. .
-    topNgeneExpressions <- t( scale( t( topNgeneExpressions )))
+    if (isTRUE(scaled)) {
+        topNgeneExpressions <- t( scale( t( topNgeneExpressions )))
+    }
+
 
     # Get the assay group labels to use as the labels for the heatmap columns.
     assayGroupLabels <- colnames( topNgeneExpressions )
 
-    # Some nice colours.
-    colours <- colorRampPalette( brewer.pal( 9, heatmap_color ) )( top_n )
+    min_val <- min(topNgeneExpressions, na.rm = TRUE)
+    max_val <- max(topNgeneExpressions, na.rm = TRUE)
+    mid_val <- (min_val + max_val) / 2
 
-    imageWidth <- 8
-    if( ( length( assayGroupLabels ) / 2 ) > 8 ) {
-        imageWidth <- length( assayGroupLabels ) / 2
-    }
-
-    # Get the lengths of the longest assay group label
-    longestLabel <- max(unlist(lapply( assayGroupLabels, function( x ) nchar( x ) )))
-
-    # Changing image and margin height to get the column (assay
-    # group) labels to fit on the page. 
-    if( longestLabel / 3 > 8 ) {
-        imageHeight <- ( longestLabel / 3 )
-        marginHeight <- ( longestLabel / 3 )
-    } else {
-        imageHeight <- 8
-        marginHeight <- 8
-    }
-
-
-    # PDF Output (Only if save_pdf = TRUE)
-    if (save_pdf) {
-        heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
-        pdf(heatmap_file, height=8, width=8)
-    }
+    # viridis colours.
+    colours <- circlize::colorRamp2(
+        breaks = c(min_val, mid_val, max_val),
+        colors = viridis(3, option = palette)
+    )
 
     title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
 
-    # Make the heatmap.
-    heatmap.2(
-        as.matrix(topNgeneExpressions),
-        col = colours,
-        labRow = topNgeneNames,
-        labCol = assayGroupLabels,
-        key = FALSE,
-        trace = "none",
-        cexRow = 0.4,
-        cexCol = 0.7, # hardcoding for now, may need to make this dynamic but requires thinking about.
-        cex.main = 0.6,
-        margins = c( marginHeight, 6 ),
-        main = ifelse(show_heatmap_title, title, "")
+    heatmap_vis <- ComplexHeatmap::Heatmap(
+        topNgeneExpressions,
+        row_labels = topNgeneNames,
+        name = "Gene Expression",
+        col = colours,  
+        cluster_rows = TRUE,  
+        cluster_columns = TRUE,
+        show_row_names = TRUE,
+        show_column_names = TRUE,
+        row_names_gp = gpar(fontsize = 0.4 * 12),       
+        column_names_gp = gpar(fontsize = 0.7 * 12),    
+        column_title = ifelse(show_heatmap_title, title, ""),
+        column_title_gp = gpar(fontsize = 0.6 * 12),
+        show_heatmap_legend = TRUE,
+        row_names_max_width = unit(6, "cm")
     )
 
-    # Close PDF if it was opened
-    if (save_pdf) invisible(dev.off())
+    if (show_plot){ 
+        print("Plotting on screen")
+        ComplexHeatmap::draw(heatmap_vis)
+    }
 
-    # Show plot on screen if requested
-    if (show_plot) print("Plotting on screen") 
+    if (save_pdf) {
+        ComplexHeatmap::draw(heatmap_vis)
+        heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
+        ggsave(heatmap_file, height=8, width=8)
+    }
+
+
 
 }
 
 
 
-getAnalysticsDifferentialAtlasExpression <- function(experimentAccession) {
+getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
 
     # Ensure the experiment accession is in the correct format.
     if (!.isValidExperimentAccession(experimentAccession)) {
@@ -767,8 +766,8 @@ volcanoDifferentialAtlasExperiment <- function(df,
 
     # search across all details
     matching_accessions <- experiments_df %>%
-        dplyr::filter(grepl(search_term, details, ignore.case = TRUE)) %>%
-        dplyr::pull(accession)
+        dplyr::filter(grepl(search_term, .data$details, ignore.case = TRUE)) %>%
+        dplyr::pull(.data$accession)
 
     return(matching_accessions)
 
@@ -1115,8 +1114,14 @@ getAtlasSCExperiment <- function( experimentAccession ) {
         )
     )
 
+    # check if colData has the same number of rows as the normalised matrix
+    if (ncol(colData(loadResult)) == 0 ) {
+        # here we could fill the colData with data from the ftp site
+        message("No colData found in the SingleCellExperiment object.")
+    }
+
     # Return SingleCellExperiment object
-    mainExpName(loadResult) <- experimentAccession
+    SingleCellExperiment::mainExpName(loadResult) <- experimentAccession
     return( loadResult )
 
 }
@@ -1125,12 +1130,12 @@ getAtlasSCExperiment <- function( experimentAccession ) {
 plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
     
     # Check if the provided dimRed exists in reducedDimNames
-    if (!(dimRed %in% reducedDimNames(sceObject))) {
+    if (!(dimRed %in% SingleCellExperiment::reducedDimNames(sceObject))) {
         stop(paste("Error: Dimension reduction method", dimRed, "not found in the object!"))
     }
     
     # Extract dimension reduction coordinates
-    dim_coords <- reducedDim(sceObject, dimRed)
+    dim_coords <- SingleCellExperiment::reducedDim(sceObject, dimRed)
 
     # Check if colorby exists in colData
     if (!(colorby %in% colnames(colData(sceObject)))) {
@@ -1230,7 +1235,7 @@ heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NU
 
     # Convert sparse matrix to dense
     dense_matrix <- as.matrix(normalised_matrix)
-    if ( scaleNormExp == TRUE ) {
+    if ( isTRUE(scaleNormExp) ) {
         dense_matrix <- t(scale(t(dense_matrix)))
     }
 
@@ -1244,6 +1249,8 @@ heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NU
     # Generate a color mapping for clusters
     cluster_levels <- unique(gene_clusters)
     cluster_colors <- setNames(rainbow(length(cluster_levels)), cluster_levels)
+    #cluster_colors <- setNames(viridis::viridis(length(cluster_levels)), cluster_levels)
+
 
     # Define row annotation (for genes, not samples)
     if ( is.null(genes) == TRUE ) {
@@ -1262,7 +1269,8 @@ heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NU
     # Plot heatmap
     ComplexHeatmap::Heatmap(
         dense_matrix , 
-        name = "Expression", 
+        name = "Expression",
+        col = viridis::viridis(400),
         left_annotation = row_annotation,
         show_row_names = show_row_names, 
         show_column_names = FALSE, 
@@ -1326,7 +1334,7 @@ dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, sc
     }
     
     dense_matrix <- as.matrix(normalised_matrix)
-    if (scaleNormExp) {
+    if ( isTRUE(scaleNormExp) ) {
         dense_matrix <- t(scale(t(dense_matrix)))
     }
     
@@ -1357,8 +1365,8 @@ dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, sc
 
     # Compute average expression per gene per cluster
     df_avg <- df %>%
-        group_by(Gene, Cluster) %>%
-        summarise(Average_Expression = mean(Expression, na.rm = TRUE), .groups = "drop")
+        group_by(.data$Gene, .data$Cluster) %>%
+        summarise(Average_Expression = mean(.data$Expression, na.rm = TRUE), .groups = "drop")
 
     ggplot(df_avg, aes(x = Cluster, y = Gene, size = Average_Expression, color = Average_Expression)) +
         geom_point() +
