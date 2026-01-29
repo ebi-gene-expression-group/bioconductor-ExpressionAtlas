@@ -28,7 +28,7 @@
         Number of top most variable genes to be shown in the heatmap. Default is 100.
     }
     \item{ scaled }{
-        Scale the normaliased gene expression data. Default is \code{FALSE}.
+        Scale the normalised gene expression data. Default is \code{FALSE}.
     }
     \item{ show_heatmap_title }{
         Whether to show a title in the heatmap. Default is \code{TRUE}.
