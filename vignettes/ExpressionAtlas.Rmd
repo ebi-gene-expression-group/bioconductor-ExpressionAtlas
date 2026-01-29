@@ -211,3 +211,175 @@ mtab3007 <- getAtlasExperiment( "E-MTAB-3007" )
 # Successfully downloaded experiment summary object for E-MTAB-3007
 ```
 
+## Downloading a single Expression Atlas experiment normalised data
+
+You can download normalised data for a single Expression Atlas experiment using the
+`getNormalisedAtlasExpression()` function:
+
+```{r eval=FALSE}
+mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" )
+# Downloading XML file from FTP...
+# E-MTAB-4045  is  rnaseq_mrna_baseline , will continue downloading data
+# Downloading expression file from:
+#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-4045/E-MTAB-4045-tpms.tsv
+# Downloading XML file from FTP...
+```
+
+
+```{r eval=FALSE}
+mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" )
+# Downloading XML file from FTP...
+# E-MTAB-4045  is  rnaseq_mrna_baseline , will continue downloading data
+# Downloading Expression Atlas experiment summary from:
+#  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-4045/E-MTAB-4045-atlasExperimentSummary.Rdata
+# Successfully downloaded experiment summary object for E-MTAB-4045
+```
+
+## Downloading a single Expression Atlas differential experiment analytics data
+
+You can also download analytics data for a single Expression Atlas differential experiment using the
+`getAnalyticsDifferentialAtlasExpression()` function:
+
+```{r eval=FALSE}
+mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
+# Downloading expression file from:
+# ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-10104/E-MTAB-10104-analytics.tsv
+```
+
+
+## Creating heatmap from normalised data of a Expression Atlas experiment
+
+You can create heatmap from downloaded normalised data for a single Expression Atlas experiment using the
+`getNormalisedAtlasExpression()` function:
+
+```{r eval=TRUE, fig.width=7, fig.height=8}
+mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" ) 
+mtab4045 <- heatmapAtlasExperiment( df = mtab4045_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", top_n = 20, scaled = FALSE, show_heatmap_title = TRUE )
+
+```
+
+And now using CPM data, instead of TPM:
+```{r eval=TRUE, fig.width=7, fig.height=8}
+mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" ) 
+mtab4045 <- heatmapAtlasExperiment( df = mtab4045_cpm, save_pdf = FALSE, show_plot = TRUE,  palette = "viridis", top_n = 20, scaled = TRUE, show_heatmap_title = TRUE )
+```
+
+
+## Creating a Volcano plot using normalised data from a differential Expression Atlas experiment
+
+You can create volcano plot from downloaded normalised data for a single Expression Atlas experiment using the
+`volcanoDifferentialAtlasExperiment()` function:
+
+```{r eval=TRUE, fig.width=7, fig.height=5}
+mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
+
+head(mtab10104_dea)
+mtab10104 <-  volcanoDifferentialAtlasExperiment( df = mtab10104_dea, save_pdf = FALSE, show_plot = TRUE, low_fc_colour = "Gray", high_fc_colour = "Blue", cutoff = 1, show_volcanoplot_title = TRUE )
+
+```
+
+
+# Searching, downloading and visualising Single-Cell Expression Atlas experiments
+
+## Search Single Expression Atlas experiments
+
+You can search for experiments in Atlas using the `searchSCAtlasExperiments()`
+function.
+
+```{r}
+search_1 <- searchSCAtlasExperiments( query = "endoderm" )
+print(search_1)
+
+search_2 <- searchSCAtlasExperiments( query = "endoderm", secondaryFilter = "human" )
+print(search_2)
+
+search_3 <- searchSCAtlasExperiments( query = "endoderm", secondaryFilter = "mouse" )
+print(search_3)
+
+search_4 <- searchSCAtlasExperiments( query = "arabidopsis" )
+print(search_4)
+
+search_5 <- searchSCAtlasExperiments( query = "pluripotency" )
+print(search_5)
+
+```
+
+## Downloading a study into a SingleCellExperiment object
+
+You can download data for a Single-Cell Expression Atlas experiment using the 
+`getAtlasSCExperiment()` function:
+
+```{r eval=FALSE}
+enad19 <- getAtlasSCExperiment( "E-ENAD-19" )
+# returns a SingleCellExperiment object
+
+```
+
+## Visualise a dimensionality reduction plot of a SingleCellExperiment object
+
+Let's use and example for pluripotency of human early embryos and embryonic stem cells by single cell RNA-seq.
+
+```{r}
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+# returns a SingleCellExperiment object
+
+print("Reduced dimension names:")
+print(reducedDimNames(egeod36552))
+
+print("Column data names:")
+print(colnames(colData(egeod36552)))
+
+plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_pca", colorby = "time" )
+
+plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type")
+
+plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_classic() + theme(legend.position = "left")
+
+```
+
+## Plot a gene expression heatmap from a SingleCellExperiment object
+
+For the default cluster or selected clusters with Expression Atlas marker genes, you can use the `heatmapSCAtlasExperiment()` function:
+```{r}
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+
+heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE ) 
+
+# heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE ) 
+
+heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=6, scaleNormExp=TRUE, show_row_names=FALSE ) 
+
+```
+
+For user selected genes:
+```{r}
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+
+heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE ) 
+
+# heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
+
+```
+
+## Dot-plot for a SingleCellExperiment object
+
+For example, if we chose one marker gene from each of the clusters (k = 4) in the previous example, we can use the `dotPlotSCAtlasExperiment()` function to plot the average expression of these genes across the clusters:
+
+```{r, fig.width=7, fig.height=4}
+egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
+
+# dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
+
+dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
+```
+
+# sessionInfo
+
+```{r}
+sessionInfo()
+```
+
+# References
+
+
+
