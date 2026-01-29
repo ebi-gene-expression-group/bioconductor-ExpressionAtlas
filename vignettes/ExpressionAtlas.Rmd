@@ -286,7 +286,7 @@ mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" )
 
 ## Downloading a single Expression Atlas differential experiment analytics data
 
-You can also download analytics data for a single Expression Atlas deifferential experiment using the
+You can also download analytics data for a single Expression Atlas differential experiment using the
 `getAnalyticsDifferentialAtlasExpression()` function:
 
 ```{r eval=FALSE}
