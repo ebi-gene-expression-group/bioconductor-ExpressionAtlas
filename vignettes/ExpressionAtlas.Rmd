@@ -394,8 +394,6 @@ egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
 heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE ) 
 
-# heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE ) 
-
 heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=6, scaleNormExp=TRUE, show_row_names=FALSE ) 
 
 ```
