@@ -515,17 +515,6 @@ heatmapAtlasExperiment <- function(df,
         colors = viridis(3, option = palette)
     )
 
-
-    min_val <- min(topNgeneExpressions, na.rm = TRUE)
-    max_val <- max(topNgeneExpressions, na.rm = TRUE)
-    mid_val <- (min_val + max_val) / 2
-
-    # viridis colours.
-    colours <- circlize::colorRamp2(
-        breaks = c(min_val, mid_val, max_val),
-        colors = viridis(3, option = palette)
-    )
-
     title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
 
     heatmap_vis <- ComplexHeatmap::Heatmap(
