@@ -826,7 +826,7 @@ heatmapAtlasExperiment <- function(df,
         ggsave(heatmap_file, height=8, width=8)
     }
 
-
+  return(heatmap_vis)
 
 }
 
@@ -968,6 +968,8 @@ volcanoDifferentialAtlasExperiment <- function(df,
         # Optional: Print the plot in the R console
         if (show_plot) print(p)
     }
+    
+    return(p)
 }
 
 
@@ -1551,7 +1553,7 @@ heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NU
     }
 
     # Plot heatmap
-    ComplexHeatmap::Heatmap(
+    heat_df <- ComplexHeatmap::Heatmap(
         dense_matrix , 
         name = "Expression",
         col = viridis::viridis(400),
@@ -1564,7 +1566,7 @@ heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NU
         show_column_dend = FALSE,
         row_split = gene_clusters
     )
-
+    return(heat_df)
 }
 
 
@@ -1652,13 +1654,12 @@ dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, sc
         group_by(.data$Gene, .data$Cluster) %>%
         summarise(Average_Expression = mean(.data$Expression, na.rm = TRUE), .groups = "drop")
 
-    ggplot(df_avg, aes(x = Cluster, y = Gene, size = Average_Expression, color = Average_Expression)) +
+    df_g <- ggplot(df_avg, aes(x = Cluster, y = Gene, size = Average_Expression, color = Average_Expression)) +
         geom_point() +
         scale_color_viridis_c() +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
         labs(title = "Dot Plot of Average Gene Expression", x = "Cluster", y = "Gene", size = "Expression", color = "Expression")
     
-    #print(p)
+    return(df_g) 
 }
-
