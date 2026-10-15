@@ -34,14 +34,69 @@ getAtlasExperiment <- function( experimentAccession ) {
         )
     )
 
+
     # Create connection object for downloading data.
     connection <- url( fullUrl )
+
+    max_attempts <- 3
+    delay_seconds <- 3
+    
+    
+    default_time <- getOption("timeout")
+    on.exit(options(timeout = default_time), add = TRUE)
+
 
     # Try download, catching any errors
     loadResult <- try( load( connection ), silent = TRUE )
 
+
     # Quit if we got an error.
     if( class( loadResult ) == "try-error" ) {
+
+    while (attempt <= max_attempts) {
+      
+      #try download first time for 1 minute 
+      if(attempt == 1){
+      message('Downloading....')
+      }
+      
+      #retry second time for 1 minute 
+      if(attempt == 2){
+      message('First attempt failed')
+      message('Trying again...')
+      }
+      
+      #retry third time for 5 minutes 
+      if(attempt == 3){
+      message('Second attempt failed')
+      message('Trying last time for 5 minutes....')
+        options(timeout = if (attempt == 3) 300 else default_time)
+      }
+        # Create connection object for downloading data.
+
+        connection <- url(fullUrl)
+
+        # Try download, catching any errors
+        loadResult <- try(load(connection), silent = TRUE)
+
+        # Close the connection after each attempt
+        close(connection)
+
+        # Check if download was successful
+        if (!inherits(loadResult, "try-error")) {
+          break
+        } 
+        
+        message(paste("Attempt", attempt, "failed. Retrying in", delay_seconds, "seconds..."))
+        Sys.sleep(delay_seconds)
+
+        attempt <- attempt + 1
+    }
+
+
+    # If all attempts failed, display an error message and return
+    if (inherits(loadResult, "try-error")) {
+
 
         msg <- geterrmessage()
 
@@ -56,7 +111,7 @@ getAtlasExperiment <- function( experimentAccession ) {
                 paste(
                     "There may not currently be an Expression Atlas experiment summary available for ",
                     experimentAccession,
-                    ".\nPlease try again later, check the website at ",
+                    ".\nPlease try to find a better connection or try again later, check the website at ",
                     paste(
                         "http://www.ebi.ac.uk/gxa/experiments/",
                         experimentAccession,
@@ -78,7 +133,7 @@ getAtlasExperiment <- function( experimentAccession ) {
     # Make sure experiment summary object exists before trying to return it.
     getResult <- try( get( "experiment_summary" ) )
 
-    if( class( getResult ) == "try-error" ) {
+    if (inherits(getResult, "try-error")) {
 
         stop(
             "ERROR - Download appeared successful but no experiment summary object was found."
@@ -1253,7 +1308,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
     loadResult <- try( readH5AD( file = tempFile, reader="R" , use_hdf5 = FALSE ), silent = TRUE )
 
     # Quit if we got an error.
-    if( class( loadResult ) == "try-error" ) {
+    if (inherits(loadResult, "try-error")) {
 
         msg <- geterrmessage()
 
@@ -1291,7 +1346,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
     # Here I could check other data needed by plot functions exists,
     # e.g. reducedDim(loadResult, "X_pca") for PCA plot
 
-    if( class( getResult ) == "NULL" || class( getResult ) == "try-error" ) {
+    if (is.null(getResult) || inherits(getResult, "try-error")) {
 
         stop(
             "ERROR - Download and load appeared successful but no assay 'normalised' matrix was found."
