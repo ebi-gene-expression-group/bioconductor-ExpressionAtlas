@@ -25,6 +25,7 @@ Description: This package is for searching for datasets in EMBL-EBI Expression
     Atlas, and downloading them into R for further analysis. Each Expression Atlas
     dataset is represented as a SimpleList object with one element per platform.
     Sequencing data is contained in a SummarizedExperiment object, while microarray
+
     data is contained in an ExpressionSet or MAList object.
 biocViews: ExpressionData, ExperimentData, SequencingData,
         MicroarrayData, ArrayExpress
@@ -32,6 +33,18 @@ Depends: R (>= 4.2.0), methods, Biobase, SummarizedExperiment, limma,
         S4Vectors, xml2, RCurl, jsonlite, BiocStyle
 Imports: utils, XML, httr
 Suggests: knitr, testthat, rmarkdown
+
+    data is contained in an ExpressionSet or MAList object. SingleCellExperiment 
+    object is used for Single-Cell Expression Atlas datasets.
+biocViews: ExpressionData, ExperimentData, SequencingData, 
+        MicroarrayData, ArrayExpress, SingleCellData
+Depends: R (>= 4.6.0), methods, Biobase
+Imports: utils, XML, httr, reshape2, tidyr, yaml, SummarizedExperiment, 
+        limma, SingleCellExperiment, viridis, HDF5Array, 
+        S4Vectors, xml2, jsonlite, BiocStyle, zellkonverter, gplots,
+        genefilter, edgeR, ggplot2, dplyr, ComplexHeatmap, circlize
+Suggests: knitr, testthat, rmarkdown, curl
+
 VignetteBuilder: knitr
 Collate: functions.R
 License: GPL (>= 3)

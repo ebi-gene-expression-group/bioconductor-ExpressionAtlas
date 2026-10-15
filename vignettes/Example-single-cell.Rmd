@@ -11,8 +11,8 @@ output:
 bibliography: references.bib
 keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor", "single-cell"]
 vignette: >
-    %\VignetteEngine{ knitr::rmarkdown }
-    %\VignetteBuilder{ knitr }
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteBuilder{knitr}
     %\VignetteIndexEntry{ Accessing data from Single-Cell Expression Atlas }
     %\VignetteEncoding{UTF-8}
 ---
@@ -22,16 +22,15 @@ This vignette demonstrates how to access and visualise dataset [E-GEOD-81383](ht
 Single-Cell Expression Atlas using the `ExpressionAtlas` package. 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(message=FALSE)
-knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 ```
-```{r}
+```{r load-packages} 
 library( ExpressionAtlas ) 
 library( SingleCellExperiment )
 library( ggplot2 )
 ```
 
-```{r eval=TRUE}
+```{r single-cell-workflow,eval=TRUE}
 sc_search_results <- searchSCAtlasExperiments( query = "hematopoietic", secondaryFilter = "old" )
 print(sc_search_results)
 
@@ -63,7 +62,7 @@ dotPlotSCAtlasExperiment(geod81383, genes=c('ENSG00000185664', 'ENSG00000205777'
 
 # sessionInfo
 
-```{r}
+```{r session-info}
 sessionInfo()
 ```
 
