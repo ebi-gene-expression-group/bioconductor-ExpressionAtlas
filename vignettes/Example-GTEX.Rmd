@@ -11,9 +11,9 @@ output:
 bibliography: references.bib
 keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor"]
 vignette: >
-    %\VignetteEngine{ knitr::rmarkdown }
-    %\VignetteBuilder{ knitr }
-    %\VignetteIndexEntry{ Accessing GTEX RNA-seq data from Expression Atlas }
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteBuilder{knitr}
+    %\VignetteIndexEntry{Accessing GTEX RNA-seq data from Expression Atlas}
     %\VignetteEncoding{UTF-8}
 ---
 
@@ -30,16 +30,15 @@ The following example uses the `ExpressionAtlas` package to access `E-GTEX-8` da
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(message=FALSE)
-knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 ```
 
-```{r}
+```{r load-package}
 suppressMessages( library( ExpressionAtlas ) )
 suppressMessages( library( SummarizedExperiment ) )
 ```
 
-```{r}
+```{r search-and-download-gtex}
 
 atlasRes <- searchAtlasExperiments( query = "gtex" )
 atlasRes
@@ -60,11 +59,11 @@ head(gtex_fpkm)
 ```
 
 
-```{r, fig.width=7, fig.height=8}
+```{r gtex-tpm-heatmap, fig.width=7, fig.height=8}
 gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, save_pdf= FALSE, show_plot = TRUE, palette = "viridis", top_n = 40, scaled = TRUE, show_heatmap_title = TRUE )
 ```
 
-```{r}
+```{r gtex-selected-genes-heatmap}
 library(ComplexHeatmap)
 library(dplyr)
 library(viridis)
@@ -104,6 +103,6 @@ plot_gene_heatmap(gtex_fpkm, selected_genes, "RdBu")
 
 # sessionInfo
 
-```{r}
+```{r session-info}
 sessionInfo()
 ```

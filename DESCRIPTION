@@ -29,14 +29,13 @@ Description: This package is for searching for datasets in EMBL-EBI Expression
     object is used for Single-Cell Expression Atlas datasets.
 biocViews: ExpressionData, ExperimentData, SequencingData, 
         MicroarrayData, ArrayExpress, SingleCellData
-Depends: R (>= 4.4.0), methods, Biobase
+Depends: R (>= 4.6.0), methods, Biobase
 Imports: utils, XML, httr, reshape2, tidyr, yaml, SummarizedExperiment, 
         limma, SingleCellExperiment, viridis, HDF5Array, 
         S4Vectors, xml2, jsonlite, BiocStyle, zellkonverter, gplots,
         genefilter, edgeR, ggplot2, dplyr, ComplexHeatmap, circlize
-Suggests: knitr, testthat, rmarkdown
+Suggests: knitr, testthat, rmarkdown, curl
 VignetteBuilder: knitr
-VignetteEngine: knitr::rmarkdown
 Collate: functions.R
 Encoding: UTF-8
 License: GPL (>= 3)
