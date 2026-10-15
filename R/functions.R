@@ -1000,7 +1000,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
 }
 
 .search_gxa_experiments_yaml <- function( query_yaml ){
-    yaml_gxa <- "https://raw.githubusercontent.com/ebi-gene-expression-group/atlas-experiment-fetcher/main/gxa-studies.yaml"
+    yaml_gxa <- "https://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/gxa-studies.yaml"
     # load YAML from URL
     yaml_response <- GET(yaml_gxa)
 

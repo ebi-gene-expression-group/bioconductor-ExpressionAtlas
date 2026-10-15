@@ -1,11 +1,30 @@
-
-test_that( "Accession validation returns true or false at the right times", {
+#valid experiment accession check: 
+test_that( "Valid accessions are accepted", {
     
     expect_true( .isValidExperimentAccession( "E-MTAB-3007" ) )
-    expect_false( .isValidExperimentAccession( "DRP000391" ) )
-    expect_false( .isValidExperimentAccession( ) )
+    expect_true( .isValidExperimentAccession( "E-GEOD-36552" ) )
+
 })
 
+test_that("Accession validation rejects an invalid accession", {
+  expect_warning(
+    result <- .isValidExperimentAccession("EMTAB3007"),
+    "does not look like an ArrayExpress"
+  )
+  
+  expect_false(result)
+})
+
+test_that("Accession validation rejects empty accession",{
+  expect_warning(
+    result <- .isValidExperimentAccession(),
+    "Accession missing"
+  )
+  expect_false(result)
+} )
+
+
+#checking whether data is valid from atlaRes from vignette: 
 test_that("check test data", {
 
     data( "atlasRes" )
