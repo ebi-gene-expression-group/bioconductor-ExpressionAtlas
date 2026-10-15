@@ -662,33 +662,67 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
         }
 
         cpm_mean_df <- data.frame(row.names = rownames(cpm_df))
-
-        # Loop through subgroups and calculate the row-wise mean
+        
+        # Calculate mean CPM for each assay group
         for (group_name in names(subgroups_list)) {
-            group_columns <- subgroups_list[[group_name]]
-
-            # Ensure columns exist in 'results' before proceeding
-            if(all(group_columns %in% colnames(cpm_df))) {
-                # Calculate the row-wise mean for the subgroup columns and assign it to df
-                cpm_mean_df[[group_name]] <- rowMeans(cpm_df[, group_columns, drop = FALSE])
-            } else {
-                print(paste("Error: Columns not found for", group_name))
-            }
+          group_columns <- subgroups_list[[group_name]]
+          
+          if (all(group_columns %in% colnames(cpm_df))) {
+            cpm_mean_df[[group_name]] <- rowMeans(
+              cpm_df[, group_columns, drop = FALSE]
+            )
+          } else {
+            print(paste("Error: Columns not found for", group_name))
+          }
         }
-
-        cpm_mean_df <- cbind(GeneID = rownames(cpm_mean_df), Gene.Name = NA, cpm_mean_df)
-
-        # assayData(ex[["A-AFFY-44"]])$exprs 
-        # this is microarray so not applied here
-
+        
+        # Use GeneID as the default gene name
+        cpm_mean_df <- cbind(
+          GeneID = rownames(cpm_mean_df),
+          Gene.Name = rownames(cpm_mean_df),
+          cpm_mean_df
+        )
+        
+        # Download TPM data to look up gene names
+        tpm_url <- paste(
+          urlBase,
+          experimentAccession,
+          paste0(experimentAccession, "-tpms.tsv"),
+          sep = "/"
+        )
+        
+        tpm_data <- .downloadTabularFile(tpm_url, experimentAccession)
+        
+        if (!is.null(tpm_data) &&
+            all(c("GeneID", "Gene.Name") %in% names(tpm_data))) {
+          
+          # Keep the first entry for each GeneID
+          gene_lookup <- tpm_data[
+            !duplicated(tpm_data$GeneID),
+            c("GeneID", "Gene.Name")
+          ]
+          
+          # Match gene names to CPM rows
+          match_index <- match(cpm_mean_df$GeneID, gene_lookup$GeneID)
+          gene_names <- as.character(gene_lookup$Gene.Name[match_index])
+          
+          # Replace GeneID only where a gene name is available
+          has_name <- !is.na(gene_names) & trimws(gene_names) != ""
+          cpm_mean_df$Gene.Name[has_name] <- gene_names[has_name]
+          
+        } else {
+          warning("TPM gene names unavailable; using GeneID as Gene.Name.")
+        }
         return(cpm_mean_df)
-
+        
     } else {
-        stop("Defined Normalisation type ", normalisation ," is not supported, must be a tpm, fpkm or cpm.")
-    }
-
-}
-
+      stop(
+        "Defined Normalisation type ", normalisation,
+        " is not supported, must be a tpm, fpkm or cpm."
+      )
+    } # Closes the normalisation check
+    
+} # Closes getNormalisedAtlasExpression
 
 heatmapAtlasExperiment <- function(df, 
                                      filename = "heatmap",
