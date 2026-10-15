@@ -1115,8 +1115,11 @@ getAtlasSCExperiment <- function( experimentAccession ) {
     .download_anndata_with_retry(fullUrl, tempFile)
 
     # Read a H5AD file and returns a SingleCellExperiment object
-    loadResult <- try( readH5AD( file = tempFile, reader="R" , use_hdf5 = FALSE ), silent = TRUE )
-
+    
+    loadResult <- try(readH5AD( file = tempFile, reader="python", version ="0.7.6", use_hdf5 = FALSE ), silent = TRUE )
+    
+    # Check whether gene identifiers survived the import
+    head(rownames(loadResult))
     # Quit if we got an error.
     if (inherits(loadResult, "try-error")) {
 
