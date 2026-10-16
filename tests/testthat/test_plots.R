@@ -22,8 +22,29 @@ test_that("heatmapAtlasExperiment returns a Heatmap for CPM", {
   expect_s4_class(result, "Heatmap")
 })
 
-# test if returns volcano plot
+# test that CPM gene names match with TPM
+test_that("CPM gene names match TPM annotations", {
+  skip_if_offline()
+  
+  cpm <- getNormalisedAtlasExpression("E-MTAB-4045", "cpm")
+  tpm <- getNormalisedAtlasExpression("E-MTAB-4045", "tpm")
+  
+  
+  matching_rows <- match(cpm$GeneID, tpm$GeneID)
+  expected_names <- tpm$Gene.Name[matching_rows]
+  
+  
+  has_name <- !is.na(expected_names) & trimws(expected_names) != ""
+  
+  expect_true(any(has_name))
+  expect_equal(
+    cpm$Gene.Name[has_name],
+    expected_names[has_name]
+  )
+  
+})
 
+# test if returns volcano plot
 test_that("volcanoDifferentialAtlasExperiment returns a non-empty ggplot", {
   skip_if_offline()
   
@@ -67,7 +88,6 @@ test_that("plotDimRedSCAtlasExperiment returns a ggplot", {
 })
 
 # test if returns heatmap
-
 test_that("heatmapSCAtlasExperiment returns heatmap for single cell experiment", {
   skip_if_offline()
   
@@ -79,7 +99,6 @@ test_that("heatmapSCAtlasExperiment returns heatmap for single cell experiment",
 })
 
 # test if returns dotPlotSCAtlasExperiment
-
 test_that("dotPlotSCAtlasExperiment returns dot plot for single cell experiment", {
   skip_if_offline()
   
