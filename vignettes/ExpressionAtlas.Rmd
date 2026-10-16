@@ -63,7 +63,7 @@ You can search for experiments in Atlas using the
 containing the results of your search. The first argument to
 `searchAtlasExperiments()` should be a character vector of sample
 properties, e.g. biological sample attributes, experimental treatments
-nad/or species. You may also optionally provide a secondary filter yo
+and/or species. You may also optionally provide a secondary filter to
 your query to limit your search to, as a second argument.
 
 ```{r setup, include=FALSE}
@@ -267,7 +267,7 @@ preproc( experimentData( affy126data ) )
 You can download data for a single Expression Atlas experiment using the
 `getAtlasExperiment()` function:
 
-```{r donwload-experiment, eval=FALSE}
+```{r download-experiment, eval=FALSE}
 mtab3007 <- getAtlasExperiment( "E-MTAB-3007" )
 # Downloading Expression Atlas experiment summary from:
 #  ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/E-MTAB-3007/E-MTAB-3007-atlasExperimentSummary.Rdata
@@ -380,7 +380,7 @@ enad19 <- getAtlasSCExperiment( "E-ENAD-19" )
 
 ## Visualise a dimensionality reduction plot of a SingleCellExperiment object
 
-Let's use and example for pluripotency of human early embryos and
+Let's use an example for pluripotency of human early embryos and
 embryonic stem cells by single cell RNA-seq.
 
 ```{r plot-single-cell-dimensions}
@@ -417,12 +417,12 @@ heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=6, scaleNormExp=TRUE, sh
 
 For user selected genes:
 
-```{r plot-single-cell-selcted-genes-heatmap}
+```{r plot-single-cell-selected-genes-heatmap}
 egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
 heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE ) 
 
-# heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
+heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
 
 ```
 
