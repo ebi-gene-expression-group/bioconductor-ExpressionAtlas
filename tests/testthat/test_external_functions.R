@@ -1,7 +1,5 @@
 # NORMAL USE BULK  ----
 
-# get something u expect from the functions 
-
 # test for seacrhAtlasExperiment to return Data Frame:
 #needs internet connection: 
 test_that("searchAtlasExperiment returns data frame", {
@@ -28,7 +26,6 @@ test_that("getAtlasExperiment returns a non-empty SimpleList", {
 
 
 # test for getAtlasData to return expected output: 
-
 test_that("getAtlasData returns a non-empty SimpleList", {
   skip_if_offline()
   
@@ -40,7 +37,6 @@ test_that("getAtlasData returns a non-empty SimpleList", {
 
 
 # test for getNormalizedAtlasExperiment to return data frame: 
-
 test_that("getNormalisedAtlasExpression return data frame", {
   skip_if_offline()
   
@@ -83,7 +79,6 @@ test_that("getAnalyticsDifferentialAtlasExpression returns data frame for differ
 # NORMAL USE SINGLE CELL ----
 
 # test for  searchSCAtlasExperiments() to return Data Frame:
-
 test_that("searchSCAtlasExperiments returns data frame", {
   skip_if_offline()
   
@@ -104,6 +99,7 @@ test_that("getAtlasSCExperiment() returns SingleCellExperiment object", {
 # nrow for genes 
 # ncol for cells 
 test_that("getAtlasSCExperiment() SingleCellExperiment does not return NULL", {
+  skip_if_offline()
   
   single_cell_exp <- getAtlasSCExperiment("E-ENAD-19")
   
@@ -187,7 +183,7 @@ test_that("getAnalyticsDifferentialAtlasExpression rejects empty query", {
     "Accession missing. Cannot validate.")
 })
 
-# test getAnalyticsDifferentialAtlasExpression  - no normalizatin file - mock???
+
 
 # ERROR HANDLING SINGLE CELL ----
 
