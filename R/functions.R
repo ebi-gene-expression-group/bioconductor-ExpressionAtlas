@@ -66,11 +66,11 @@ getAtlasExperiment <- function( experimentAccession ) {
       message('Trying again...')
       }
       
-      #retry third time for 5 minutes 
+      #retry third time for 10 minutes 
       if(attempt == 3){
       message('Second attempt failed')
-      message('Trying last time for 5 minutes....')
-        options(timeout = if (attempt == 3) 300 else default_time)
+      message('Trying last time for 10 minutes....')
+        options(timeout = if (attempt == 3) 600 else default_time)
       }
         # Create connection object for downloading data.
 
@@ -682,7 +682,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
           Gene.Name = rownames(cpm_mean_df),
           cpm_mean_df
         )
-        
+
         # Download TPM data to look up gene names
         tpm_url <- paste(
           urlBase,
@@ -690,26 +690,26 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
           paste0(experimentAccession, "-tpms.tsv"),
           sep = "/"
         )
-        
+
         tpm_data <- .downloadTabularFile(tpm_url, experimentAccession)
-        
+
         if (!is.null(tpm_data) &&
             all(c("GeneID", "Gene.Name") %in% names(tpm_data))) {
-          
+
           # Keep the first entry for each GeneID
           gene_lookup <- tpm_data[
             !duplicated(tpm_data$GeneID),
             c("GeneID", "Gene.Name")
           ]
-          
+
           # Match gene names to CPM rows
           match_index <- match(cpm_mean_df$GeneID, gene_lookup$GeneID)
           gene_names <- as.character(gene_lookup$Gene.Name[match_index])
-          
+
           # Replace GeneID only where a gene name is available
           has_name <- !is.na(gene_names) & trimws(gene_names) != ""
           cpm_mean_df$Gene.Name[has_name] <- gene_names[has_name]
-          
+
         } else {
           warning("TPM gene names unavailable; using GeneID as Gene.Name.")
         }
@@ -1000,7 +1000,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
 }
 
 .search_gxa_experiments_yaml <- function( query_yaml ){
-    yaml_gxa <- "https://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/gxa-studies.yaml"
+    yaml_gxa <- "https://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/gxa-studies.yaml" 
     # load YAML from URL
     yaml_response <- GET(yaml_gxa)
 
