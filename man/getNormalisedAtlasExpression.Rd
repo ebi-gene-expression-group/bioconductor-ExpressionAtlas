@@ -37,5 +37,5 @@
     # See the entries available
     dim(mtab4045_cpm)
     # Prints out the following:
-    # [1] 57147    275
+    # [1] 57147    45
 }
