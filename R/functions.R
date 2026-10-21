@@ -68,7 +68,7 @@ getAtlasExperiment <- function( experimentAccession ) {
       
       #retry third time for 10 minutes 
       if(attempt == 3){
-      message('Second attempt failed')
+      message('Second attempt failed. The file may be too large.')
       message('Trying last time for 10 minutes....')
         options(timeout = if (attempt == 3) 600 else default_time)
       }
@@ -100,7 +100,7 @@ getAtlasExperiment <- function( experimentAccession ) {
 
         msg <- geterrmessage()
 
-        warning(
+          warning(
             paste(
                 paste(
                     "Error encountered while trying to download experiment summary for",
@@ -122,9 +122,11 @@ getAtlasExperiment <- function( experimentAccession ) {
                 ),
                 sep = "\n"
             )
+            
         )
-
+        
         return( )
+
     }
 
     # Close the connection.
@@ -944,7 +946,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
 
         title <- paste("Volcano Plot:", logFC_col, "vs", pval_col)
         # Create the plot
-        p <- ggplot(clean_df, aes(x = .data[[logFC_col]], y = -log10(.data[[pval_col]]), color = color)) +
+        p <- ggplot(clean_df, aes(x = .data[[logFC_col]], y = -log10(.data[[pval_col]]), color = .data$color)) +
             geom_point(alpha = 0.6) +
             geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
             geom_vline(xintercept = c(-cutoff, cutoff), linetype = "dashed", color = high_fc_colour) +
@@ -1249,7 +1251,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
         Title = unlist(parsedJSON$experiments[["experimentDescription"]])
     )
 
-    filtered_data <- S4Vectors::subset(experiment_data, Accession %in% ebiResult$Accession )
+    filtered_data <- experiment_data[experiment_data$Accession %in% ebiResult$Accession, , drop = FALSE]
 
     return( filtered_data )
 
@@ -1436,7 +1438,7 @@ plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
     )
 
     # Plot using ggplot2
-    ggplot(dimred_df, aes(x = axis1, y = axis2, color = colorBy)) +
+    ggplot(dimred_df, aes(x = .data$axis1, y = .data$axis2, color = .data$colorBy)) +
         geom_point() +
         labs(
             title = paste("Dimensionality Reduction Plot:", dimRed), 
@@ -1451,7 +1453,7 @@ plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
 
 
 
-heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NULL, scaleNormExp=FALSE, show_row_names=FALSE ) {
+heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NULL, scaleNormExp=FALSE, show_row_names=FALSE) {
 
     if (!is(singleCellExperiment, "SingleCellExperiment")) {
         stop("The provided object is not a SingleCellExperiment.")
@@ -1654,12 +1656,12 @@ dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, sc
         group_by(.data$Gene, .data$Cluster) %>%
         summarise(Average_Expression = mean(.data$Expression, na.rm = TRUE), .groups = "drop")
 
-    df_g <- ggplot(df_avg, aes(x = Cluster, y = Gene, size = Average_Expression, color = Average_Expression)) +
+    df_g <- ggplot(df_avg, aes(x = .data$Cluster, y = .data$Gene, size = .data$Average_Expression, color = .data$Average_Expression)) +
         geom_point() +
         scale_color_viridis_c() +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
         labs(title = "Dot Plot of Average Gene Expression", x = "Cluster", y = "Gene", size = "Expression", color = "Expression")
     
-    return(df_g) 
+    return(df_g)
 }
