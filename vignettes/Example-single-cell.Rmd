@@ -24,15 +24,20 @@ Single-Cell Expression Atlas using the `ExpressionAtlas` package.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 ```
+
 ```{r load-packages} 
 library( ExpressionAtlas ) 
 library( SingleCellExperiment )
 library( ggplot2 )
 ```
 
-```{r single-cell-workflow,eval=TRUE}
+```{r single-cell-search,eval=TRUE}
+
 sc_search_results <- searchSCAtlasExperiments( query = "hematopoietic", secondaryFilter = "old" )
 print(sc_search_results)
+```
+
+```{r single-cell-download, eval=TRUE}
 
 geod81383 <- getAtlasSCExperiment( "E-GEOD-81383" )
 geod81383
@@ -43,6 +48,10 @@ print(reducedDimNames(geod81383 ))
 print("Column data names:")
 print(colnames(colData(geod81383 )))
 
+```
+
+```{r single-cel-plot-cluster, eval=TRUE}
+
 plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_0.1") + theme_classic() 
 
 # plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "genotype") + theme_classic() 
@@ -50,7 +59,9 @@ plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20
 plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "age") + theme_classic() + scale_colour_brewer(palette = "Set2")
 
 plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_line") + theme_classic() + scale_colour_brewer(palette = "Accent")
+```
 
+```{r single-cell-heatmap-plot, eval=TRUE}
 
 # heatmapSCAtlasExperiment(geod81383, genes=NULL, sel.K=5, scaleNormExp=FALSE, show_row_names=FALSE ) 
 
