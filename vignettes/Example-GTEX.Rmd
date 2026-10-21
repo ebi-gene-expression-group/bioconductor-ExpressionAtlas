@@ -20,10 +20,11 @@ vignette: >
 
 This vignette demonstrates how to access and analyze GTEX RNA-seq data from Expression Atlas. The example shows how to:
 
-1. Search and retrieve GTEX data.
-2. Get raw counts and normalized expression data (TPM and FPKM).
-3. Create heatmaps for visualization of gene expression patterns.
-4. Filter and analyze specific genes of interest across GTEX tissues.
+1. Search GTEX data.
+2. Retrieve GTEX data.
+3. Get raw counts and normalized expression data (TPM and FPKM).
+4. Create heatmaps for visualization of gene expression patterns.
+5. Filter and analyze specific genes of interest across GTEX tissues.
 
 
 The following example uses the `ExpressionAtlas` package to access `E-GTEX-8` dataset (17350 samples).
@@ -38,10 +39,14 @@ suppressMessages( library( ExpressionAtlas ) )
 suppressMessages( library( SummarizedExperiment ) )
 ```
 
-```{r search-and-download-gtex}
+```{r search-GTEX}
 
 atlasRes <- searchAtlasExperiments( query = "gtex" )
 atlasRes
+
+```
+
+```{r downolad-GTEX}
 
 gtex <- getAtlasExperiment( experimentAccession = "E-GTEX-8" )
 gtex
@@ -51,19 +56,27 @@ dim( assays( gtex$rnaseq )$counts )
 colData( gtex$rnaseq )
 metadata( gtex$rnaseq )
 
+```
+
+```{r normalise-GTEX}
+
 gtex_tpm <- getNormalisedAtlasExpression( experimentAccession = "E-GTEX-8", normalisation = "tpm" )
 head(gtex_tpm)
 
 gtex_fpkm <- getNormalisedAtlasExpression( experimentAccession = "E-GTEX-8", normalisation = "fpkm" )
 head(gtex_fpkm)
+
 ```
 
 
 ```{r gtex-tpm-heatmap, fig.width=7, fig.height=8}
+
 gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, save_pdf= FALSE, show_plot = TRUE, palette = "viridis", top_n = 40, scaled = TRUE, show_heatmap_title = TRUE )
+
 ```
 
 ```{r gtex-selected-genes-heatmap}
+
 library(ComplexHeatmap)
 library(dplyr)
 library(viridis)
