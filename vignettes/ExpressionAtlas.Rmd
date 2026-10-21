@@ -69,6 +69,9 @@ in the R object.
 Single-cell datasets are downloaded in annData format, and loaded into a
 SingleCellExperiment object for access and customised visualisation.
 
+The first single cell import may download and configure a Python
+environment through zellkonverter, no manual installation is required.
+
 # Searching and downloading Expression Atlas data
 
 The package communicates with the EBI RESTful Web Services API and
@@ -119,6 +122,8 @@ atlas_res <- searchAtlasExperiments( query = "salt", secondaryFilter = "oryza" )
 # Found 16 experiments matching your query.
 ```
 
+For this tutorial, we will use saved results supplied with package:
+
 ```{r load-search-example, echo=FALSE}
 data( "atlasRes" )
 ```
@@ -136,6 +141,8 @@ listed.
 
 
 ## Detailed search through experiment metadata
+
+To demonstrate detailed search, we will use different example here:
 
 ```{r search-lung-experiment}
 searchAtlasExperiments( query = "lung" , detailed = FALSE )
@@ -352,6 +359,7 @@ function:
 
 ```{r plot-tpm-heatmap, eval=TRUE, fig.width=7, fig.height=8}
 mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" ) 
+
 mtab4045 <- heatmapAtlasExperiment( df = mtab4045_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", top_n = 20, scaled = FALSE, show_heatmap_title = TRUE )
 
 ```
@@ -360,16 +368,18 @@ And now using CPM data, instead of TPM:
 
 ```{r plot-cpm-heatmap, eval=TRUE, fig.width=7, fig.height=8}
 mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" ) 
+
 mtab4045 <- heatmapAtlasExperiment( df = mtab4045_cpm, save_pdf = FALSE, show_plot = TRUE,  palette = "viridis", top_n = 20, scaled = TRUE, show_heatmap_title = TRUE )
 ```
 
 ## Creating a Volcano plot using normalised data from a differential Expression Atlas experiment
 
-You can create volcano plot from downloaded normalised data for a single
-Expression Atlas experiment using the
+You can create volcano plot from downloaded differential expression data
+for a single Expression Atlas experiment using the
 `volcanoDifferentialAtlasExperiment()` function:
 
 ```{r plot-volcano-plot, eval=TRUE, fig.width=7, fig.height=5}
+
 mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 
 head(mtab10104_dea)
@@ -444,7 +454,7 @@ marker genes, you can use the `heatmapSCAtlasExperiment()` function:
 ```{r plot-single-cell-heatmap}
 egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE ) 
+heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE) 
 
 heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=6, scaleNormExp=TRUE, show_row_names=FALSE ) 
 
@@ -471,9 +481,10 @@ clusters:
 ```{r plot-single-cell-dotplot, fig.width=7, fig.height=4}
 egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-# dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
+dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
 
-dotplot <- dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
+dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
+
 ```
 
 # sessionInfo
