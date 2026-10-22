@@ -16,7 +16,7 @@ Authors@R:
       ),
         person(given = "Anil",
            family = "Thanki",
-           role = c("cre"),
+           role = c("aut"),
            email = "anilthanki@ebi.ac.uk",
            comment = c(ORCID = "0000-0002-8941-444X")
       ),
