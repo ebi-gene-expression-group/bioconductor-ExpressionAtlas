@@ -1,13 +1,7 @@
 Package: ExpressionAtlas
-
-Version: 2.5.0
-Date: 2025/09/01
-Title: Download datasets from EMBL-EBI Expression Atlas
-
 Title: Search, download and visualise datasets from EMBL-EBI Expression Atlas and Single-Cell Expression Atlas
 Version: 2.5.0
 Date: 2026-10-20
-
 Authors@R: 
     c(person(given = "Maria",
            family = "Keays",
@@ -25,7 +19,6 @@ Authors@R:
            role = c("cre"),
            email = "anilthanki@ebi.ac.uk",
            comment = c(ORCID = "0000-0002-8941-444X")
-
       ),
         person(given = "Maria",
            family = "Keays",
@@ -48,26 +41,16 @@ Description: This package is for searching for datasets in EMBL-EBI Expression
     Atlas, and downloading them into R for further analysis. Each Expression Atlas
     dataset is represented as a SimpleList object with one element per platform.
     Sequencing data is contained in a SummarizedExperiment object, while microarray
-
-    data is contained in an ExpressionSet or MAList object.
-biocViews: ExpressionData, ExperimentData, SequencingData,
-        MicroarrayData, ArrayExpress
-Depends: R (>= 4.2.0), methods, Biobase, SummarizedExperiment, limma,
-        S4Vectors, xml2, RCurl, jsonlite, BiocStyle
-Imports: utils, XML, httr
-Suggests: knitr, testthat, rmarkdown
-
     data is contained in an ExpressionSet or MAList object. SingleCellExperiment 
     object is used for Single-Cell Expression Atlas datasets.
-biocViews: ExpressionData, ExperimentData, SequencingData, 
-        MicroarrayData, ArrayExpress, SingleCellData
+biocViews: ExpressionData, ExperimentData, SequencingData,
+        MicroarrayData, ArrayExpress
 Depends: R (>= 4.6.0), methods, Biobase
 Imports: utils, XML, httr, reshape2, tidyr, yaml, SummarizedExperiment, 
         limma, SingleCellExperiment, viridis, HDF5Array, 
         S4Vectors, xml2, jsonlite, BiocStyle, zellkonverter, gplots,
         genefilter, edgeR, ggplot2, dplyr, ComplexHeatmap, circlize
 Suggests: knitr, testthat, rmarkdown, curl
-
 VignetteBuilder: knitr
 Collate: functions.R
 License: GPL (>= 3)
