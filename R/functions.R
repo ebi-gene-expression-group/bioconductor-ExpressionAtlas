@@ -1346,97 +1346,292 @@ heatmapSCAtlasExperiment <- function( singleCellExperiment, genes=NULL, sel.K=NU
 }
 
 
+dotPlotSCAtlasExperiment <- function(
+    singleCellExperiment,
+    genes,
+    sel.K = NULL,
+    scaleNormExp = FALSE,
+    geneLabel = c("symbol", "id")
+) {
+    geneLabel <- match.arg(geneLabel)
 
-dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, scaleNormExp=FALSE) {
-    
-    if (!is(singleCellExperiment, "SingleCellExperiment")) {
+    if (!methods::is(singleCellExperiment, "SingleCellExperiment")) {
         stop("The provided object is not a SingleCellExperiment.")
     }
-    if (!"normalised" %in% assayNames(singleCellExperiment)) {
-        stop("The 'normalised' assay is not available in the SingleCellExperiment object.")
+
+    if (!"normalised" %in%
+        SummarizedExperiment::assayNames(singleCellExperiment)) {
+        stop(
+            "The 'normalised' assay is not available ",
+            "in the SingleCellExperiment object."
+        )
     }
-    
-    normalised_matrix <- assay(singleCellExperiment, "normalised", withDimnames=FALSE, use.names=FALSE)
-    
-    if (nrow(normalised_matrix) == 0 || ncol(normalised_matrix) == 0) {
+
+    normalised_matrix <- SummarizedExperiment::assay(
+        singleCellExperiment,
+        "normalised",
+        withDimnames = FALSE
+    )
+
+    if (nrow(normalised_matrix) == 0L ||
+        ncol(normalised_matrix) == 0L) {
         stop("The normalised matrix has zero rows or columns.")
     }
-    
-    expName <- mainExpName(singleCellExperiment)
-    
-    if (!.isValidExperimentAccession(expName)) {
+
+    # Use the imported object's identifiers and ordering.
+    gene_ids <- rownames(singleCellExperiment)
+    cell_ids <- colnames(singleCellExperiment)
+
+    if (is.null(gene_ids) ||
+        anyNA(gene_ids) ||
+        any(!nzchar(gene_ids)) ||
+        anyDuplicated(gene_ids) > 0L) {
+        stop("The object must have unique, nonempty gene IDs as row names.")
+    }
+
+    if (is.null(cell_ids) ||
+        anyNA(cell_ids) ||
+        any(!nzchar(cell_ids)) ||
+        anyDuplicated(cell_ids) > 0L) {
+        stop("The object must have unique, nonempty cell IDs as column names.")
+    }
+
+    gene_symbols <- rep(NA_character_, length(gene_ids))
+    gene_annotations <- SummarizedExperiment::rowData(
+        singleCellExperiment
+    )
+
+    if ("gene_symbols" %in% colnames(gene_annotations)) {
+        gene_symbols <- as.character(gene_annotations$gene_symbols)
+    }
+
+    rownames(normalised_matrix) <- gene_ids
+    colnames(normalised_matrix) <- cell_ids
+
+    # Match requests against both gene IDs and gene symbols.
+    genes <- unique(as.character(genes))
+    genes <- genes[!is.na(genes) & nzchar(genes)]
+
+    valid_symbol <- !is.na(gene_symbols) & nzchar(gene_symbols)
+
+    keep <- gene_ids %in% genes |
+        (valid_symbol & gene_symbols %in% genes)
+
+    if (!any(keep)) {
+        stop("None of the provided gene IDs or symbols were found.")
+    }
+
+    matched <- genes %in% gene_ids |
+        genes %in% gene_symbols[valid_symbol]
+
+    if (any(!matched)) {
+        warning(
+            "Genes not found: ",
+            paste(genes[!matched], collapse = ", ")
+        )
+    }
+
+    selected_ids <- gene_ids[keep]
+    selected_symbols <- gene_symbols[keep]
+
+    # Construct labels while retaining IDs for grouping.
+    display_labels <- selected_ids
+
+    if (geneLabel == "symbol") {
+        has_symbol <- !is.na(selected_symbols) &
+            nzchar(selected_symbols)
+
+        display_labels[has_symbol] <- selected_symbols[has_symbol]
+
+        # Distinguish genes that share the same display label.
+        repeated <- duplicated(display_labels) |
+            duplicated(display_labels, fromLast = TRUE)
+
+        display_labels[repeated] <- paste0(
+            display_labels[repeated],
+            " (", selected_ids[repeated], ")"
+        )
+
+        display_labels <- make.unique(display_labels)
+    }
+
+    # Retrieve Atlas cluster assignments.
+    expName <- SingleCellExperiment::mainExpName(
+        singleCellExperiment
+    )
+
+    # This helper must be available, as in the original function.
+    if (length(expName) != 1L ||
+        is.na(expName) ||
+        !.isValidExperimentAccession(expName)) {
         stop("Invalid experiment accession in SingleCellExperiment object.")
     }
-    
-    base_url_path <- "http://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/sc_experiments"
-    exp_url_path <- paste(base_url_path, expName, expName, sep = "/")
-    
-    genes_exp <- read.table(paste0(exp_url_path, ".aggregated_filtered_normalised_counts.mtx_rows"), header = FALSE, sep = "\t")
-    rownames(normalised_matrix) <- genes_exp[[1]]
-    
-    samples_exp <- read.table(paste0(exp_url_path, ".aggregated_filtered_normalised_counts.mtx_cols"), header = FALSE, sep = "\t")
-    colnames(normalised_matrix) <- samples_exp[[1]]
-    
-    clusters_exp <- read.table(paste0(exp_url_path, ".clusters.tsv"), header = TRUE, sep = "\t")
-    
-    if (is.null(sel.K)) {
-        sel.K <- clusters_exp$K[which(clusters_exp$sel.K == TRUE)]
-    } else {
-        if (!sel.K %in% clusters_exp$K) {
-            stop("The selected K is not in the clusters.")
-        }
-    }
-    
-    markers_exp <- read.table(paste0(exp_url_path, paste0(".marker_genes_", sel.K, ".tsv")), header = TRUE, sep = "\t")
 
-    
-    genes <- intersect(unique(genes), genes_exp[[1]])
-    if (length(genes) == 0) {
-        stop("None of the provided genes were found in the experiment.")
+    base_url_path <- paste0(
+        "https://ftp.ebi.ac.uk/pub/databases/",
+        "microarray/data/atlas/sc_experiments"
+    )
+
+    exp_url_path <- paste(
+        base_url_path,
+        expName,
+        expName,
+        sep = "/"
+    )
+
+    clusters_exp <- utils::read.table(
+        paste0(exp_url_path, ".clusters.tsv"),
+        header = TRUE,
+        sep = "\t",
+        check.names = FALSE,
+        stringsAsFactors = FALSE
+    )
+
+    if (!all(c("K", "sel.K") %in% colnames(clusters_exp))) {
+        stop("The cluster file must contain 'K' and 'sel.K' columns.")
     }
-    
-    dense_matrix <- as.matrix(normalised_matrix)
-    if ( isTRUE(scaleNormExp) ) {
+
+    if (is.null(sel.K)) {
+        sel.K <- unique(
+            clusters_exp$K[which(clusters_exp$sel.K == TRUE)]
+        )
+    }
+
+    if (length(sel.K) != 1L ||
+        is.na(sel.K) ||
+        !sel.K %in% clusters_exp$K) {
+        stop("Select exactly one K present in the cluster file.")
+    }
+
+    selected_clustering <- clusters_exp[
+        which(clusters_exp$K == sel.K),
+        ,
+        drop = FALSE
+    ]
+
+    if (nrow(selected_clustering) != 1L) {
+        stop("Expected exactly one row for the selected K.")
+    }
+
+    # Remaining columns contain cell-specific cluster assignments.
+    assignment_columns <- !colnames(selected_clustering) %in%
+        c("K", "sel.K")
+
+    cluster_data <- data.frame(
+        SampleID = colnames(selected_clustering)[assignment_columns],
+        Cluster = as.character(
+            unlist(
+                selected_clustering[
+                    , assignment_columns, drop = FALSE
+                ],
+                use.names = FALSE
+            )
+        ),
+        stringsAsFactors = FALSE
+    )
+
+    if (anyDuplicated(cluster_data$SampleID) > 0L) {
+        stop("The cluster file contains duplicate cell IDs.")
+    }
+
+    cluster_index <- match(cell_ids, cluster_data$SampleID)
+
+    if (anyNA(cluster_index)) {
+        stop(
+            sum(is.na(cluster_index)),
+            " cell IDs in the object were not found in the Atlas ",
+            "cluster file. Check that the cell identifiers match."
+        )
+    }
+
+    cell_clusters <- cluster_data$Cluster[cluster_index]
+
+    if (anyNA(cell_clusters) || any(!nzchar(cell_clusters))) {
+        stop("Some cells have missing cluster assignments.")
+    }
+
+    # Subset before converting to a dense matrix.
+    dense_matrix <- as.matrix(
+        normalised_matrix[keep, , drop = FALSE]
+    )
+
+    if (isTRUE(scaleNormExp)) {
         dense_matrix <- t(scale(t(dense_matrix)))
     }
-    
-    dense_matrix <- dense_matrix[genes, , drop = FALSE]
-    
-
-    # Transpose and reshape cluster data
-    cluster_data <- as.data.frame(t(clusters_exp[clusters_exp$K == sel.K, -c(1, 2)]))
-
-    # Add sample IDs as a column
-    cluster_data$SampleID <- rownames(cluster_data)
-
-    # Rename cluster assignment column
-    colnames(cluster_data)[1] <- "Cluster"
-
-    # Reset row names
-    rownames(cluster_data) <- NULL
-
 
     df <- reshape2::melt(dense_matrix)
     colnames(df) <- c("Gene", "SampleID", "Expression")
-    df <- merge(df, cluster_data, by = "SampleID")
 
-    df$Expression <- as.numeric(as.character(df$Expression))
     df$Gene <- as.character(df$Gene)
-    df$Cluster <- as.character(df$Cluster)
-    df$Cluster <- as.numeric(as.character(df$Cluster))
+    df$SampleID <- as.character(df$SampleID)
+    df$Expression <- as.numeric(df$Expression)
 
-    # Compute average expression per gene per cluster
-    df_avg <- df %>%
-        group_by(.data$Gene, .data$Cluster) %>%
-        summarise(Average_Expression = mean(.data$Expression, na.rm = TRUE), .groups = "drop")
+    df$Cluster <- cell_clusters[
+        match(df$SampleID, cell_ids)
+    ]
 
-    df_g <- ggplot(df_avg, aes(x = Cluster, y = Gene, size = Average_Expression, color = Average_Expression)) +
-        geom_point() +
-        scale_color_viridis_c() +
-        theme_minimal() +
-        theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-        labs(title = "Dot Plot of Average Gene Expression", x = "Cluster", y = "Gene", size = "Expression", color = "Expression")
-    
-    return(df_g) 
+    # Treat clusters as categories, using numeric order where possible.
+    cluster_levels <- unique(cell_clusters)
+    numeric_clusters <- suppressWarnings(
+        as.numeric(cluster_levels)
+    )
+
+    if (all(!is.na(numeric_clusters))) {
+        cluster_levels <- cluster_levels[order(numeric_clusters)]
+    } else {
+        cluster_levels <- sort(cluster_levels)
+    }
+
+    df$Cluster <- factor(
+        df$Cluster,
+        levels = cluster_levels
+    )
+
+    # Aggregate by gene ID before applying display labels.
+    df_avg <- dplyr::summarise(
+        dplyr::group_by(df, .data$Gene, .data$Cluster),
+        Average_Expression = mean(
+            .data$Expression,
+            na.rm = TRUE
+        ),
+        .groups = "drop"
+    )
+
+    df_avg$Gene <- factor(
+        df_avg$Gene,
+        levels = selected_ids,
+        labels = display_labels
+    )
+
+    expression_label <- if (isTRUE(scaleNormExp)) {
+        "Mean gene z-score"
+    } else {
+        "Mean expression"
+    }
+
+    ggplot2::ggplot(
+        df_avg,
+        ggplot2::aes(
+            x = Cluster,
+            y = Gene,
+            size = Average_Expression,
+            color = Average_Expression
+        )
+    ) +
+        ggplot2::geom_point() +
+        ggplot2::scale_color_viridis_c() +
+        ggplot2::theme_minimal() +
+        ggplot2::theme(
+            axis.text.x = ggplot2::element_text(
+                angle = 90,
+                hjust = 1
+            )
+        ) +
+        ggplot2::labs(
+            title = "Dot Plot of Average Gene Expression",
+            x = "Cluster",
+            y = if (geneLabel == "symbol") "Gene symbol" else "Gene ID",
+            size = expression_label,
+            color = expression_label
+        )
 }
- 
