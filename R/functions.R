@@ -44,16 +44,12 @@ getAtlasExperiment <- function( experimentAccession ) {
     
     default_time <- getOption("timeout")
     on.exit(options(timeout = default_time), add = TRUE)
+    
+    attempt <- 1
+    loadResult <- NULL
+      
 
-
-    # Try download, catching any errors
-    loadResult <- try( load( connection ), silent = TRUE )
-
-
-    # Quit if we got an error.
-    if( class( loadResult ) == "try-error" ) {
-
-    while (attempt <= max_attempts) {
+    for (attempt in seq_len(max_attempts)){
       
       #try download first time for 1 minute 
       if(attempt == 1){
@@ -62,35 +58,34 @@ getAtlasExperiment <- function( experimentAccession ) {
       
       #retry second time for 1 minute 
       if(attempt == 2){
-      message('First attempt failed')
       message('Trying again...')
       }
       
       #retry third time for 10 minutes 
       if(attempt == 3){
-      message('Second attempt failed. The file may be too large.')
+      message('The file may be too large.')
       message('Trying last time for 10 minutes....')
         options(timeout = if (attempt == 3) 600 else default_time)
       }
-        # Create connection object for downloading data.
+     # Create connection object for downloading data.
 
-        connection <- url(fullUrl)
+      connection <- url(fullUrl)
 
-        # Try download, catching any errors
-        loadResult <- try(load(connection), silent = TRUE)
+      # Try download, catching any errors
+      loadResult <- try(load(connection), silent = TRUE)
 
-        # Close the connection after each attempt
-        close(connection)
+       # Close the connection after each attempt
+      close(connection)
 
         # Check if download was successful
-        if (!inherits(loadResult, "try-error")) {
-          break
-        } 
+      if (!inherits(loadResult, "try-error")) {
+         break
+      } 
         
+      if(attempt < max_attempts){
         message(paste("Attempt", attempt, "failed. Retrying in", delay_seconds, "seconds..."))
         Sys.sleep(delay_seconds)
-
-        attempt <- attempt + 1
+      }
     }
 
 
@@ -123,14 +118,11 @@ getAtlasExperiment <- function( experimentAccession ) {
                 sep = "\n"
             )
             
-        )
+          )
         
         return( )
 
     }
-
-    # Close the connection.
-    close( connection )
 
     # Make sure experiment summary object exists before trying to return it.
     getResult <- try( get( "experiment_summary" ) )
@@ -1281,8 +1273,33 @@ searchAtlasExperiments <- function( query, secondaryFilter = NULL, detailed = FA
 }
 
 
-.download_anndata_with_retry <- function(url, destfile, max_attempts = 5) {
+.download_anndata_with_retry <- function(url, destfile, max_attempts = 3) {
+  
+  default_time <- getOption("timeout")
+  on.exit(options(timeout = default_time), add = TRUE)
+  
   for (attempt in 1:max_attempts) {
+    
+    #try download first time for 1 minute 
+    if(attempt == 1){
+      message('Downloading....')
+    }
+    
+    #retry second time for 1 minute 
+    if(attempt == 2){
+      message('First attempt failed.')
+      message('Trying again for 5 minutes now...')
+      options(timeout = if(attempt == 2) 300 else default_time)
+    }
+    
+    #retry third time for 10 minutes 
+    if(attempt == 3){
+      message('Second attempt failed.')
+      message('File may be too large')
+      message('Will try last time for 15 minutes....')
+      options(timeout = if(attempt == 3) 900 else default_time)
+    }
+    
     tryCatch(
       {
         download.file(url, destfile, mode = "wb")
@@ -1348,6 +1365,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
     
     # Check whether gene identifiers survived the import
     head(rownames(loadResult))
+    
     # Quit if we got an error.
     if (inherits(loadResult, "try-error")) {
 
@@ -1664,4 +1682,5 @@ dotPlotSCAtlasExperiment <- function(singleCellExperiment, genes, sel.K=NULL, sc
         labs(title = "Dot Plot of Average Gene Expression", x = "Cluster", y = "Gene", size = "Expression", color = "Expression")
     
     return(df_g)
-}
+  }
+
