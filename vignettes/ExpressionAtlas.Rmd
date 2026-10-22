@@ -77,7 +77,6 @@ environment through zellkonverter, no manual installation is required.
 The package communicates with the EBI RESTful Web Services API and
 Expression Atlas API to enable efficient data searching and retrieval.
 
-
 ## Searching
 
 You can search for experiments in Atlas using the
@@ -85,26 +84,12 @@ You can search for experiments in Atlas using the
 (see
 [S4Vectors](http://bioconductor.org/packages/release/bioc/html/S4Vectors.html))
 containing the results of your search. The first argument to
-
 `searchAtlasExperiments()` should be a character vector of sample properties,
 e.g. biological sample attributes and/or experimental treatments. You may also
 optionally provide a species to limit your search to, as a second argument.
 
 ```{r}
 suppressMessages( library( ExpressionAtlas ) )
-```
-
-```{r eval=FALSE}
-atlasRes <- searchAtlasExperiments( properties = "salt", species = "oryza" )
-# Searching for Expression Atlas experiments matching your query ...
-
-`searchAtlasExperiments()` should be a character vector of sample
-properties, e.g. biological sample attributes, experimental treatments
-and/or species. You may also optionally provide a secondary filter to
-your query to limit your search to, as a second argument.
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 ```
 
 ```{r load-packages}
@@ -438,11 +423,14 @@ print(reducedDimNames(egeod36552))
 print("Column data names:")
 print(colnames(colData(egeod36552)))
 
-plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_pca", colorby = "time" )
+egeod36552_pca <- plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_pca", colorby = "time" )
+print(egeod36552_pca)
 
-plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type")
+egeod36552_umap <- plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type")
+print(egeod36552_umap)
 
-plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_classic() + theme(legend.position = "left")
+egeod36552_umap_louvain <- plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0") + theme_classic() + theme(legend.position = "left")
+print(egeod36552_umap_louvain)
 
 ```
 
@@ -454,10 +442,11 @@ marker genes, you can use the `heatmapSCAtlasExperiment()` function:
 ```{r plot-single-cell-heatmap}
 egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE) 
+egeod36552_heatmap <- heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=NULL, scaleNormExp=TRUE, show_row_names=FALSE) 
+print(egeod36552_heatmap)
 
-heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=6, scaleNormExp=TRUE, show_row_names=FALSE ) 
-
+egeod36552_heatmap_marker <- heatmapSCAtlasExperiment( egeod36552, genes=NULL, sel.K=6, scaleNormExp=TRUE, show_row_names=FALSE ) 
+print(egeod36552_heatmap_marker)
 ```
 
 For user selected genes:
@@ -465,10 +454,11 @@ For user selected genes:
 ```{r plot-single-cell-selected-genes-heatmap}
 egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE ) 
+egeod36552_heatmap_selected <- heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE ) 
+print(egeod36552_heatmap_selected)
 
-heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
-
+egeod36552_heatmap_selected_scaled <- heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
+print(egeod36552_heatmap_selected_scaled)
 ```
 
 ## Dot-plot for a SingleCellExperiment object
@@ -481,10 +471,11 @@ clusters:
 ```{r plot-single-cell-dotplot, fig.width=7, fig.height=4}
 egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
+egeod36552_dot_plot <- dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
+print(egeod36552_dot_plot)
 
-dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
-
+egeod36552_dot_plot_scale <- dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
+print(egeod36552_dot_plot_scale)
 ```
 
 # sessionInfo
