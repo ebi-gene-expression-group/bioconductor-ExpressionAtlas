@@ -541,191 +541,268 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
 }
 
 
-getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "tpm") {
-
-    # Ensure the experiment accession is in the correct format.
-    if (!.isValidExperimentAccession(experimentAccession)) {
-        stop("Experiment accession not valid. Cannot continue.")
-    }
-
-    expType <- .getExperimentType(experimentAccession)
-
-    if (expType %in% c("rnaseq_mrna_baseline" )){
-        message(paste(experimentAccession," is ", expType , ", will continue downloading data"))
-    } else {
-        stop("Experiment type not contain normalised expression data.")
-    }
-
-    # Base URL for downloading data.
-    urlBase <- "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments"
-
-    # Define filenames for configuration files.
-    configFile <- paste(experimentAccession, "-configuration.xml", sep = "")
-        
-    # XML URL for downloading config data.
-    xmlUrl <- paste(urlBase, experimentAccession, configFile, sep = "/")
-
-    if (normalisation %in% c("tpm", "fpkm")) {
-        # Ensure the normalisation is valid.
-        fileType <- match.arg(normalisation, c("tpm", "fpkm"))
-
-        # Define filenames for TPM and FPKM files.
-        expressionFile <- paste(experimentAccession, "-", fileType, "s.tsv", sep = "")
-
-        # Create full URLs for TPM and FPKM files.
-        expressionUrl <- paste(urlBase, experimentAccession, expressionFile, sep = "/")
-
-        # Initialise a list to hold the results.
-        results <- list()
-
-        # Download and read TPM file if requested or in "both" mode.
-        results <- .downloadTabularFile(expressionUrl, experimentAccession)
-
-        # Remove NULL results for files that could not be downloaded.
-        results <- Filter(Negate(is.null), results)
-
-        # Check if any files were successfully downloaded.
-        if (length(results) == 0) {
-            stop("ERROR - Could not download the requested data. Please check the experiment type is RNAseq baseline or try again later.")
-        }
-
-        # Message indicating success.
-        if ("expression" %in% names(results)) {
-            message(paste("Successfully downloaded expression data for", experimentAccession))
-        }
-
-        # TPMs and FPKMs can have multiple values in expression comma-separated columns (min, lower quartile, mean, higher quartile and max)
-        get_mean_value <- function(col) {
-            # Split by commas and return the third value
-            sapply(strsplit(col, ","), function(x) x[3])
-        }
-
-        # the first two columns are GeneID and Gene.Name, fetching 3rd column as it contains mean values. 
-        results[ ,3:ncol(results)] <- lapply(results[ ,3:ncol(results)], get_mean_value)
-
-
-
-        # Read the XML file directly from the FTP URL
-        message("Downloading XML file from FTP...")
-        xmlContent <- .downloadXMLFile(xmlUrl)
-
-        # Extract the assay_group id and label attributes
-        assay_groups <- xml_find_all(xmlContent, ".//assay_group")
-
-        # Create a named vector with id as names and label as values
-        assay_vector <- setNames(xml_attr(assay_groups, "label"), xml_attr(assay_groups, "id"))
-
-        # Replace the columns names in results, excluding 'GeneID' and 'Gene.Name' columns
-        colnames(results)[-c(1, 2)] <- assay_vector[colnames(results)[-c(1, 2)]]
-
-        return(results)
-
-    } else if (normalisation %in% c("cpm")) {
-        # Define filenames for TPM and FPKM files.
-
-        experiment_summary <- getAtlasData( c(experimentAccession))[[experimentAccession]]
-
-        # Get counts.
-        counts_matrix <- assay(experiment_summary$rnaseq, "counts")
-
-        # Calculates CPM from counts using EdgeR.
-        cpm_matrix <- edgeR::cpm(counts_matrix)
-
-        # Converts to DataFrame to match TPM and FPKM output.
-        cpm_df <- as.data.frame(cpm_matrix)
-
-        # Adds two columns GeneID and Gene.Name to DataFrame to match TPM and FPKM output format.
-        # cpm_df <- cbind(GeneID = rownames(cpm_df), Gene.Name = NA, cpm_df)
-
-        xmlContent <- .downloadXMLFile(xmlUrl)
-
-        assay_groups <- xml_find_all(xmlContent, ".//assay_group")
-
-        subgroups_list <- list()
-
-        # Loop through each assay group and extract label and assays
-        for (group in assay_groups) {
-            # Get the label of the assay group
-            label <- xml_attr(group, "label")
-
-            # Get all assay values in the group
-            assays <- xml_text(xml_find_all(group, "assay"))
-
-            # Add to the list
-            subgroups_list[[label]] <- assays
-        }
-
-        cpm_mean_df <- data.frame(row.names = rownames(cpm_df))
-        
-        # Calculate mean CPM for each assay group
-        for (group_name in names(subgroups_list)) {
-          group_columns <- subgroups_list[[group_name]]
-          
-          if (all(group_columns %in% colnames(cpm_df))) {
-            cpm_mean_df[[group_name]] <- rowMeans(
-              cpm_df[, group_columns, drop = FALSE]
-            )
-          } else {
-            print(paste("Error: Columns not found for", group_name))
-          }
-        }
-        
-        # Use GeneID as the default gene name
-        cpm_mean_df <- cbind(
-          GeneID = rownames(cpm_mean_df),
-          Gene.Name = rownames(cpm_mean_df),
-          cpm_mean_df
-        )
-
-        # Download TPM data to look up gene names
-        tpm_url <- paste(
-          urlBase,
-          experimentAccession,
-          paste0(experimentAccession, "-tpms.tsv"),
-          sep = "/"
-        )
-
-        tpm_data <- .downloadTabularFile(tpm_url, experimentAccession)
-
-        if (!is.null(tpm_data) &&
-            all(c("GeneID", "Gene.Name") %in% names(tpm_data))) {
-
-          # Keep the first entry for each GeneID
-          gene_lookup <- tpm_data[
-            !duplicated(tpm_data$GeneID),
-            c("GeneID", "Gene.Name")
-          ]
-
-          # Match gene names to CPM rows
-          match_index <- match(cpm_mean_df$GeneID, gene_lookup$GeneID)
-          gene_names <- as.character(gene_lookup$Gene.Name[match_index])
-
-          # Replace GeneID only where a gene name is available
-          has_name <- !is.na(gene_names) & trimws(gene_names) != ""
-          cpm_mean_df$Gene.Name[has_name] <- gene_names[has_name]
-
-        } else {
-          warning("TPM gene names unavailable; using GeneID as Gene.Name.")
-        }
-        return(cpm_mean_df)
-        
-    } else {
-      stop(
-        "Defined Normalisation type ", normalisation,
-        " is not supported, must be a tpm, fpkm or cpm."
+#helper to download markers file 
+.loadmarkers <- function(experimentAccession, attempts = 5, delay = 3){
+  
+  experiment_markers <- paste0(experimentAccession, "-tpms-markers.tsv")
+  
+  url_for_markers <- paste0(
+    "https://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/",
+    experimentAccession, "/",
+    experiment_markers
+  )
+  
+  message("Downloading markers file:\n", url_for_markers)
+  
+  for (i in seq_len(attempts)) {
+    markers <- tryCatch({
+      read.delim(
+        url_for_markers,
+        na.strings = c("NULL", "NA", ""),
+        stringsAsFactors = FALSE
       )
-    } # Closes the normalisation check
-    
-} # Closes getNormalisedAtlasExpression
+    }, error = function(e){
+      message("Attempt", i, " failed: ", e$message)
+      NULL
+    })
+      if (!is.null(markers)) {
+        return(markers)
+      }
+    if(i < attempts) {
+      Sys.sleep(delay)
+    }
+  }
+  
+  warning(
+    "Failed to download markers for ",
+    experimentAccession, " after ", attempts, " attempts."
+  )
+  return(NULL)
+  
+}
+  
 
-heatmapAtlasExperiment <- function(df, 
+getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "tpm") {
+  
+  # Ensure the experiment accession is in the correct format.
+  if (!.isValidExperimentAccession(experimentAccession)) {
+    stop("Experiment accession not valid. Cannot continue.")
+  }
+  
+  expType <- .getExperimentType(experimentAccession)
+  
+  if (expType %in% c("rnaseq_mrna_baseline" )){
+    message(paste(experimentAccession," is ", expType , ", will continue downloading data"))
+  } else {
+    stop("Experiment type not contain normalised expression data.")
+  }
+  
+  # Base URL for downloading data.
+  urlBase <- "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments"
+  
+  # Define filenames for configuration files.
+  configFile <- paste(experimentAccession, "-configuration.xml", sep = "")
+  
+  # XML URL for downloading config data.
+  xmlUrl <- paste(urlBase, experimentAccession, configFile, sep = "/")
+  
+  # Download markers annotations: 
+  markers <- .loadmarkers(experimentAccession)
+  
+  # Getting ranked gene-assay annotations for merging 
+  ranked_markers <- markers[
+    !is.na(markers$marker_gene_rank),
+    c("gene_id", "assay", "marker_gene_rank"),
+  ]
+  
+  if (normalisation %in% c("tpm")) {
+    # Ensure the normalisation is valid.
+    fileType <- match.arg(normalisation, c("tpm"))
+    
+    # Define filenames for TPM files.
+    expressionFile <- paste(experimentAccession, "-", fileType, "s.tsv", sep = "")
+    
+    # Create full URLs for TPM files.
+    expressionUrl <- paste(urlBase, experimentAccession, expressionFile, sep = "/")
+    
+    # Initialise a list to hold the results.
+    results <- list()
+    
+    # Download and read TPM file if requested or in "both" mode.
+    results <- .downloadTabularFile(expressionUrl, experimentAccession)
+    
+    # Remove NULL results for files that could not be downloaded.
+    results <- Filter(Negate(is.null), results)
+    
+    # Check if any files were successfully downloaded.
+    if (length(results) == 0) {
+      stop("ERROR - Could not download the requested data. Please check the experiment type is RNAseq baseline or try again later.")
+    }
+    
+    # Message indicating success.
+    if ("expression" %in% names(results)) {
+      message(paste("Successfully downloaded expression data for", experimentAccession))
+    }
+    
+    # TPMs can have multiple values in expression comma-separated columns (min, lower quartile, mean, higher quartile and max)
+    get_mean_value <- function(col) {
+      # Split by commas and return the third value
+      sapply(strsplit(col, ","), function(x) x[3])
+    }
+    
+    # the first two columns are GeneID and Gene.Name, fetching 3rd column as it contains mean values. 
+    results[ ,3:ncol(results)] <- lapply(results[ ,3:ncol(results)], get_mean_value)
+    
+    
+    
+    # Read the XML file directly from the FTP URL
+    message("Downloading XML file from FTP...")
+    xmlContent <- .downloadXMLFile(xmlUrl)
+    
+    # Extract the assay_group id and label attributes
+    assay_groups <- xml_find_all(xmlContent, ".//assay_group")
+    
+    # Create a named vector with id as names and label as values
+    assay_vector <- setNames(xml_attr(assay_groups, "label"), xml_attr(assay_groups, "id"))
+    
+    # Replace the columns names in results, excluding 'GeneID' and 'Gene.Name' columns
+    colnames(results)[-c(1, 2)] <- assay_vector[colnames(results)[-c(1, 2)]]
+    
+    # Adding markers annotations by matching Gene ID:
+    results <- merge(results,
+                     ranked_markers,
+                     by.x = "GeneID", 
+                     by.y = "gene_id",
+                     all.x = TRUE)
+    
+    # Rename 'assay' to 'tissue' column 
+    names(results)[names(results) == "assay"] <- "tissue"
+    
+    return(results)
+    
+  } else if (normalisation %in% c("cpm")) {
+    # Define filenames for TPM files.
+    
+    experiment_summary <- getAtlasData( c(experimentAccession))[[experimentAccession]]
+    
+    # Get counts.
+    counts_matrix <- assay(experiment_summary$rnaseq, "counts")
+    
+    # Calculates CPM from counts using EdgeR.
+    cpm_matrix <- edgeR::cpm(counts_matrix)
+    
+    # Converts to DataFrame to match TPM output.
+    cpm_df <- as.data.frame(cpm_matrix)
+    
+    xmlContent <- .downloadXMLFile(xmlUrl)
+    
+    assay_groups <- xml_find_all(xmlContent, ".//assay_group")
+    
+    subgroups_list <- list()
+    
+    # Loop through each assay group and extract label and assays
+    for (group in assay_groups) {
+      # Get the label of the assay group
+      label <- xml_attr(group, "label")
+      
+      # Get all assay values in the group
+      assays <- xml_text(xml_find_all(group, "assay"))
+      
+      # Add to the list
+      subgroups_list[[label]] <- assays
+    }
+    
+    cpm_mean_df <- data.frame(row.names = rownames(cpm_df))
+    
+    # Calculate mean CPM for each assay group
+    for (group_name in names(subgroups_list)) {
+      group_columns <- subgroups_list[[group_name]]
+      
+      if (all(group_columns %in% colnames(cpm_df))) {
+        cpm_mean_df[[group_name]] <- rowMeans(
+          cpm_df[, group_columns, drop = FALSE]
+        )
+      } else {
+        print(paste("Error: Columns not found for", group_name))
+      }
+    }
+    
+    # Use GeneID as the default gene name
+    cpm_mean_df <- cbind(
+      GeneID = rownames(cpm_mean_df),
+      Gene.Name = rownames(cpm_mean_df),
+      cpm_mean_df
+    )
+    
+    # Download TPM data to look up gene names
+    tpm_url <- paste(
+      urlBase,
+      experimentAccession,
+      paste0(experimentAccession, "-tpms.tsv"),
+      sep = "/"
+    )
+    
+    tpm_data <- .downloadTabularFile(tpm_url, experimentAccession)
+    
+    if (!is.null(tpm_data) &&
+        all(c("GeneID", "Gene.Name") %in% names(tpm_data))) {
+      
+      # Keep the first entry for each GeneID
+      gene_lookup <- tpm_data[
+        !duplicated(tpm_data$GeneID),
+        c("GeneID", "Gene.Name")
+      ]
+      
+      # Match gene names to CPM rows
+      match_index <- match(cpm_mean_df$GeneID, gene_lookup$GeneID)
+      gene_names <- as.character(gene_lookup$Gene.Name[match_index])
+      
+      # Replace GeneID only where a gene name is available
+      has_name <- !is.na(gene_names) & trimws(gene_names) != ""
+      cpm_mean_df$Gene.Name[has_name] <- gene_names[has_name]
+      
+    } else {
+      warning("TPM gene names unavailable; using GeneID as Gene.Name.")
+    }
+    
+    # Merging with marker file 
+    cpm_mean_df <- merge(
+      cpm_mean_df,
+      ranked_markers, 
+      by.x = "GeneID",
+      by.y = "gene_id",
+      all.x = TRUE 
+    )
+    
+    # Renaming assay column to tissue 
+    names(cpm_mean_df)[names(cpm_mean_df) == "assay"] <- "tissue"
+    
+    return(cpm_mean_df)
+
+  } else {
+    stop(
+      "Defined Normalisation type ", normalisation,
+      " is not supported, must be a tpm or cpm."
+    )
+  } 
+  
+} 
+
+
+
+                                   
+heatmapAtlasExperiment <- function(df,
                                      filename = "heatmap",
                                      save_pdf = FALSE,
                                      show_plot = TRUE,
-                                     palette = "viridis",
+                                     palette = 'viridis',
+                                     markers = TRUE,
                                      top_n = 100,
                                      scaled = FALSE,
-                                     show_heatmap_title = TRUE ) {  
+                                     show_heatmap_title = TRUE)
+  {
+                                     
+                                           
 
     if (!is.logical(scaled)) {
         stop("'scaled' parameter must be TRUE or FALSE")
@@ -733,63 +810,134 @@ heatmapAtlasExperiment <- function(df,
 
     if (!is.data.frame(df)) stop("Input must be a dataframe.")
     
-    rownames( df ) <- df[[1]]
+    # If markers = TRUE, plot rank #1 genes
+    if(markers) {
     
-    # Remove the gene id column.
-    df[[1]] <- NULL
-    geneIDsToGeneNames <- data.frame( id = df[[1]], stringsAsFactors=FALSE )
+      top_markers <- !is.na(df$marker_gene_rank) &
+        df$marker_gene_rank == 1
+      
+      df <- df[top_markers , ]
+      
+    } 
     
-    # Add the Ensembl gene IDs as the row names.
-    rownames( geneIDsToGeneNames ) <- rownames(df)
-
-    # Identify rows where the first column (gene names) is NA
-    naGeneNameIndices <- which(is.na(geneIDsToGeneNames[, 1]))
-
-    # Replace NA values with the corresponding row names (gene IDs)
-    geneIDsToGeneNames[naGeneNameIndices, 1] <- rownames(geneIDsToGeneNames)[naGeneNameIndices]
-
-    # Now remove the Gene.Name column from the data frame.
-    df[[1]] <- NULL
-
-    # Converting the data in the data frame to numeric.
-    df[] <- lapply(df, as.numeric)
-
-
-    if(dim(df)[2] > 1) {
-        rowVariances <- genefilter::rowVars( df )
+    if(nrow(df) == 0 ) {
+      stop("No genes available from requested gene_list")
+    }
+    
+    # Order by tissue 
+    df <- df[
+      order(df$tissue, df$marker_gene_rank),
+      ,
+      drop = FALSE
+    ]
+    
+    # Keep one row per gene ID.
+    df <- df[!duplicated(df$GeneID), , drop = FALSE]
+    
+    # Save gene labels before removing metadata.
+    gene_labels <- as.character(df$Gene.Name)
+    
+    # Distinguish different gene IDs sharing a name.
+    shared_names <- duplicated(gene_labels) |
+      duplicated(gene_labels, fromLast = TRUE)
+    
+    gene_labels[shared_names] <- paste(
+      gene_labels[shared_names],
+      df$GeneID[shared_names],
+      sep = "_"
+    )
+    
+    rownames(df) <- df$GeneID
+    
+    # Keep only expression columns.
+    df <- df[
+      ,
+      !names(df) %in% c(
+        "GeneID", "Gene.Name", "tissue", "marker_gene_rank"
+      ),
+      drop = FALSE
+    ]
+    
+    df[] <- lapply(df, function(x) as.numeric(as.character(x)))
+    
+    # Select by variance/expression only in this mode.
+    if (!markers) {
+      
+      if (ncol(df) > 1) {
+        scores <- genefilter::rowVars(as.matrix(df))
+      } else {
+        scores <- df[[1]]
+      }
+      
+      chosenRowIndices <- head(
+        order(scores, decreasing = TRUE),
+        top_n
+      )
+      
     } else {
-        # can't calculate variance of one row, use the FPKM values (alhough the heatmap isn't as valuable then)
-        rowVariances <- df[1]
+      
+      chosenRowIndices <- seq_len(nrow(df))
     }
 
-    # Get the indices of the top top_n most variable genes.
-    chosenColumnIndices<- order( rowVariances, decreasing = TRUE )[1:top_n]
-    topNgeneExpressions <- df[ chosenColumnIndices , ]
-
-    # Get the gene names for the top top_n gene IDs, to use as labels for the
-    # heatmape rows.
-    topNgeneNames <- geneIDsToGeneNames[ chosenColumnIndices, ]
-
+    
+    topNgeneExpressions <- as.matrix(
+      df[chosenRowIndices, , drop = FALSE]
+    )
+    
+    topNgeneNames <- gene_labels[chosenRowIndices]
+    
+    # Sort tissue columns alphabetically.
+    topNgeneExpressions <- topNgeneExpressions[
+      ,
+      order(colnames(topNgeneExpressions)),
+      drop = FALSE
+    ]
+    
+    topNgeneExpressions <- log(topNgeneExpressions + 1)
     # Scale and center the expression levels using Z-score transformation, so they
     # have mean 0 and standard deviation 1. .
+    
     if (isTRUE(scaled)) {
-        topNgeneExpressions <- t( scale( t( topNgeneExpressions )))
+      
+      # Calculate each gene's standard deviation.
+      gene_sd <- if (ncol(topNgeneExpressions) > 1) {
+        apply(topNgeneExpressions, 1, stats::sd)
+      } else {
+        rep(0, nrow(topNgeneExpressions))
+      }
+      
+      # Subtract each gene's mean expression.
+      topNgeneExpressions <- sweep(
+        topNgeneExpressions,
+        1,
+        rowMeans(topNgeneExpressions),
+        "-"
+      )
+      
+      # Constant genes become zero after centering.
+      # Divide by 1 to keep them zero.
+      gene_sd[gene_sd == 0] <- 1
+      
+      topNgeneExpressions <- sweep(
+        topNgeneExpressions,
+        1,
+        gene_sd,
+        "/"
+      )
     }
-
-
-    # Get the assay group labels to use as the labels for the heatmap columns.
-    assayGroupLabels <- colnames( topNgeneExpressions )
-
-    min_val <- min(topNgeneExpressions, na.rm = TRUE)
-    max_val <- max(topNgeneExpressions, na.rm = TRUE)
-    mid_val <- (min_val + max_val) / 2
-
-    # viridis colours.
+    
+    limits <- range(topNgeneExpressions, na.rm = TRUE)
+    
+    # Ensure colour breaks differ when all values are identical.
+    if (limits[1] == limits[2]) {
+      limits <- limits + c(-0.5, 0.5)
+    }
+    
     colours <- circlize::colorRamp2(
-        breaks = c(min_val, mid_val, max_val),
-        colors = viridis(3, option = palette)
+      breaks = c(limits[1], mean(limits), limits[2]),
+      colors = viridis::viridis(3, option = palette)
     )
-
+    
     title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
 
     heatmap_vis <- ComplexHeatmap::Heatmap(
@@ -797,8 +945,8 @@ heatmapAtlasExperiment <- function(df,
         row_labels = topNgeneNames,
         name = "Gene Expression",
         col = colours,  
-        cluster_rows = TRUE,  
-        cluster_columns = TRUE,
+        cluster_rows = !markers && nrow(topNgeneExpressions) >1,  
+        cluster_columns = !markers && ncol(topNgeneExpressions) >1,
         show_row_names = TRUE,
         show_column_names = TRUE,
         row_names_gp = gpar(fontsize = 0.4 * 12),       
