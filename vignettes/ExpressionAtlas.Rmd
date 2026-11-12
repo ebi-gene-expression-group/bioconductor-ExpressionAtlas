@@ -4,11 +4,6 @@ author: "Maria Keays"
 date: "`r Sys.Date()`"
 output: html_document
 vignette: >
-
-    %\VignetteEngine{ knitr::rmarkdown }
-    %\VignetteIndexEntry{ ExpressionAtlas }
-
-    %\VignetteBuilder{knitr}
     %\VignetteIndexEntry{ExpressionAtlas}
     %\VignetteEncoding{UTF-8}
     %\VignetteEngine{knitr::rmarkdown}
@@ -307,7 +302,7 @@ You can download normalised data for a single Expression Atlas
 experiment using the `getNormalisedAtlasExpression()` function:
 
 ```{r download-tpm-expression, eval=FALSE}
-mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" )
+mtab1733_tpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "tpm" )
 # Downloading XML file from FTP...
 # E-MTAB-4045  is  rnaseq_mrna_baseline , will continue downloading data
 # Downloading expression file from:
@@ -316,7 +311,7 @@ mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" )
 ```
 
 ```{r download-cpm-expression, eval=FALSE}
-mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" )
+mtab1733_cpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "cpm" )
 # Downloading XML file from FTP...
 # E-MTAB-4045  is  rnaseq_mrna_baseline , will continue downloading data
 # Downloading Expression Atlas experiment summary from:
@@ -342,19 +337,28 @@ You can create heatmap from downloaded normalised data for a single
 Expression Atlas experiment using the `getNormalisedAtlasExpression()`
 function:
 
-```{r plot-tpm-heatmap, eval=TRUE, fig.width=7, fig.height=8}
-mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" ) 
+As default you can plot top ranked gene per tissue from downloaded experiment.
+You can also include your gene list of interest and plot it with top ranked genes or without. 
+If markers = FALSE and gene list is NULL, the heatmap will plot top variable genes in the experiment e.g. top_n = 20. 
+geneLabel parameter allows you to choose, whether to show Gene Ids or Gene names. 
 
-mtab4045 <- heatmapAtlasExperiment( df = mtab4045_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", top_n = 20, scaled = FALSE, show_heatmap_title = TRUE )
+```{r plot-tpm-heatmap, eval=TRUE, fig.width=7, fig.height=8}
+mtab1733_tpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "tpm" ) 
+
+mtab1733_heatmap_tpm_top <- heatmapAtlasExperiment( df = mtab1733_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", markers= TRUE, gene_list = NULL, top_n = 20, scaled = FALSE, show_heatmap_title = TRUE, geneLabel = 'name' )
+
+mtab1733_heatmap_tpm <- heatmapAtlasExperiment( df = mtab1733_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", markers= TRUE, gene_list = c("FGR", "CFH", "STPG1"), top_n = 20, scaled = FALSE, show_heatmap_title = TRUE, geneLabel = 'name' )
 
 ```
 
 And now using CPM data, instead of TPM:
 
 ```{r plot-cpm-heatmap, eval=TRUE, fig.width=7, fig.height=8}
-mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" ) 
+mtab1733_cpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "cpm" ) 
 
-mtab4045 <- heatmapAtlasExperiment( df = mtab4045_cpm, save_pdf = FALSE, show_plot = TRUE,  palette = "viridis", top_n = 20, scaled = TRUE, show_heatmap_title = TRUE )
+mtab1733_heatmap_cpm <- heatmapAtlasExperiment(df = mtab1733_cpm, save_pdf = FALSE, show_plot = TRUE,  palette = "viridis", markers = FALSE, gene_list = c("FGR", "CFH", "STPG1"), top_n = 20, scaled = FALSE, show_heatmap_title = TRUE, geneLabel = 'id' )
+
+mtab1733_heatmap_cpm_topn <- heatmapAtlasExperiment(df = mtab1733_cpm, save_pdf = FALSE, show_plot = TRUE,  palette = "viridis", markers = FALSE, gene_list = NULL, top_n = 50, scaled = FALSE, show_heatmap_title = TRUE, geneLabel = 'name' )
 ```
 
 ## Creating a Volcano plot using normalised data from a differential Expression Atlas experiment
@@ -454,10 +458,10 @@ For user selected genes:
 ```{r plot-single-cell-selected-genes-heatmap}
 egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-egeod36552_heatmap_selected <- heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE ) 
+egeod36552_heatmap_selected <- heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE, geneLabel ='name' ) 
 print(egeod36552_heatmap_selected)
 
-egeod36552_heatmap_selected_scaled <- heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE ) 
+egeod36552_heatmap_selected_scaled <- heatmapSCAtlasExperiment( egeod36552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869'), sel.K=NULL, scaleNormExp=TRUE, show_row_names=TRUE, geneLabel = 'id' ) 
 print(egeod36552_heatmap_selected_scaled)
 ```
 
@@ -471,17 +475,20 @@ clusters:
 ```{r plot-single-cell-dotplot, fig.width=7, fig.height=4}
 egeod36552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-egeod36552_dot_plot <- dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
+egeod36552_dot_plot <- dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, geneLabel = 'name')
 print(egeod36552_dot_plot)
 
-egeod36552_dot_plot_scale <- dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE) + theme_classic()
+egeod36552_dot_plot_scale <- dotPlotSCAtlasExperiment(egeod36552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, scaleNormExp=TRUE, geneLabel = 'id') + theme_classic()
 print(egeod36552_dot_plot_scale)
+
+
+
 ```
 
 # sessionInfo
 
 ```{r session-info}
-sessionInfo()
+#sessionInfo()
 ```
 
 # References
