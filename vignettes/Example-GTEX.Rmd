@@ -12,6 +12,10 @@ bibliography: references.bib
 keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor"]
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
+<<<<<<< HEAD
+=======
+    %\VignetteBuilder{knitr}
+>>>>>>> f8c769ecd438496a70b72afab838ed788c79ce05
     %\VignetteIndexEntry{Accessing GTEX RNA-seq data from Expression Atlas}
     %\VignetteEncoding{UTF-8}
 ---
@@ -38,7 +42,8 @@ suppressMessages( library( ExpressionAtlas ) )
 suppressMessages( library( SummarizedExperiment ) )
 ```
 
-```{r search-GTEX}
+
+```{r search-and-download-gtex}
 
 atlasRes <- searchAtlasExperiments( query = "gtex" )
 atlasRes
@@ -66,6 +71,7 @@ head(gtex_tpm)
 
 
 ```{r gtex-tpm-heatmap, fig.width=7, fig.height=8}
+
 
 gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, save_pdf= FALSE, show_plot = TRUE, palette = "viridis", markers = TRUE, gene_list = NULL, top_n = NULL, scaled = FALSE, show_heatmap_title = TRUE )
 

@@ -31,6 +31,7 @@ library( SingleCellExperiment )
 library( ggplot2 )
 ```
 
+<<<<<<< HEAD
 ```{r single-cell-search,eval=TRUE}
 
 sc_search_results <- searchSCAtlasExperiments( query = "hematopoietic", secondaryFilter = "old" )

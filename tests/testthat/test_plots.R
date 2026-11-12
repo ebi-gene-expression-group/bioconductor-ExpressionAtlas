@@ -17,6 +17,7 @@ test_that("heatmapAtlasExperiment returns a Heatmap for CPM", {
   
   heatmap_cpm <- getNormalisedAtlasExpression("E-GEOD-74322", "cpm")
   
+
   result <- heatmapAtlasExperiment( heatmap_cpm, "tpm-heatmap.pdf", FALSE, TRUE,  "viridis", TRUE, NULL, NULL, TRUE, 'name' )
   
   expect_s4_class(result, "Heatmap")
@@ -93,6 +94,7 @@ test_that("heatmapSCAtlasExperiment returns heatmap for single cell experiment",
   
   heatmap_single_test <- getAtlasSCExperiment( "E-GEOD-36552" )
   
+
   heatmap_single_result <- heatmapSCAtlasExperiment( heatmap_single_test, genes=NULL, sel.K=NULL, geneLabel = 'name',
                                                      scaleNormExp=TRUE, show_row_names=FALSE ) 
   expect_s4_class(heatmap_single_result, "Heatmap")
@@ -106,7 +108,8 @@ test_that("dotPlotSCAtlasExperiment returns dot plot for single cell experiment"
   
   result_dotplot <- dotPlotSCAtlasExperiment(dotplot_exp, genes=c('ENSG00000166681','ENSG00000178928', 
                                                                 'ENSG00000142182' , 'ENSG00000160282' ),
-                                            sel.K=4, geneLabel = 'name', scaleNormExp=TRUE) + theme_classic()
+                                             sel.K=4, geneLabel = 'name', scaleNormExp=TRUE) + theme_classic()
+
   expect_true("ggplot" %in% class(result_dotplot))
   
 })
@@ -117,7 +120,7 @@ test_that("dotPlotSCAtlasExperiment returns data", {
   
   dotplot_exp <- getAtlasSCExperiment( "E-GEOD-36552" )
   
-  result_dotplot <- dotPlotSCAtlasExperiment(dotplot_exp, genes=c('ENSG00000166681','ENSG00000178928', 
+  result_dotplot <- dotPlotSCAtlasExperiment(dotplot_exp, genes=c('ENSG00000166681','ENSG00000178928',
                                                                   'ENSG00000142182' , 'ENSG00000160282' ), geneLabel = 'name',
                                              sel.K=4, scaleNormExp=TRUE) + theme_classic()
   

@@ -492,4 +492,3 @@ print(egeod36552_dot_plot_scale)
 ```
 
 # References
-

@@ -53,7 +53,6 @@ test_that("getNormalisedAtlasExpression return data frame", {
 })
 
 
-
 # test for getAnalyticsDifferentialAtlasExpression() to return data frame: 
 test_that("getAnalyticsDifferentialAtlasExpression returns data frame for differential bulk data", {
   skip_if_offline()
