@@ -590,6 +590,16 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
   }
   
   expType <- .getExperimentType(experimentAccession)
+  
+  if (expType == "rnaseq_mrna_differential") {
+    stop(
+      paste(
+        "This is a differential RNA-seq experiment.",
+        "Use getAnalyticsDifferentialAtlasExpression() instead.",
+        sep = "\n"
+      )
+    )
+  }
 
   if (expType %in% c("rnaseq_mrna_baseline" )){
     message(paste(experimentAccession," is ", expType , ", will continue downloading data"))
@@ -807,9 +817,6 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
   
 } 
 
-
-
-                                   
 heatmapAtlasExperiment <- function(df,
                                    filename = "heatmap",
                                    save_pdf = FALSE,
@@ -1022,6 +1029,16 @@ getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
     }
 
     expType <- .getExperimentType(experimentAccession)
+    
+    if (expType == "rnaseq_mrna_baseline") {
+      stop(
+        paste(
+          "This is a baseline RNA-seq experiment.",
+          "Use getNormalisedAtlasExpression() instead.",
+          sep = "\n"
+        )
+      )
+    }
 
     if (expType %in% c("rnaseq_mrna_differential" )){ # add prot differential and microarray later
         message(paste(experimentAccession," is ", expType , ", will continue downloading data"))
