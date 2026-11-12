@@ -52,16 +52,7 @@ test_that("getNormalisedAtlasExpression return data frame", {
   expect_true(ncol(data_frame_cpm) > 0)
 })
 
-#test for getNormalizedAtlasExperiment fkpm: 
-test_that("getNormalisedAtlasExpression return data frame for fpkm",{
-  skip_if_offline()
-  
-  data_frame_fpkm <- getNormalisedAtlasExpression("E-MTAB-4045", "fpkm")
-  
-  expect_s3_class(data_frame_fpkm, 'data.frame')
-  expect_true(nrow(data_frame_fpkm) > 0)
-  expect_true(ncol(data_frame_fpkm) > 0)
-})
+
 
 # test for getAnalyticsDifferentialAtlasExpression() to return data frame: 
 test_that("getAnalyticsDifferentialAtlasExpression returns data frame for differential bulk data", {

@@ -45,6 +45,6 @@ test_that("Download data for E-MTAB-1624", {
 test_that("Search for cancer datasets in human", {
 
     skip_if_offline()
-    cancer_res <- searchAtlasExperiments( properties = "cancer", species = "human"  )
+    cancer_res <- searchAtlasExperiments( query = "cancer", secondaryFilter = "human"  )
     expect_false( ( nrow(cancer_res) == 0 ) ) 
 })
