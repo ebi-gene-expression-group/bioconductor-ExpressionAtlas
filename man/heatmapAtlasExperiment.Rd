@@ -5,7 +5,8 @@
     This function generates a heatmap for an Expression Atlas experiment, from normalised expression data.
 }
 \usage{
-    heatmapAtlasExperiment( df, filename = "heatmap", save_pdf = FALSE, show_plot = TRUE, palette = "viridis", top_n = 100, scaled=FALSE, show_heatmap_title = TRUE )
+    heatmapAtlasExperiment( df, filename = "heatmap", save_pdf = FALSE, show_plot = TRUE, palette = "viridis", markers = TRUE, gene_list = NULL, top_n = 100, scaled=FALSE,
+    show_heatmap_title = TRUE, geneLabel = c('name', 'id'))
 }
 \arguments{
     \item{ df }{
@@ -24,6 +25,13 @@
         Viridis colour palette for the heatmap. Default is "viridis".
         Other options are: magma, plasma, inferno, cividis, rocket, mako, turbo
     }
+    \item{ markers }{
+        Top ranked genes per tissue. Default is \code{TRUE}. 
+    }
+    \item{ gene_list }{
+        Gene list of user's choise. Can be ploted with top ranked genes when markers = TRUE.
+        If markers = FALSE, will be plotting only genes from gene list. 
+    }
     \item{ top_n }{
         Number of top most variable genes to be shown in the heatmap. Default is 100.
     }
@@ -33,26 +41,32 @@
     \item{ show_heatmap_title }{
         Whether to show a title in the heatmap. Default is \code{TRUE}.
     }
-}
+    \item{ geneLabel }{
+        Whether to plot with GeneID = 'id' or Gene names = 'name'. Default is 'name'.
+    }
+    
+    }
+    
+
 \value{
     A PDF file with the generated heatmap.
 }
 \examples{
     
     # Download the TPM Expression values for experiment E-MTAB-4045
-    mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "tpm" )
+    mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "tpm" )
 
     # Generate heatmap with default parameters
-    heatmapAtlasExperiment( mtab4045_tpm, "heatmap", TRUE, FALSE, "viridis", 100, FALSE, TRUE )
+    heatmapAtlasExperiment( mtab4045_tpm, "heatmap", TRUE, FALSE, "viridis", TRUE, c("FGR", "CFH", "STPG1"), NULL, FALSE, TRUE, 'name' )
 
     # Check if the PDF file was created
     file.exists("heatmap.pdf")
 
     # Download the CPM Expression values for experiment E-MTAB-4045 with custom parameters
-    mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-4045", "cpm" )
+    mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "cpm" )
 
     # Generate heatmap with default parameters
-    heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap", TRUE, FALSE, "viridis", 100, FALSE, TRUE )
+    heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap", TRUE, FALSE, "viridis", FALSE, c("FGR", "CFH", "STPG1"), NULL, FALSE, TRUE, 'id' )
 
     # Check if the PDF file was created
     file.exists("E-MTAB-4045-cpm-heatmap.pdf")
