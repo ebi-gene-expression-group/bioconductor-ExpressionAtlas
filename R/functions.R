@@ -1,6 +1,8 @@
+# ----- Bulk  ----
+
 # getAtlasExperiment
 #   - Download and return the SimpleList object representing a single
-#   Expression Atlas experiment.
+#     Expression Atlas experiment.
 getAtlasExperiment <- function( experimentAccession ) {
   
   # Make sure the experiment accession is in the correct format.
@@ -51,33 +53,33 @@ getAtlasExperiment <- function( experimentAccession ) {
   
   for (attempt in seq_len(max_attempts)){
     
-    #try download first time for 1 minute 
+    # Try download first time for 1 minute 
     if(attempt == 1){
       message('Downloading....')
     }
     
-    #retry second time for 1 minute 
+    # Retry second time for 1 minute 
     if(attempt == 2){
       message('Trying again...')
     }
     
-    #retry third time for 10 minutes 
+    # Retry third time for 10 minutes 
     if(attempt == 3){
       message('The file may be too large.')
       message('Trying last time for 10 minutes....')
       options(timeout = if (attempt == 3) 600 else default_time)
     }
-    # Create connection object for downloading data.
     
+    # Create connection object for downloading data.
     connection <- url(fullUrl)
     
-    # Try download, catching any errors
+    # Try download, catching any errors.
     loadResult <- try(load(connection), silent = TRUE)
     
-    # Close the connection after each attempt
+    # Close the connection after each attempt.
     close(connection)
     
-    # Check if download was successful
+    # Check if download was successful.
     if (!inherits(loadResult, "try-error")) {
       break
     } 
@@ -89,7 +91,7 @@ getAtlasExperiment <- function( experimentAccession ) {
   }
   
   
-  # If all attempts failed, display an error message and return
+  # If all attempts failed, error message displayed. 
   if (inherits(loadResult, "try-error")) {
     
     
@@ -134,7 +136,6 @@ getAtlasExperiment <- function( experimentAccession ) {
     )
   }
   
-  # If we're still here, things must have worked ok.
   message(
     paste(
       "Successfully downloaded experiment summary object for",
@@ -176,17 +177,15 @@ getAtlasData <- function( experimentAccessions ) {
     )
   ]
   
-  # The experimentAccessions vector is empty if none of the accessions are
-  # valid. Just quit here if so.
+  # Stop if no valid accessions remain after filtering.
   if( length( experimentAccessions ) == 0 ) {
     stop( "None of the accessions passed are valid ArrayExpress/BioStudies accessions. Cannot continue." )
   }
   
-  # Go through each one and download it, creating a list.
-  # So that the list has the experiment accessions as the names, use them as
-  # names for the vector before starting to create the list.
+  # Named the input vector so the resulting list is keyed by accession.
   names( experimentAccessions ) <- experimentAccessions
   
+  # Download the experiment data for each accession and collect it in a SimpleList.
   experimentSummaryList <- SimpleList(
     
     lapply( experimentAccessions, function( experimentAccession ) {
@@ -195,7 +194,7 @@ getAtlasData <- function( experimentAccessions ) {
     }
     ) )
   
-  # Remove any null entries, i.e. experiments without R data files available.
+  # Keep only accessions that returned an experiment summary.
   experimentSummaryList <- experimentSummaryList[ ! sapply( experimentSummaryList, is.null ) ]
   
   return( experimentSummaryList )
@@ -235,7 +234,7 @@ getAtlasData <- function( experimentAccessions ) {
 
 
 # searchAtlasExperiments
-#   - Search (currently against BioStudies API) for datasets in Atlas matching given terms.
+#   - Search against BioStudies API for datasets in Atlas matching given terms.
 searchAtlasExperiments <- function( properties, species = NULL ) {
   
   # Quit if we don't have any search terms
@@ -320,10 +319,10 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
     message( "Query successful." )
   }
   
-  ## Parse the JSON document.
+  # Parse the JSON document.
   parsedJSON <- fromJSON( txt = queryURL )
   
-  ## Get the number of experiments we found.
+  # Get the number of experiments we found.
   numExps <- as.numeric( parsedJSON$totalHits )
   
   # If there were no results, quit here.
@@ -343,7 +342,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
     message( "WARNING: Total number of hits reported by BioStudies is not exact" )
   } 
   
-  # traverse BioStudies pages to get the list of experiments
+  # Traverse BioStudies pages to get the list of experiments
   allExperiments <- c()
   if ( numExps < page_size || numExps%%page_size != 0 ){
     modulus <- 1
@@ -364,13 +363,13 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
     allExperiments <- append(allExperiments, page_acc)
   }
   
-  # check the number of experiments is correct, otherwise quit here.
+  # Check the number of experiments is correct, otherwise quit here.
   if( numExps != length(allExperiments) ) {
     return( message( "Number of experiments obtained is not correct. Cannot continue." ) )
   }
   
   
-  # Create vectors of all accessions, experiment types, species, titles and conect errors.
+  # Create vectors of all accessions, experiment types, species, titles and connect errors.
   allSpecies <- rep( NA, numExps )
   allExpTypes <- rep( NA, numExps )
   allTitles <- rep( NA, numExps )
@@ -386,7 +385,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
       allExperiments[ acc ],
       sep = ""
     )
-    # Make sure the HTTP request works
+    # Make sure the HTTP request works.
     if( status_code( GET( accQueryURL ) ) != 200 ) {
       
       allConnErr[ acc ] <- TRUE
@@ -394,7 +393,7 @@ searchAtlasExperiments <- function( properties, species = NULL ) {
     else{ 
       accQuery <- fromJSON( txt = accQueryURL )
       
-      # get indexes of title, the experiment type and species
+      # Get indexes of title, the experiment type and species.
       
       pos_title <-  which( accQuery$section$attributes$name %in% "Title" )
       if ( length( pos_title ) == 1 ){
@@ -473,7 +472,8 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
   return( experiment_list[1] )
 }
 
-# Internal helper to get Experiment Type from accession
+# getExperimentType 
+# - Internal helper to get Experiment Type from accession. 
 .getExperimentType <- function(experimentAccession) {
   
   # Base URL for downloading data.
@@ -485,17 +485,17 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
   # Define ftpUrl for configuration file.
   ftpUrl <- paste(urlBase, experimentAccession, configFile, sep = "/")
   
-  # Read the XML file directly from the FTP URL
+  # Read the XML file directly from the FTP URL.
   message("Downloading XML file from FTP...")
   xmlContent <- .downloadXMLFile(ftpUrl)
   
-  # Extract the <configuration> node and the experimentType attribute
+  # Extract the <configuration> node and the experimentType attribute.
   configurationNode <- xml_find_first(xmlContent, "/configuration")
   if (is.na(configurationNode)) {
     stop("No <configuration> node found in the XML file.")
   }
   
-  # Get the value of the experimentType attribute
+  # Get the value of the experimentType attribute.
   experimentType <- xml_attr(configurationNode, "experimentType")
   if (is.na(experimentType)) {
     stop("The 'experimentType' attribute is missing in the <configuration> node.")
@@ -503,6 +503,9 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
   
   return(experimentType)
 }
+
+# downloadXMLFile 
+# - Internal helper to download XML file. 
 
 .downloadXMLFile <- function(url, attempts = 7, delay = 3) {
   for (i in 1:attempts) {
@@ -512,12 +515,14 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
       message(paste("Attempt", i, "failed:", e$message))
       NULL
     })
-    if (!is.null(result)) return(result)
-    Sys.sleep(delay)
+    if (!is.null(result)) return(result) # Return downloaded data 
+    Sys.sleep(delay) # Wait before retrying 
   }
   stop("Failed to download XML file after multiple attempts.")
 }
 
+# downloaTabularFile
+# - Internal helper to download TSV file. 
 .downloadTabularFile <- function(fileUrl, experimentAccession, attempts = 5, delay = 3) {
   message(paste("Downloading expression file from:\n", fileUrl))
   
@@ -540,12 +545,13 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
   return(NULL)  # Return NULL if all attempts fail
 }
 
-
-#helper to download markers file 
+# loadmarkers 
+# - Internal helper to download markers TSV file from FTP. 
 .loadmarkers <- function(experimentAccession, attempts = 5, delay = 3){
   
   experiment_markers <- paste0(experimentAccession, "-tpms-markers.tsv")
   
+  # URL to download the file. 
   url_for_markers <- paste0(
     "https://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/",
     experimentAccession, "/",
@@ -566,10 +572,10 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
       NULL
     })
     if (!is.null(markers)) {
-      return(markers)
+      return(markers) # Return if file sussecfully loaded.
     }
     if(i < attempts) {
-      Sys.sleep(delay)
+      Sys.sleep(delay) # Wait before retrying 
     }
   }
   
@@ -581,7 +587,9 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
   
 }
 
-
+# getNormalisedAtlasExpression
+# - Download normalized data  for single Expression Atlas experiment 
+#   and returns data frame with marker genes rank. 
 getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "tpm") {
   
   # Ensure the experiment accession is in the correct format.
@@ -589,6 +597,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
     stop("Experiment accession not valid. Cannot continue.")
   }
   
+  # Ensure the experiment type is correct. 
   expType <- .getExperimentType(experimentAccession)
   
   if (expType == "rnaseq_mrna_differential") {
@@ -620,7 +629,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
   # Download markers annotations: 
   markers <- .loadmarkers(experimentAccession)
   
-  # Getting ranked gene-assay annotations for merging 
+  # Getting ranked gene-assay annotations for merging. 
   ranked_markers <- markers[
     !is.na(markers$marker_gene_rank),
     c("gene_id", "assay", "marker_gene_rank"),
@@ -655,54 +664,55 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
       message(paste("Successfully downloaded expression data for", experimentAccession))
     }
     
-    # TPMs can have multiple values in expression comma-separated columns (min, lower quartile, mean, higher quartile and max)
+    # TPMs can have multiple values in expression comma-separated columns (min, lower quartile, mean, higher quartile and max).
     get_mean_value <- function(col) {
-      # Split by commas and return the third value
+      # Split by commas and return the third value.
       sapply(strsplit(col, ","), function(x) x[3])
     }
     
-    # the first two columns are GeneID and Gene.Name, fetching 3rd column as it contains mean values. 
+    # The first two columns are GeneID and Gene.Name, fetching 3rd column as it contains mean values. 
     results[ ,3:ncol(results)] <- lapply(results[ ,3:ncol(results)], get_mean_value)
     
     
     
-    # Read the XML file directly from the FTP URL
+    # Read the XML file directly from the FTP URL.
     message("Downloading XML file from FTP...")
     xmlContent <- .downloadXMLFile(xmlUrl)
     
-    # Extract the assay_group id and label attributes
+    # Extract the assay_group id and label attributes.
     assay_groups <- xml_find_all(xmlContent, ".//assay_group")
     
-    # Create a named vector with id as names and label as values
+    # Create a named vector with id as names and label as values.
     assay_vector <- setNames(xml_attr(assay_groups, "label"), xml_attr(assay_groups, "id"))
     
-    # Replace the columns names in results, excluding 'GeneID' and 'Gene.Name' columns
+    # Replace the columns names in results, excluding 'GeneID' and 'Gene.Name' columns.
     colnames(results)[-c(1, 2)] <- assay_vector[colnames(results)[-c(1, 2)]]
     
-    # Adding markers annotations by matching Gene ID:
+    # Adding markers annotations by matching Gene ID. 
     results <- merge(results,
                      ranked_markers,
                      by.x = "GeneID", 
                      by.y = "gene_id",
                      all.x = TRUE)
     
-    # Rename 'assay' to 'tissue' column 
+    # Rename 'assay' to 'tissue' column in data frame.
     names(results)[names(results) == "assay"] <- "tissue"
     
-    # Replace NA in gene names with GeneID 
+    # Replace NA in gene names with GeneID.
     missing_names <- is.na(results$Gene.Name) |
       results$Gene.Name == ""
     
     results$Gene.Name[missing_names] <-
       results$GeneID[missing_names]
     
+    # Set the normalisation label to TPM for the heatmap. 
     attr(results, "normalisation") <- "TPM"
     
     return(results)
     
   } else if (normalisation %in% c("cpm")) {
-    # Define filenames for TPM files.
     
+    # Download the experiment summary and extract it by accession.
     experiment_summary <- getAtlasData( c(experimentAccession))[[experimentAccession]]
     
     # Get counts.
@@ -720,21 +730,21 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
     
     subgroups_list <- list()
     
-    # Loop through each assay group and extract label and assays
+    # Loop through each assay group and extract label and assays.
     for (group in assay_groups) {
-      # Get the label of the assay group
+      # Get the label of the assay group.
       label <- xml_attr(group, "label")
       
-      # Get all assay values in the group
+      # Get all assay values in the group.
       assays <- xml_text(xml_find_all(group, "assay"))
       
-      # Add to the list
+      # Add to the list.
       subgroups_list[[label]] <- assays
     }
-    
+      
     cpm_mean_df <- data.frame(row.names = rownames(cpm_df))
     
-    # Calculate mean CPM for each assay group
+    # Calculate mean CPM for each assay group.
     for (group_name in names(subgroups_list)) {
       group_columns <- subgroups_list[[group_name]]
       
@@ -747,14 +757,14 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
       }
     }
     
-    # Use GeneID as the default gene name
+    # Use GeneID as the default Gene name. 
     cpm_mean_df <- cbind(
       GeneID = rownames(cpm_mean_df),
       Gene.Name = rownames(cpm_mean_df),
       cpm_mean_df
     )
     
-    # Download TPM data to look up gene names
+    # Download TPM data to look up Gene names. 
     tpm_url <- paste(
       urlBase,
       experimentAccession,
@@ -767,17 +777,17 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
     if (!is.null(tpm_data) &&
         all(c("GeneID", "Gene.Name") %in% names(tpm_data))) {
       
-      # Keep the first entry for each GeneID
+      # Keep the first entry for each GeneID.
       gene_lookup <- tpm_data[
         !duplicated(tpm_data$GeneID),
         c("GeneID", "Gene.Name")
       ]
       
-      # Match gene names to CPM rows
+      # Match gene names to CPM rows.
       match_index <- match(cpm_mean_df$GeneID, gene_lookup$GeneID)
       gene_names <- as.character(gene_lookup$Gene.Name[match_index])
       
-      # Replace GeneID only where a gene name is available
+      # Replace GeneID only where a gene name is available.
       has_name <- !is.na(gene_names) & trimws(gene_names) != ""
       cpm_mean_df$Gene.Name[has_name] <- gene_names[has_name]
       
@@ -785,7 +795,7 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
       warning("TPM gene names unavailable; using GeneID as Gene.Name.")
     }
     
-    # Merging with marker file 
+    # Merging with marker file.  
     cpm_mean_df <- merge(
       cpm_mean_df,
       ranked_markers, 
@@ -794,16 +804,17 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
       all.x = TRUE 
     )
     
-    # Renaming assay column to tissue 
+    # Renaming assay column to tissue.  
     names(cpm_mean_df)[names(cpm_mean_df) == "assay"] <- "tissue"
     
-    #Replacing NA Gene names with GeneID 
+    # Replacing NA Gene names with GeneID. 
     missing_names_cpm <- is.na(cpm_mean_df$Gene.Name) |
       cpm_mean_df$Gene.Name == ""
     
     cpm_mean_df$Gene.Name[missing_names_cpm] <-
       cpm_mean_df$GeneID[missing_names_cpm]
     
+    # Set the normalisation label to CPM for the heatmap.
     attr(cpm_mean_df, "normalisation") <- "CPM"
     
     return(cpm_mean_df)
@@ -816,6 +827,10 @@ getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "t
   } 
   
 } 
+
+# heatmapAtlasExperiment 
+# - function that plots heatmap using normalisation data 
+#   from getNormalisedAtlasExpression function. 
 
 heatmapAtlasExperiment <- function(df,
                                    filename = "heatmap",
@@ -831,23 +846,25 @@ heatmapAtlasExperiment <- function(df,
 )
 {
   
-  
+  # Get one of the supported versions for geneLabel. 
   geneLabel <- match.arg(geneLabel)
   
+  # Scaled must be TRUE or FALSE. 
   if (!is.logical(scaled)) {
     stop("'scaled' parameter must be TRUE or FALSE")
   }
   
+  # df must be data frame.  
   if (!is.data.frame(df)) stop("Input must be a dataframe.")
   
+  # Reading normalisatio label. 
   units <- attr(df, "normalisation", exact = TRUE)
   
-  # Matching genes from gene list 
-  
+  # Matching genes from gene list. 
   user_genes <- df$Gene.Name %in% gene_list |
     df$GeneID %in% gene_list
   
-  # Exclude genes that are not in data frame 
+  # Exclude genes that are not in data frame.  
   missing_genes <- setdiff(gene_list,
                            c(df$Gene.Name, df$GeneID))
   
@@ -859,7 +876,7 @@ heatmapAtlasExperiment <- function(df,
   }
   
   
-  # If markers = TRUE, plot rank #1 genes
+  # If markers = TRUE, plot rank #1 genes and genes from user list. 
   if(markers) {
     
     top_markers <- !is.na(df$marker_gene_rank) &
@@ -867,30 +884,31 @@ heatmapAtlasExperiment <- function(df,
     
     df <- df[top_markers | user_genes, ]
     
-  } else if(length(gene_list) > 0 ) {
-    
+  } else if(length(gene_list) > 0 ) { 
+    # Keep only genes from usrr list. 
     df <- df[user_genes, ]
     
   }
   
+  # Stop if no genes remain to plot.
   if(nrow(df) == 0 ) {
     stop("No genes available from requested gene_list")
   }
   
-  # Order by tissue 
+  # Order by tissue. 
   df <- df[
     order(df$tissue, df$marker_gene_rank),
   ]
   
-  # Keep one row per GeneID 
+  # Keep one row per GeneID. 
   df <- df[!duplicated(df$GeneID), ]
   
-  # Make Gene Name - gene labels 
+  # Make Gene Name - gene labels. 
   gene_labels <- as.character(df$Gene.Name)
   
   rownames(df) <- df$GeneID
   
-  # Remove annotations, only keep expression for heatmap 
+  # Remove annotations, only keep expression for heatmap.  
   df <- df[
     ,
     !names(df) %in% c(
@@ -899,34 +917,43 @@ heatmapAtlasExperiment <- function(df,
   ]
   
   
-  # Make df numeric 
+  # Make columns numeric.  
   df[] <- lapply(df, function(x) as.numeric(as.character(x)))
   
+  # Covert numeric to expression matrix. 
   expression_matrix <- as.matrix(df)
   
+  # Select all rows. 
   chosen_rows <- seq_len(nrow(expression_matrix))
   
+  # If no markers and no gene list, take top_n genes. 
   if (!markers && length(gene_list) == 0) {
+    # Rank genes by variance across columns or by expression for a single column.
     scores <- if (ncol(expression_matrix) > 1) {
       genefilter::rowVars(expression_matrix)
     } else {
       expression_matrix[, 1]
     }
     
+    # Exclude missing scores and keep the rows with the highest scores.
     chosen_rows <- head(order(scores, decreasing = TRUE, na.last = NA), top_n)
   }
   
+  # If no genes selected, stop. 
   if (length(chosen_rows) == 0) {
     stop("No genes have usable expression scores.")
   }
   
-  topNgeneExpressions <- expression_matrix[chosen_rows, , drop = FALSE]
+  topNgeneExpressions <- expression_matrix[chosen_rows, ]
+  # Sort columns by name. 
   topNgeneExpressions <- topNgeneExpressions[
-    , order(colnames(topNgeneExpressions)), drop = FALSE
+    , order(colnames(topNgeneExpressions))
   ]
   
+  # Get GeneIDs from row names. 
   gene_ids <- rownames(topNgeneExpressions)
   
+  # Use GeneID or Gene name as row labels for heatmap.
   if(geneLabel == 'id') {
     topNgeneNames <- gene_ids
   } else {
@@ -936,6 +963,7 @@ heatmapAtlasExperiment <- function(df,
   missing_ids <- is.na(topNgeneNames) | topNgeneNames == ""
   topNgeneNames[missing_ids] <- gene_ids[missing_ids]
   
+  # If several genes have same Gene name, append GeneID to them. 
   shared_name <- duplicated(topNgeneNames) |
     duplicated(topNgeneNames, fromLast = TRUE)
   
@@ -947,7 +975,7 @@ heatmapAtlasExperiment <- function(df,
   
   
   # Scale and center the expression levels using Z-score transformation, so they
-  # have mean 0 and standard deviation 1
+  # have mean 0 and standard deviation 1.
   
   if (isTRUE(scaled)) {
     topNgeneExpressions <- t( scale( t( topNgeneExpressions )))
@@ -956,19 +984,20 @@ heatmapAtlasExperiment <- function(df,
   }
   
   
-  # get the assay group labels to use as the labels for the heatmap columns
+  # Get the assay group labels to use as the labels for the heatmap columns.
   assayGroupLabels <- colnames( topNgeneExpressions )
   
   min_val <- min(topNgeneExpressions, na.rm = TRUE)
   max_val <- max(topNgeneExpressions, na.rm = TRUE)
   mid_val <- (min_val + max_val) / 2
   
-  # viridis colours
+  # Viridis colours.
   colours <- circlize::colorRamp2(
     breaks = c(min_val, mid_val, max_val),
     colors = viridis(3, option = palette)
   )
   
+  # Title done according to parameters chosen for heatmap. 
   title <- paste("Gene Expression for top ", top_n, " Genes", sep = "")
   
   if(markers && length(gene_list) > 0) {
@@ -979,12 +1008,12 @@ heatmapAtlasExperiment <- function(df,
     title <- ("Gene list ")
   }
   
-  
+  # If scaled = TRUE, z-score displayed on heatmap bar. 
   title_small <- if(isTRUE(scaled)) {
     
     paste("Gene Expression\n", units, "z-score")
     
-  } else {
+  } else { # else log + 1
     paste("Gene Expression\nlog(", units, "+ 1)")
   }
   
@@ -1011,6 +1040,7 @@ heatmapAtlasExperiment <- function(df,
     ComplexHeatmap::draw(heatmap_vis)
   }
   
+  # PDF Output (Only if save_pdf = TRUE).
   if (save_pdf) {
     ComplexHeatmap::draw(heatmap_vis)
     heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
@@ -1021,6 +1051,9 @@ heatmapAtlasExperiment <- function(df,
   
 }
 
+# getAnalyticsDifferentialAtlasExpression 
+# - Downloads and returns differential expression analytics data for an 
+#   Expression Atlas experiment. 
 getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
   
   # Ensure the experiment accession is in the correct format.
@@ -1028,6 +1061,7 @@ getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
     stop("Experiment accession not valid. Cannot continue.")
   }
   
+  # Ensure the experiment type is correct. 
   expType <- .getExperimentType(experimentAccession)
   
   if (expType == "rnaseq_mrna_baseline") {
@@ -1040,7 +1074,7 @@ getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
     )
   }
   
-  if (expType %in% c("rnaseq_mrna_differential" )){ # add prot differential and microarray later
+  if (expType %in% c("rnaseq_mrna_differential" )){ 
     message(paste(experimentAccession," is ", expType , ", will continue downloading data"))
   } else {
     stop("Experiment type not contain normalised expression data.")
@@ -1076,7 +1110,7 @@ getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
   
   contrasts <- xml_find_all(xmlContent, ".//contrasts")
   
-  # # Extract contrast IDs and names
+  # Extract contrast IDs and names
   contrast_ids <- xmlContent %>% 
     xml_find_all("//contrast") %>% 
     xml_attr("id")
@@ -1107,6 +1141,9 @@ getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
   
 }
 
+# sanitize-filename
+# Internal helper that replace invalid characters with underscores 
+# and trims whitespaces. 
 .sanitize_filename <- function(filename) {
   # Replace invalid characters with an underscore
   sanitized <- gsub("[<>:\"/\\\\|?*]", "_", filename)
@@ -1118,6 +1155,9 @@ getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
   return(sanitized)
 }
 
+# volcanoDifferentialAtlasExperiment 
+# - Function that plots volacno plot from 
+#   diffeential expression data from getAnalyticsDifferentialAtlasExpression function. 
 volcanoDifferentialAtlasExperiment <- function(df, 
                                                filename_prefix = "volcano-plot",
                                                save_pdf = FALSE,
@@ -1127,7 +1167,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
                                                cutoff = 1,
                                                show_volcanoplot_title = TRUE ) {  
   
-  # replace NA string with <NA> and remove rows with <NA>, reset rownames
+  # replace NA string with <NA> and remove rows with <NA>, reset rownames.
   df[df == "NA"] <- NA
   clean_df <- stats::na.omit(df)
   rownames(clean_df) <- NULL
@@ -1138,11 +1178,11 @@ volcanoDifferentialAtlasExperiment <- function(df,
     
     clean_df[[pval_col]] <- as.numeric(clean_df[[pval_col]])
     
-    # Add a new column as low and high foldchange for colour
+    # Add a new column as low and high foldchange for colour.
     clean_df$color <- ifelse(abs(clean_df[[logFC_col]]) < cutoff, "low", "high")
     
     title <- paste("Volcano Plot:", logFC_col, "vs", pval_col)
-    # Create the plot
+    # Create the plot.
     p <- ggplot(clean_df, aes(x = .data[[logFC_col]], y = -log10(.data[[pval_col]]), color = .data$color)) +
       geom_point(alpha = 0.6) +
       geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
@@ -1155,28 +1195,25 @@ volcanoDifferentialAtlasExperiment <- function(df,
       ) +
       theme_minimal()
     
-    # PDF Output (Only if save_pdf = TRUE)
+    # PDF Output (Only if save_pdf = TRUE).
     if (save_pdf) {
-      # Save each plot as a separate image
+      # Save each plot as a separate image.
       plot_name <- gsub(".log2foldchange", "", logFC_col)
       filename <- .sanitize_filename(paste0(filename_prefix, "_", plot_name, ".png"))
       message(filename)
       ggsave(filename, plot = p, width = 8, height = 6, bg = "white")
     }
     
-    # Optional: Print the plot in the R console
+    # Optional: Print the plot in the R console.
     if (show_plot) print(p)
   }
   
   return(p)
 }
 
-
-
-
-# ----- add single-cell support ----
-
-# function to extract all nested elements as a flat string
+# ----- Search  Second Filter ----
+# flatten_experiment
+# - Internal helper: function to extract all nested elements as a flat string
 # used by .search_gxa_experiments_yaml
 
 .flatten_experiment <- function(exp) {
@@ -1187,23 +1224,25 @@ volcanoDifferentialAtlasExperiment <- function(df,
     organism = exp$organism
   )
   
-  # extract data from assay_groups if present
+  # Extract data from assay_groups if present. 
   if (!is.null(exp$assay_groups)) {
     for (group in exp$assay_groups) {
       details_list <- append(details_list, unlist(group, use.names = FALSE))
     }
   }
   
-  # concatenate all extracted values into a single searchable string
+  # Concatenate all extracted values into a single searchable string. 
   return(paste(details_list, collapse = " | "))
 }
 
+# searcg_gxa_experiemnts_yaml 
+# - Internal helper to search experiments using YAML. 
 .search_gxa_experiments_yaml <- function( query_yaml ){
   yaml_gxa <- "https://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/gxa-studies.yaml" 
   # load YAML from URL
   yaml_response <- GET(yaml_gxa)
   
-  # check if the request was successful
+  # Check if the request was successful.
   if (status_code(yaml_response) == 200) {
     yaml_text <- content(yaml_response, "text", encoding = "UTF-8")
     
@@ -1215,7 +1254,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
       }
     )
     
-    # ensure all elements remain in their original format
+    # Ensure all elements remain in their original format.
     yaml_data <- lapply(yaml_data, function(x) {
       if (is.list(x)) {
         return(lapply(x, function(y) {
@@ -1255,15 +1294,13 @@ volcanoDifferentialAtlasExperiment <- function(df,
   
 }
 
-
+# ebiAPIsearch
+# - Internal helper: Search the EBI RESTful Web Services API for experiment accessions
+# DataFrame with columns (Accession, Species, Type, Title), all <character>
+# Query Atlas , SCE atlas API
 
 .ebiAPIsearch <- function (resource, query, secondaryFilter = NULL, detailed = FALSE) {
-  # Search the EBI RESTful Web Services API for experiment accessions
-  # We will aim to return an output of similar format to the searchAtlasExperiments function:
-  #   DataFrame with columns (Accession, Species, Type, Title), all <character>
-  # For that we will query Atlas , SCE atlas API
-  
-  
+
   if (!is.logical(detailed)) {
     stop("'detailed' parameter must be TRUE or FALSE")
   }
@@ -1282,7 +1319,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
     stop("Resource not supported")
   }
   
-  # Quit if we don't have any query search terms
+  # Quit if we don't have any query search terms.
   if( missing( query ) ) {
     stop( "Please provide at least one query search term." )
   }
@@ -1292,10 +1329,10 @@ volcanoDifferentialAtlasExperiment <- function(df,
     stop( "Please provide query search term(s) as a character vector." )
   }
   
-  # Make 'query' URL friendly (e.g. replace spaces with %20
+  # Make 'query' URL friendly (e.g. replace spaces with %20). 
   query <- sapply( query, URLencode )
   
-  # If we weren't passed a secondaryFilter, log this.
+  # If does not pass a secondaryFilter, log this.
   if( missing( secondaryFilter ) ) {
     
     message( "No secondaryFilter was provided." )
@@ -1334,7 +1371,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
   # Log search is beginning.
   message( "Searching for experiments matching your query ..." )
   
-  # Check the query works with httr
+  # Check the query works with httr.
   response <- GET( queryURL )
   
   # Make sure the HTTP request worked.
@@ -1350,15 +1387,15 @@ volcanoDifferentialAtlasExperiment <- function(df,
     message( "Query successful." )
   }
   
-  ## Parse the JSON document.
+  # Parse the JSON document.
   parsedJSON <- fromJSON( txt = queryURL )
   
-  ## Get the number of experiments we found.
+  # Get the number of experiments found.
   numExps <- as.numeric( parsedJSON$hitCount )
   
   
   
-  # search cell type wheel
+  # search cell type wheel.
   if (resource == "scxa") {
     # first search with the 'query' and retrieve accessions
     query_ctw1 <- paste( cell_type_wheel,as.character(query), sep = "" )
@@ -1371,7 +1408,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
     }
     parsedJSON_ctw1 <- fromJSON( txt = query_ctw1 )
     
-    # second, search with the 'secondaryFilter' and retrieve accessions
+    # Second, search with the 'secondaryFilter' and retrieve accessions. 
     if( missing(secondaryFilter) || is.null(secondaryFilter) ) {
       additionalExps <- unique(unlist(parsedJSON_ctw1$experimentAccessions))
       
@@ -1390,7 +1427,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
     
   }
   
-  # search using yaml file in github - slow
+  # Search using YAML file. 
   if (resource == "gxa") {
     if ( detailed == FALSE ) {
       additionalExps <- 0
@@ -1422,7 +1459,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
     Title     = "NA"
   )
   
-  # now we need to query Atlas API to get the species, type and title
+  # Query Atlas API to get the species, type and title. 
   atlasAPIresponse <- GET( atlas_api )
   
   # Make sure the HTTP request worked.
@@ -1438,7 +1475,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
     message( "Query successful." )
   }
   
-  # Parse the JSON document
+  # Parse the JSON document.
   parsedJSON <- fromJSON(content(atlasAPIresponse, "text"))
   
   experiment_data <- DataFrame(
@@ -1454,9 +1491,10 @@ volcanoDifferentialAtlasExperiment <- function(df,
   
 }
 
-
+# searchSCAtlasExperiement
+# - Function to search for Single Cell Atlas experiments. 
 searchSCAtlasExperiments <- function( query, secondaryFilter = NULL ) { 
-  # wrapper function to search for Single Cell Atlas experiments
+  # Apply secondary filter if supplied. 
   if( missing( secondaryFilter ) ) {
     scExperiments <- .ebiAPIsearch(resource = "scxa", query)
   } else {
@@ -1466,8 +1504,10 @@ searchSCAtlasExperiments <- function( query, secondaryFilter = NULL ) {
   return( scExperiments )
 }
 
+# searchAtlasExperiments 
+# - Function to search for Expression Atlas experiments.
 searchAtlasExperiments <- function( query, secondaryFilter = NULL, detailed = FALSE ) { 
-  # wrapper function to search for Expression Atlas experiments
+  # Apply secondary filter, if supplied. 
   if( missing( secondaryFilter ) ) {
     scExperiments <- .ebiAPIsearch(resource = "gxa", query = query, detailed = detailed)
   } else {
@@ -1477,7 +1517,8 @@ searchAtlasExperiments <- function( query, secondaryFilter = NULL, detailed = FA
   return( scExperiments )
 }
 
-
+# download_anndata_with_entry
+# - Internal helper to download Single Cell AnnData file with retries. 
 .download_anndata_with_retry <- function(url, destfile, max_attempts = 3) {
   
   default_time <- getOption("timeout")
@@ -1485,19 +1526,19 @@ searchAtlasExperiments <- function( query, secondaryFilter = NULL, detailed = FA
   
   for (attempt in 1:max_attempts) {
     
-    #try download first time for 1 minute 
+    # Try download first time for 1 minute. 
     if(attempt == 1){
       message('Downloading....')
     }
     
-    #retry second time for 1 minute 
+    # Retry second time for 1 minute. 
     if(attempt == 2){
       message('First attempt failed.')
       message('Trying again for 5 minutes now...')
       options(timeout = if(attempt == 2) 300 else default_time)
     }
     
-    #retry third time for 10 minutes 
+    # Retry third time for 10 minutes. 
     if(attempt == 3){
       message('Second attempt failed.')
       message('File may be too large')
@@ -1521,11 +1562,14 @@ searchAtlasExperiments <- function( query, secondaryFilter = NULL, detailed = FA
 }
 
 
+# ----- Single Cell  ----
 
-
+# getAtlasSCExperiment 
+# - Download and return the SingleCellExperiemnt object representing a single
+#   Single Cell Expression Atlas experiment.
 getAtlasSCExperiment <- function( experimentAccession ) {
   
-  # Make sure the experiment accession is in the correct format
+  # Make sure the experiment accession is in the correct format.
   if( ! .isValidExperimentAccession( experimentAccession ) ) {
     
     stop( "Experiment accession not valid. Cannot continue." )
@@ -1557,18 +1601,18 @@ getAtlasSCExperiment <- function( experimentAccession ) {
   )
   
   
-  # Download the H5AD file to a temporary location
+  # Download the H5AD file to a temporary location.
   tempFile <- tempfile(fileext = ".h5ad")
   
-  on.exit( unlink(tempFile) )  # Ensures the temp file is deleted when the function exits
+  # Ensure the temp file is deleted when the function exits. 
+  on.exit( unlink(tempFile) )  
   
   .download_anndata_with_retry(fullUrl, tempFile)
   
-  # Read a H5AD file and returns a SingleCellExperiment object
-  
+  # Read a H5AD file and returns a SingleCellExperiment object, using python version. 
   loadResult <- try(readH5AD( file = tempFile, reader="python", version ="0.7.6", use_hdf5 = FALSE ), silent = TRUE )
   
-  # Check whether gene identifiers survived the import
+  # Check whether gene identifiers survived the import.
   head(rownames(loadResult))
   
   # Quit if we got an error.
@@ -1604,12 +1648,10 @@ getAtlasSCExperiment <- function( experimentAccession ) {
   }
   
   
-  # Make sure 'normalised' expression exists in the SCE object
+  # Check that 'normalised' expression exists in the SCE object. 
   getResult <- try( assays(loadResult)$normalised )
   
-  # Here I could check other data needed by plot functions exists,
-  # e.g. reducedDim(loadResult, "X_pca") for PCA plot
-  
+  # Stop if retrieving the normalised assay failed or returned NULL.
   if (is.null(getResult) || inherits(getResult, "try-error")) {
     
     stop(
@@ -1617,7 +1659,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
     )
   }
   
-  # If we're still here, things must have worked ok.
+  # Else if retrieved. 
   message(
     paste(
       "Successfully loaded assay 'normalised' from SingleCellExperiment object for ",
@@ -1625,42 +1667,43 @@ getAtlasSCExperiment <- function( experimentAccession ) {
     )
   )
   
-  # check if colData has the same number of rows as the normalised matrix
+  # Check if colData has the same number of rows as the normalised matrix. 
   if (ncol(colData(loadResult)) == 0 ) {
     # here we could fill the colData with data from the ftp site
     message("No colData found in the SingleCellExperiment object.")
   }
   
-  # Return SingleCellExperiment object
+  # Return SingleCellExperiment object. 
   SingleCellExperiment::mainExpName(loadResult) <- experimentAccession
   return( loadResult )
   
 }
 
-
+# plotDimRedSCAtlasExperiment 
+# - Plots dimensionality reduction (PCA, t-sne, UMAP) of a SingleCellExperiment object. 
 plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
   
-  # Check if the provided dimRed exists in reducedDimNames
+  # Check if the provided dimRed exists in reducedDimNames.
   if (!(dimRed %in% SingleCellExperiment::reducedDimNames(sceObject))) {
     stop(paste("Error: Dimension reduction method", dimRed, "not found in the object!"))
   }
   
-  # Extract dimension reduction coordinates
+  # Extract dimension reduction coordinates.
   dim_coords <- SingleCellExperiment::reducedDim(sceObject, dimRed)
   
-  # Check if colorby exists in colData
+  # Check if colorby exists in colData.
   if (!(colorby %in% colnames(colData(sceObject)))) {
     stop(paste("Error: Color attribute", colorby, "not found in colData!"))
   }
   
-  # Convert to a data frame
+  # Convert to a data frame.
   dimred_df <- data.frame(
     axis1 = dim_coords[, 1], 
     axis2 = dim_coords[, 2], 
     colorBy = as.character( colData(sceObject)[, colorby] )
   )
   
-  # Plot using ggplot2
+  # Plot using ggplot2.
   ggplot(dimred_df, aes(x = .data$axis1, y = .data$axis2, color = .data$colorBy)) +
     geom_point() +
     labs(
@@ -1672,7 +1715,8 @@ plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
     theme_minimal()
 }
 
-
+# heatmapSCAtlasEXperiment 
+# - Plots heatmap from from a SingleCellExperiment object. 
 heatmapSCAtlasExperiment <- function(
     singleCellExperiment,
     genes = NULL,
@@ -1681,13 +1725,19 @@ heatmapSCAtlasExperiment <- function(
     show_row_names = FALSE,
     geneLabel = c("name", "id")
 ) {
+  
+  # Get one of the supported versions for geneLabel.
   geneLabel <- match.arg(geneLabel)
+  
+  # Use markers if genes is NULL. 
   use_markers <- is.null(genes)
   
+  # Checking if SingleCellExperiemnt object was supplied. 
   if (!methods::is(singleCellExperiment, "SingleCellExperiment")) {
     stop("The provided object is not a SingleCellExperiment.")
   }
   
+  # Checking if normalized assay available. 
   if (!"normalised" %in%
       SummarizedExperiment::assayNames(singleCellExperiment)) {
     stop(
@@ -1696,12 +1746,14 @@ heatmapSCAtlasExperiment <- function(
     )
   }
   
+  # Extracting normalized assay. 
   normalised_matrix <- SummarizedExperiment::assay(
     singleCellExperiment,
     "normalised",
     withDimnames = FALSE
   )
   
+  # Require the normalised matrix to have at least one row and one column.
   if (nrow(normalised_matrix) == 0 ||
       ncol(normalised_matrix) == 0) {
     stop("The normalised matrix has zero rows or columns.")
@@ -1725,6 +1777,7 @@ heatmapSCAtlasExperiment <- function(
     stop("The object must have unique, nonempty cell IDs as column names.")
   }
   
+  # Label the matrix rows with gene IDs and the columns with cell IDs.
   rownames(normalised_matrix) <- gene_ids
   colnames(normalised_matrix) <- cell_ids
   
@@ -1768,6 +1821,7 @@ heatmapSCAtlasExperiment <- function(
       sep = "/"
     )
     
+    # Read the cluster table and check that it contains K and sel.K.
     clusters_exp <- utils::read.table(
       paste0(exp_url_path, ".clusters.tsv"),
       header = TRUE,
@@ -1792,6 +1846,7 @@ heatmapSCAtlasExperiment <- function(
       stop("Select exactly one K present in the cluster file.")
     }
     
+    # Read the marker gene table for the selected K.
     markers_exp <- utils::read.table(
       paste0(
         exp_url_path,
@@ -1808,9 +1863,8 @@ heatmapSCAtlasExperiment <- function(
       stop("The marker file must contain 'genes' and 'cluster' columns.")
     }
     
-    # Atlas marker identifiers are matched to the object's gene IDs.
-    # If a gene has multiple marker entries, retain its first entry,
-    # matching the original function's behaviour.
+    # Match the object's gene IDs to the Atlas marker table.
+    # If a gene appears more than once, use its first entry as before.
     marker_index <- match(
       gene_ids,
       as.character(markers_exp$genes)
@@ -1894,18 +1948,21 @@ heatmapSCAtlasExperiment <- function(
     display_labels <- make.unique(display_labels)
   }
   
+  # Assign a distinct colour to each label in gene_clusters.
   cluster_levels <- unique(gene_clusters)
   cluster_colors <- stats::setNames(
     grDevices::rainbow(length(cluster_levels)),
     cluster_levels
   )
   
+  # Annotate each marker gene row with its cluster.
   if (use_markers) {
     row_annotation <- ComplexHeatmap::rowAnnotation(
       cluster = gene_clusters,
       col = list(cluster = cluster_colors)
     )
   } else {
+    # Annotate the user-selected gene rows and hide the annotation legend.
     row_annotation <- ComplexHeatmap::rowAnnotation(
       selected_genes = gene_clusters,
       col = list(selected_genes = cluster_colors),
@@ -1932,7 +1989,8 @@ heatmapSCAtlasExperiment <- function(
   return(heat_df)
 }
 
-
+# dorPlotSCAtlasExperiment 
+# - Generates a Dot-Plot from a SingleCellExperiment object.
 dotPlotSCAtlasExperiment <- function(
     singleCellExperiment,
     genes,
@@ -1940,8 +1998,11 @@ dotPlotSCAtlasExperiment <- function(
     scaleNormExp = FALSE,
     geneLabel = c("name", "id")
 ) {
+  
+  # Get one of the supported versions for geneLabel.
   geneLabel <- match.arg(geneLabel)
   
+  # Checking if SingleCellExperiemnt object was supplied. 
   if (!methods::is(singleCellExperiment, "SingleCellExperiment")) {
     stop("The provided object is not a SingleCellExperiment.")
   }
