@@ -53,22 +53,22 @@
 }
 \examples{
     
-    # Download the TPM Expression values for experiment E-MTAB-4045
-    mtab4045_tpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "tpm" )
+    # Download the TPM Expression values for experiment E-MTAB-1733
+    mtab1733_tpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "tpm" )
 
     # Generate heatmap with default parameters
-    heatmapAtlasExperiment( mtab4045_tpm, "heatmap", TRUE, FALSE, "viridis", TRUE, c("FGR", "CFH", "STPG1"), NULL, FALSE, TRUE, 'name' )
+    heatmapAtlasExperiment( mtab1733_tpm, "heatmap", TRUE, FALSE, "viridis", TRUE, c("FGR", "CFH", "STPG1"), NULL, FALSE, TRUE, 'name' )
 
     # Check if the PDF file was created
     file.exists("heatmap.pdf")
 
-    # Download the CPM Expression values for experiment E-MTAB-4045 with custom parameters
-    mtab4045_cpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "cpm" )
+    # Download the CPM Expression values for experiment E-MTAB-1733 with custom parameters
+    mtab1733_cpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "cpm" )
 
     # Generate heatmap with default parameters
-    heatmapAtlasExperiment( mtab4045_cpm, "E-MTAB-4045-cpm-heatmap", TRUE, FALSE, "viridis", FALSE, c("FGR", "CFH", "STPG1"), NULL, FALSE, TRUE, 'id' )
+    heatmapAtlasExperiment( mtab1733_cpm, "E-MTAB-4045-cpm-heatmap", TRUE, FALSE, "viridis", FALSE, c("FGR", "CFH", "STPG1"), NULL, FALSE, TRUE, 'id' )
 
     # Check if the PDF file was created
-    file.exists("E-MTAB-4045-cpm-heatmap.pdf")
+    file.exists("E-MTAB-1733-cpm-heatmap.pdf")
 
 }
