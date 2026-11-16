@@ -12,10 +12,6 @@ bibliography: references.bib
 keywords: ["gene expression", "RNA-seq", "ExpressionAtlas", "Bioconductor"]
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
-<<<<<<< HEAD
-=======
-    %\VignetteBuilder{knitr}
->>>>>>> f8c769ecd438496a70b72afab838ed788c79ce05
     %\VignetteIndexEntry{Accessing GTEX RNA-seq data from Expression Atlas}
     %\VignetteEncoding{UTF-8}
 ---
@@ -25,16 +21,18 @@ This vignette demonstrates how to access and analyze GTEX RNA-seq data from Expr
 
 1. Search GTEX data.
 2. Retrieve GTEX data.
-3. Get raw counts and normalized expression data (TPM and FPKM).
+3. Get raw counts and normalized expression data.
 4. Create heatmaps for visualization of gene expression patterns.
 5. Filter and analyze specific genes of interest across GTEX tissues.
 
 
-The following example uses the `ExpressionAtlas` package to access `E-MTAB-5200` dataset (17350 samples).
+The following example uses the `ExpressionAtlas` package to access `E-MTAB-5200` dataset (2013 samples).
+Please note, you can also use the same workflow with a newer dataset such as E-GTEX-8. 
+Larger datasets may take longer to download and load. 
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(message=FALSE, warning=TRUE)
 ```
 
 ```{r load-package}
@@ -44,14 +42,14 @@ suppressMessages( library( SummarizedExperiment ) )
 
 
 ```{r search-and-download-gtex}
-
+# Search for experiment. 
 atlasRes <- searchAtlasExperiments( query = "gtex" )
 atlasRes
 
 ```
 
 ```{r downolad-GTEX}
-
+# Download experiment. 
 gtex <- getAtlasExperiment( experimentAccession = "E-MTAB-5200" )
 gtex
 gtex$rnaseq
@@ -63,7 +61,7 @@ metadata( gtex$rnaseq )
 ```
 
 ```{r normalise-GTEX}
-
+# Download normalised expression data for experiment. 
 gtex_tpm <- getNormalisedAtlasExpression( experimentAccession = "E-MTAB-5200", normalisation = "tpm" )
 head(gtex_tpm)
 
@@ -72,46 +70,14 @@ head(gtex_tpm)
 
 ```{r gtex-tpm-heatmap, fig.width=7, fig.height=8}
 
-
+# Default heatmap plot. 
 gtex_heatmap <- heatmapAtlasExperiment( df = gtex_tpm, save_pdf= FALSE, show_plot = TRUE, palette = "viridis", markers = TRUE, gene_list = NULL, top_n = NULL, scaled = FALSE, show_heatmap_title = TRUE )
+
+# With gene list of interest. 
+gtex_heatmap_genes <- heatmapAtlasExperiment( df = gtex_tpm, save_pdf= FALSE, show_plot = TRUE, palette = "viridis", markers = FALSE, gene_list = c("TP53", "CDKN2A", "ARID1A", "KRAS", "PTEN", "TERT", "CDKN2B", "SMAD4", "PIK3CA", "RB1"), top_n = NULL, scaled = FALSE, show_heatmap_title = TRUE )
 
 ```
 
-# ```{r gtex-selected-genes-heatmap}
-# plot_gene_heatmap <- function(gtex_fpkm, selected_genes, color_scheme = "Reds") {
-# 
-#     gtex_filtered <- gtex_fpkm %>% filter(Gene.Name %in% selected_genes)
-# 
-#     if (nrow(gtex_filtered) == 0) {
-#         stop("None of the selected genes were found in the dataset.")
-#     }
-# 
-#     expr_matrix <- as.matrix(gtex_filtered[, -c(1, 2)])
-#     rownames(expr_matrix) <- gtex_filtered$Gene.Name
-# 
-#     # ensure matrix is numeric
-#     expr_matrix <- apply(expr_matrix, 2, as.numeric)
-# 
-#     #col_fun <- colorRampPalette(brewer.pal(9, color_scheme))(100)
-#     col_fun <- viridis::viridis(100)
-# 
-#     Heatmap(
-#         t(scale(t( expr_matrix ))),
-#         name = "Expression",
-#         col = col_fun,
-#         cluster_rows = TRUE,
-#         cluster_columns = TRUE,
-#         show_row_names = TRUE,
-#         show_column_names = TRUE
-#     )
-# }
-# 
-# selected_genes <- c("CTCF", "TSPAN6", "TNMD", "DPM1", "SCYL3", "CBLIF", "CTCF", "DDX4", "STATH")
-# plot_gene_heatmap(gtex_fpkm, selected_genes, "RdBu")
-# 
-# ```
-
-# sessionInfo
 
 ```{r session-info}
 sessionInfo()
