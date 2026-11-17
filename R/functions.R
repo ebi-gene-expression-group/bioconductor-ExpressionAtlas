@@ -53,17 +53,17 @@ getAtlasExperiment <- function( experimentAccession ) {
   
   for (attempt in seq_len(max_attempts)){
     
-    # Try download first time for 1 minute 
+    # Try download first time for 1 minute.
     if(attempt == 1){
       message('Downloading....')
     }
     
-    # Retry second time for 1 minute 
+    # Retry second time for 1 minute. 
     if(attempt == 2){
       message('Trying again...')
     }
     
-    # Retry third time for 10 minutes 
+    # Retry third time for 10 minutes. 
     if(attempt == 3){
       message('The file may be too large.')
       message('Trying last time for 10 minutes....')
@@ -232,35 +232,7 @@ getAtlasData <- function( experimentAccessions ) {
   }
 }
 
-
-
-eligibleAtlasExperiments <- c (
-  "transcription profiling by array",
-  "microRNA profiling by array",
-  "antigen profiling",
-  "proteomic profiling by mass spectrometer",
-  "RNA-seq of coding RNA",
-  "RNA-seq of non coding RNA",
-  "RNA-seq of total RNA",
-  "RNA-seq of coding RNA from single cells",
-  "RNA-seq of non coding RNA from single cells"
-)
-
-
-getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eligibleAtlasExperiments ) {
-  for (exptype in experiment_list){
-    if ( exptype %in% valid_experiments ){
-      # report the first in the list that is valid
-      return( exptype )
-      break
-    } else {
-      # otherwise will return the first in the list
-    }
-  }
-  return( experiment_list[1] )
-}
-
-# getExperimentType 
+# .getExperimentType 
 # - Internal helper to get Experiment Type from accession. 
 .getExperimentType <- function(experimentAccession) {
   
@@ -292,7 +264,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
   return(experimentType)
 }
 
-# downloadXMLFile 
+# .downloadXMLFile 
 # - Internal helper to download XML file. 
 
 .downloadXMLFile <- function(url, attempts = 7, delay = 3) {
@@ -309,7 +281,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
   stop("Failed to download XML file after multiple attempts.")
 }
 
-# downloaTabularFile
+# .downloaTabularFile
 # - Internal helper to download TSV file. 
 .downloadTabularFile <- function(fileUrl, experimentAccession, attempts = 5, delay = 3) {
   message(paste("Downloading expression file from:\n", fileUrl))
@@ -333,7 +305,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
   return(NULL)  # Return NULL if all attempts fail
 }
 
-# loadmarkers 
+# .loadmarkers 
 # - Internal helper to download markers TSV file from FTP. 
 .loadmarkers <- function(experimentAccession, attempts = 5, delay = 3){
   
@@ -360,7 +332,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
       NULL
     })
     if (!is.null(markers)) {
-      return(markers) # Return if file sussecfully loaded.
+      return(markers) # Return if file successfully loaded.
     }
     if(i < attempts) {
       Sys.sleep(delay) # Wait before retrying 
@@ -377,7 +349,7 @@ getEligibleAtlasExperiment <- function( experiment_list, valid_experiments = eli
 
 # getNormalisedAtlasExpression
 # - Download normalized data  for single Expression Atlas experiment 
-#   and returns data frame with marker genes rank. 
+#   and return data frame with marker genes rank. 
 getNormalisedAtlasExpression <- function(experimentAccession, normalisation = "tpm") {
   
   # Ensure the experiment accession is in the correct format.
@@ -898,7 +870,7 @@ getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
   
   contrasts <- xml_find_all(xmlContent, ".//contrasts")
   
-  # Extract contrast IDs and names
+  # Extract contrast IDs and names.
   contrast_ids <- xmlContent %>% 
     xml_find_all("//contrast") %>% 
     xml_attr("id")
@@ -907,10 +879,10 @@ getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
     xml_find_all("//contrast/name") %>% 
     xml_text()
   
-  # Combine into a data frame
+  # Combine into a data frame.
   contrast_df <- data.frame(id = contrast_ids, name = contrast_names, stringsAsFactors = FALSE)
   
-  # Replace the columns names in results, excluding 'GeneID' and 'Gene.Name' columns
+  # Replace the columns names in results, excluding 'GeneID' and 'Gene.Name' columns.
   colnames(results) <- sapply(colnames(results), function(col) {
     for (i in seq_len(nrow(contrast_df))) {
       if (grepl(contrast_df$id[i], col)) {
@@ -929,7 +901,7 @@ getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
   
 }
 
-# sanitize-filename
+# .sanitize-filename
 # Internal helper that replace invalid characters with underscores 
 # and trims whitespaces. 
 .sanitize_filename <- function(filename) {
@@ -999,8 +971,8 @@ volcanoDifferentialAtlasExperiment <- function(df,
   return(p)
 }
 
-# ----- Search  Second Filter ----
-# flatten_experiment
+# ----- Search ----
+# .flatten_experiment
 # - Internal helper: function to extract all nested elements as a flat string
 # used by .search_gxa_experiments_yaml
 
@@ -1023,7 +995,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
   return(paste(details_list, collapse = " | "))
 }
 
-# searcg_gxa_experiemnts_yaml 
+# .searcg_gxa_experiemnts_yaml 
 # - Internal helper to search experiments using YAML. 
 .search_gxa_experiments_yaml <- function( query_yaml ){
   yaml_gxa <- "https://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/gxa-studies.yaml" 
@@ -1064,13 +1036,13 @@ volcanoDifferentialAtlasExperiment <- function(df,
   }
   
   
-  # convert experiments into a data frame
+  # Cononvert experiments into a data frame.
   experiments_df <- tidyr::tibble(
     accession = sapply( yaml_data$experiments, function(x) x$accession),
     details = sapply( yaml_data$experiments, .flatten_experiment)  # Flatten all details
   )
   
-  # define search term
+  # Define search term. 
   search_term <- as.character(query_yaml) 
   
   # search across all details
@@ -1082,11 +1054,8 @@ volcanoDifferentialAtlasExperiment <- function(df,
   
 }
 
-# ebiAPIsearch
-# - Internal helper: Search the EBI RESTful Web Services API for experiment accessions
-# DataFrame with columns (Accession, Species, Type, Title), all <character>
-# Query Atlas , SCE atlas API
-
+# .ebiAPIsearch
+# - Internal helper: Search the EBI RESTful Web Services API for experiment accessions. 
 .ebiAPIsearch <- function (resource, query, secondaryFilter = NULL, detailed = FALSE) {
 
   if (!is.logical(detailed)) {
@@ -1305,7 +1274,9 @@ searchAtlasExperiments <- function( query, secondaryFilter = NULL, detailed = FA
   return( scExperiments )
 }
 
-# download_anndata_with_entry
+# ----- Single Cell  ----
+
+# .download_anndata_with_entry
 # - Internal helper to download Single Cell AnnData file with retries. 
 .download_anndata_with_retry <- function(url, destfile, max_attempts = 3) {
   
@@ -1349,8 +1320,6 @@ searchAtlasExperiments <- function( query, secondaryFilter = NULL, detailed = FA
   }
 }
 
-
-# ----- Single Cell  ----
 
 # getAtlasSCExperiment 
 # - Download and return the SingleCellExperiemnt object representing a single

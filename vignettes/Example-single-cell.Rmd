@@ -15,19 +15,18 @@ vignette: >
     %\VignetteIndexEntry{ Accessing data from Single-Cell Expression Atlas }
     %\VignetteEncoding{UTF-8}
 ---
-This vignette demonstrates how to access and visualize dataset [E-GEOD-81383](https://www.ebi.ac.uk/gxa/sc/experiments/E-GEOD-81383) from the 
-Single-Cell Expression Atlas using the `ExpressionAtlas` package. 
+
+This vignette demonstrates how to access and visualize dataset [E-GEOD-81383](https://www.ebi.ac.uk/gxa/sc/experiments/E-GEOD-81383) from the Single-Cell Expression Atlas using the `ExpressionAtlas` package.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 ```
 
-```{r load-packages} 
+```{r load-packages}
 library( ExpressionAtlas ) 
 library( SingleCellExperiment )
 library( ggplot2 )
 ```
-
 
 ```{r single-cell-search,eval=TRUE}
 
@@ -82,4 +81,3 @@ dotPlotSCAtlasExperiment(geod81383, genes=c('ENSG00000185664','ENSG00000205777',
 ```{r session-info}
 sessionInfo()
 ```
-

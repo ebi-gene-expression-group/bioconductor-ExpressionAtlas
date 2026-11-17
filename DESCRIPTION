@@ -20,11 +20,6 @@ Authors@R:
            email = "anilthanki@ebi.ac.uk",
            comment = c(ORCID = "0000-0002-8941-444X")
       ),
-        person(given = "Maria",
-           family = "Keays",
-           role = c("aut"),
-           comment = c(ORCID = "0000-0003-2034-601X")
-      ),
         person(give = "Iris",
             family = "Yu",
             role = c("aut", "cre"),

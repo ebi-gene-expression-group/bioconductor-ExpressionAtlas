@@ -57,7 +57,7 @@
     mtab1733_tpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "tpm" )
 
     # Generate heatmap with default parameters
-    heatmapAtlasExperiment( mtab1733_tpm, "heatmap", TRUE, FALSE, "viridis", TRUE, c("FGR", "CFH", "STPG1"), NULL, FALSE, TRUE, 'name' )
+    heatmapAtlasExperiment( mtab1733_tpm, "heatmap", TRUE, FALSE, "viridis", TRUE, NULL, 100, FALSE, TRUE, 'name' )
 
     # Check if the PDF file was created
     file.exists("heatmap.pdf")
@@ -66,7 +66,7 @@
     mtab1733_cpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "cpm" )
 
     # Generate heatmap with default parameters
-    heatmapAtlasExperiment( mtab1733_cpm, "E-MTAB-4045-cpm-heatmap", TRUE, FALSE, "viridis", FALSE, c("FGR", "CFH", "STPG1"), NULL, FALSE, TRUE, 'id' )
+    heatmapAtlasExperiment( mtab1733_cpm, "E-MTAB-1733-cpm-heatmap", TRUE, FALSE, "viridis", TRUE, NULL, 100, FALSE, TRUE, 'name' )
 
     # Check if the PDF file was created
     file.exists("E-MTAB-1733-cpm-heatmap.pdf")
