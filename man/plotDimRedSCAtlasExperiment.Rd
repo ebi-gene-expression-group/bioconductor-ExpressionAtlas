@@ -6,13 +6,24 @@
     a SingleCellExperiment object representing a Single-Cell Expression Atlas experiment.
 }
 \usage{
-    plotDimRedSCAtlasExperiment( sceObject, dimRed, colorby )
+    plotDimRedSCAtlasExperiment( sceObject, dimRed, colorby, filename = 'sc-dimred', save_pdf = FALSE, plot_layers = NULL)
 }
 
 \arguments{
     \item{ sceObject }{ Single-cell experiment object, representing a Single-Cell Expression Atlas experiment, obtained with the function \code{getAtlasSCExperiment}. }
     \item{ dimRed }{ Dimensionality reduction to plot. Options are: "X_pca", "X_tsne_perplexity_10", "X_umap_neighbors_20", etc. }
     \item{ colorby }{ Column name in \code{colData} to color the cells by. }
+    \item{ filename }{
+         File name or path for the heatmap PDF. Defaults to
+        \code{"sc-dimred"}, which is saved as \code{sc-dimred.pdf}.
+    }
+    \item{ save_pdf  }{
+        Save PDF file with the heatmap. Default is \code{FALSE}.
+    }
+    \item{ plot_layers }{
+        Allows user to put a list of ggplot2 components, such as themes, to be added before saving and returning the dot plot. 
+        e.g. plot_layers = list(ggplot2::theme_classic())
+    }
 }
 
 \value{

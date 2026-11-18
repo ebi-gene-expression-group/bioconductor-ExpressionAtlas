@@ -6,7 +6,7 @@
     from a Single-Cell Expression Atlas experiment.
 }
 \usage{
-    heatmapSCAtlasExperiment( singleCellExperiment, genes=NULL, sel.K=NULL, scaleNormExp=FALSE, show_row_names=FALSE )
+    heatmapSCAtlasExperiment( singleCellExperiment, genes=NULL, sel.K=NULL, scaleNormExp=FALSE, show_row_names=FALSE, geneLabel = c('name', 'id'), filename = 'sc-heatmap', save_pdf = FALSE)
 }
 \arguments{
     \item{singleCellExperiment}{
@@ -24,7 +24,18 @@
     \item{show_row_names}{
         Logical indicating whether to show gene names in rows. Default is \code{FALSE}.
     }
+    \item{ geneLabel }{
+        Whether to plot with Gene IDs = 'id' or Gene names = 'name'. Default is 'name'.
+    }
+    \item{ filename }{
+        File name or path for the heatmap PDF. Defaults to
+        \code{"sc-heatmap"}, which is saved as \code{sc-heatmap.pdf}.
+    }
+     \item{save_pdf}{
+        Save the heatmap as a PDF. Defaults to \code{FALSE}.
+    }
 }
+
 \value{
     A Heatmap-class object from the ComplexHeatmap package. This object can be further customized or combined with other heatmaps using the ComplexHeatmap package's functions.
 }
@@ -32,8 +43,8 @@
     
     egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-    heatmap6552 <- heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=NULL, scaleNormExp=FALSE, show_row_names=FALSE )
+    heatmap6552 <- heatmapSCAtlasExperiment( egeod6552, genes=NULL, sel.K=NULL, geneLabel = 'name', scaleNormExp=FALSE, show_row_names=FALSE )
 
     # Example with a specific gene list
-    heatmap6552_genes <- heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, scaleNormExp=FALSE, show_row_names=TRUE )
+    heatmap6552_genes <- heatmapSCAtlasExperiment( egeod6552, genes=c('ENSG00000151611','ENSG00000020577', 'ENSG00000188869' ), sel.K=NULL, geneLabel = 'name', scaleNormExp=FALSE, show_row_names=TRUE, save_pdf = FALSE )
 }

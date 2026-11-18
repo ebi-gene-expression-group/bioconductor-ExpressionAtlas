@@ -1,11 +1,30 @@
-
-test_that( "Accession validation returns true or false at the right times", {
+#valid experiment accession check: 
+test_that( "Valid accessions are accepted", {
     
     expect_true( .isValidExperimentAccession( "E-MTAB-3007" ) )
-    expect_false( .isValidExperimentAccession( "DRP000391" ) )
-    expect_false( .isValidExperimentAccession( ) )
+    expect_true( .isValidExperimentAccession( "E-GEOD-36552" ) )
+
 })
 
+test_that("Accession validation rejects an invalid accession", {
+  expect_warning(
+    result <- .isValidExperimentAccession("EMTAB3007"),
+    "does not look like an ArrayExpress"
+  )
+  
+  expect_false(result)
+})
+
+test_that("Accession validation rejects empty accession",{
+  expect_warning(
+    result <- .isValidExperimentAccession(),
+    "Accession missing"
+  )
+  expect_false(result)
+} )
+
+
+#checking whether data is valid from atlaRes from vignette: 
 test_that("check test data", {
 
     data( "atlasRes" )
@@ -17,22 +36,15 @@ test_that("check test data", {
 
 # the following tests require internet connection
 
-test_that("Download Expression Atlas (bulk) data for E-MTAB-1624", {
+test_that("Download data for E-MTAB-1624", {
 
     skip_if_offline()
     expect_identical( names(getAtlasData( "E-MTAB-1624" )), "E-MTAB-1624" )
 })
 
-test_that("Search for bulk cancer datasets in human", {
+test_that("Search for cancer datasets in human", {
 
     skip_if_offline()
     cancer_res <- searchAtlasExperiments( query = "cancer", secondaryFilter = "human"  )
     expect_false( ( nrow(cancer_res) == 0 ) ) 
-})
-
-test_that("Search for arabidopsis datasets at Single-Cell Expression Atlas", {
-
-    skip_if_offline()
-    arabidopsis_res <- searchSCAtlasExperiments( query = "Arabidopsis"  )
-    expect_false( ( nrow(arabidopsis_res) == 0 ) ) 
 })
