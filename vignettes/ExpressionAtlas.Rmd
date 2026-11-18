@@ -305,7 +305,7 @@ You can create volcano plot from downloaded differential expression data for a s
 mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 
 head(mtab10104_dea)
-mtab10104 <-  volcanoDifferentialAtlasExperiment( df = mtab10104_dea, save_pdf = FALSE, show_plot = TRUE, low_fc_colour = "Gray", high_fc_colour = "Blue", cutoff = 1, show_volcanoplot_title = TRUE )
+mtab10104 <-  volcanoDifferentialAtlasExperiment( df = mtab10104_dea, save_png = FALSE, show_plot = TRUE, low_fc_colour = "Gray", high_fc_colour = "Blue", cutoff = 1, show_volcanoplot_title = TRUE )
 
 ```
 

@@ -925,7 +925,7 @@ getAnalyticsDifferentialAtlasExpression <- function(experimentAccession) {
 #   diffeential expression data from getAnalyticsDifferentialAtlasExpression function. 
 volcanoDifferentialAtlasExperiment <- function(df, 
                                                filename_prefix = "volcano-plot",
-                                               save_pdf = FALSE,
+                                               save_png = FALSE,
                                                show_plot = TRUE,
                                                low_fc_colour = "gray",
                                                high_fc_colour = "blue",
@@ -946,7 +946,10 @@ volcanoDifferentialAtlasExperiment <- function(df,
     # Add a new column as low and high foldchange for colour.
     clean_df$color <- ifelse(abs(clean_df[[logFC_col]]) < cutoff, "low", "high")
     
-    title <- paste("Volcano Plot:", logFC_col, "vs", pval_col)
+    title <- paste(
+      strwrap(paste("Volcano Plot:", logFC_col, "vs", pval_col), width = 48),
+      collapse = "\n"
+    )
     # Create the plot.
     p <- ggplot(clean_df, aes(x = .data[[logFC_col]], y = -log10(.data[[pval_col]]), color = .data$color)) +
       geom_point(alpha = 0.6) +
@@ -961,7 +964,7 @@ volcanoDifferentialAtlasExperiment <- function(df,
       theme_minimal()
     
     # PDF Output (Only if save_pdf = TRUE).
-    if (save_pdf) {
+    if (save_png) {
       # Save each plot as a separate image.
       plot_name <- gsub(".log2foldchange", "", logFC_col)
       filename <- .sanitize_filename(paste0(filename_prefix, "_", plot_name, ".png"))
