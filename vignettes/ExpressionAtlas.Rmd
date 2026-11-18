@@ -280,7 +280,7 @@ As default you can plot top ranked genes per tissue from downloaded experiment. 
 ```{r plot-tpm-heatmap, eval=TRUE, fig.width=7, fig.height=8}
 mtab1733_tpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "tpm" ) 
 
-mtab1733_heatmap_tpm_top <- heatmapAtlasExperiment( df = mtab1733_tpm, save_pdf = TRUE, show_plot = TRUE, palette = "viridis", markers= TRUE, gene_list = NULL, top_n = 20, scaled = FALSE, show_heatmap_title = TRUE, geneLabel = 'name' )
+mtab1733_heatmap_tpm_top <- heatmapAtlasExperiment( df = mtab1733_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", markers= TRUE, gene_list = NULL, top_n = 20, scaled = FALSE, show_heatmap_title = TRUE, geneLabel = 'name' )
 
 mtab1733_heatmap_tpm <- heatmapAtlasExperiment( df = mtab1733_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", markers= TRUE, gene_list = c("FGR", "CFH", "STPG1"), top_n = 20, scaled = FALSE, show_heatmap_title = TRUE, geneLabel = 'name' )
 
@@ -305,7 +305,7 @@ You can create volcano plot from downloaded differential expression data for a s
 mtab10104_dea <- getAnalyticsDifferentialAtlasExpression( "E-MTAB-10104" )
 
 head(mtab10104_dea)
-mtab10104 <-  volcanoDifferentialAtlasExperiment( df = mtab10104_dea, save_pdf = TRUE, show_plot = TRUE, low_fc_colour = "Gray", high_fc_colour = "Blue", cutoff = 1, show_volcanoplot_title = TRUE )
+mtab10104 <-  volcanoDifferentialAtlasExperiment( df = mtab10104_dea, save_pdf = FALSE, show_plot = TRUE, low_fc_colour = "Gray", high_fc_colour = "Blue", cutoff = 1, show_volcanoplot_title = TRUE )
 
 ```
 
@@ -363,7 +363,7 @@ print(egeod36552_pca)
 egeod36552_umap <- plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_type", save_pdf = FALSE)
 print(egeod36552_umap)
 
-egeod36552_umap_louvain <- plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0", save_pdf = TRUE, plot_layers = list(ggplot2::theme_classic(), ggplot2::theme(legend.position = "left"))) 
+egeod36552_umap_louvain <- plotDimRedSCAtlasExperiment(egeod36552, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_2.0", save_pdf = FALSE, plot_layers = list(ggplot2::theme_classic(), ggplot2::theme(legend.position = "left"))) 
 print(egeod36552_umap_louvain)
 
 ```
