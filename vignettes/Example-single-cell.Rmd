@@ -50,29 +50,29 @@ print(colnames(colData(geod81383 )))
 ```{r single-cel-plot-cluster, eval=TRUE}
 # Colour the same UMAP by Louvain cluster, genotype, age, and cell line.
 
-plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_0.1") + theme_classic() 
+plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "louvain_resolution_0.1", save_pdf = FALSE, plot_layers = list(ggplot2::theme_classic()))
 
-plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "genotype") + theme_classic() 
+plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "genotype", save_pdf = FALSE, plot_layers = list(ggplot2::theme_classic()))
 
-plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "age") + theme_classic() + scale_colour_brewer(palette = "Set2")
+plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "age", save_pdf = FALSE, plot_layers = list(ggplot2::theme_classic(), ggplot2::scale_colour_brewer(palette = "Set2")))
 
-plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_line") + theme_classic() + scale_colour_brewer(palette = "Accent")
+plotDimRedSCAtlasExperiment(geod81383, dimRed = "X_umap_neighbors_n_neighbors_20", colorby = "cell_line", save_pdf = FALSE, plot_layers = list(ggplot2::theme_classic() , ggplot2::scale_colour_brewer(palette = "Accent")))
 ```
 
 ```{r single-cell-heatmap-plot, eval=TRUE}
 
 # Plot marker genes for K = 3 using unscaled normalized expression.
-heatmapSCAtlasExperiment(geod81383, genes=NULL, sel.K=3, scaleNormExp=FALSE, show_row_names=FALSE ) 
+heatmapSCAtlasExperiment(geod81383, genes=NULL, sel.K=3, scaleNormExp=FALSE, show_row_names=FALSE, save_pdf = FALSE ) 
 
 
 # Plot the same marker genes after scaling expression for each gene.
-heatmapSCAtlasExperiment(geod81383, genes=NULL, sel.K=3, scaleNormExp=TRUE, show_row_names=FALSE ) 
+heatmapSCAtlasExperiment(geod81383, genes=NULL, sel.K=3, scaleNormExp=TRUE, show_row_names=FALSE, save_pdf = FALSE) 
 
 # Plot unscaled expression and display Gene names. 
-dotPlotSCAtlasExperiment(geod81383, genes=c('ENSG00000185664', 'ENSG00000205777', 'CD36'), sel.K=3, scaleNormExp=TRUE, geneLabel = 'name' ) + theme_classic()
+dotPlotSCAtlasExperiment(geod81383, genes=c('ENSG00000185664', 'ENSG00000205777', 'CD36'), sel.K=3, scaleNormExp=TRUE, geneLabel = 'name', save_pdf = FALSE, dot_theme = list(ggplot2::theme_classic()))
 
 # Plot scaled expression and display Gene IDs. 
-dotPlotSCAtlasExperiment(geod81383, genes=c('ENSG00000185664','ENSG00000205777', 'CD36'), sel.K=3, scaleNormExp=TRUE, geneLabel = 'id' ) + theme_classic()
+dotPlotSCAtlasExperiment(geod81383, genes=c('ENSG00000185664','ENSG00000205777', 'CD36'), sel.K=3, scaleNormExp=TRUE, geneLabel = 'id', save_pdf = FALSE, dot_theme = list(ggplot2::theme_classic()))
 
 ```
 

@@ -696,7 +696,7 @@ heatmapAtlasExperiment <- function(df,
     }
     
     # Exclude missing scores and keep the rows with the highest scores.
-    chosen_rows <- head(order(scores, decreasing = TRUE, na.last = NA), top_n)
+    chosen_rows <- utils::head(order(scores, decreasing = TRUE, na.last = NA), top_n)
   }
   
   # If no genes selected, stop. 
@@ -782,7 +782,9 @@ heatmapAtlasExperiment <- function(df,
     topNgeneExpressions,
     row_labels = topNgeneNames,
     name = title_small,
-    col = colours,  
+    col = colours, 
+    use_raster = TRUE,
+    raster_quality = 5,
     cluster_rows = !markers && nrow(topNgeneExpressions) >1,  
     cluster_columns = !markers && ncol(topNgeneExpressions) >1,
     show_row_names = TRUE,
@@ -795,16 +797,19 @@ heatmapAtlasExperiment <- function(df,
     row_names_max_width = unit(6, "cm")
   )
   
-  if (show_plot){ 
-    print("Plotting on screen")
+  if (show_plot) {
     ComplexHeatmap::draw(heatmap_vis)
   }
   
-  # PDF Output (Only if save_pdf = TRUE).
+  # PDF save (only if user choose save_pdf = TRUE)
   if (save_pdf) {
+    if (!grepl("\\.pdf$", filename, ignore.case = TRUE)) {
+      filename <- paste0(filename, ".pdf")
+    }
+    
+    pdf(filename, width = 8, height = 8)
     ComplexHeatmap::draw(heatmap_vis)
-    heatmap_file <- ifelse(grepl("\\.pdf$", filename, ignore.case = TRUE), filename, paste0(filename, ".pdf"))
-    ggsave(heatmap_file, height=8, width=8)
+    dev.off()
   }
   
   return(heatmap_vis)
@@ -997,10 +1002,26 @@ volcanoDifferentialAtlasExperiment <- function(df,
 
 # .searcg_gxa_experiemnts_yaml 
 # - Internal helper to search experiments using YAML. 
-.search_gxa_experiments_yaml <- function( query_yaml ){
-  yaml_gxa <- "https://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/gxa-studies.yaml" 
-  # load YAML from URL
-  yaml_response <- GET(yaml_gxa)
+
+.search_gxa_experiments_yaml <- function(query_yaml, attempts = 7, delay = 3) {
+  yaml_gxa <- "https://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/gxa-studies.yaml"
+  
+  for (i in seq_len(attempts)) {
+    yaml_response <- tryCatch(
+      GET(yaml_gxa, httr::timeout(60)),
+      error = function(e) {
+        message(paste("Attempt", i, "failed: ", e$message))
+        NULL
+      }
+    )
+    
+    if (!is.null(yaml_response)) break
+    if (i < attempts) Sys.sleep(delay)
+  }
+  
+  if (is.null(yaml_response)) {
+    stop("YAML failed to download after multiple attempts.")
+  }
   
   # Check if the request was successful.
   if (status_code(yaml_response) == 200) {
@@ -1370,7 +1391,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
   loadResult <- try(readH5AD( file = tempFile, reader="python", version ="0.7.6", use_hdf5 = FALSE ), silent = TRUE )
   
   # Check whether gene identifiers survived the import.
-  head(rownames(loadResult))
+  utils::head(rownames(loadResult))
   
   # Quit if we got an error.
   if (inherits(loadResult, "try-error")) {
@@ -1424,9 +1445,8 @@ getAtlasSCExperiment <- function( experimentAccession ) {
     )
   )
   
-  # Check if colData has the same number of rows as the normalised matrix. 
+  # Check if the experiement has any cell metadata fields. 
   if (ncol(colData(loadResult)) == 0 ) {
-    # here we could fill the colData with data from the ftp site
     message("No colData found in the SingleCellExperiment object.")
   }
   
@@ -1438,7 +1458,7 @@ getAtlasSCExperiment <- function( experimentAccession ) {
 
 # plotDimRedSCAtlasExperiment 
 # - Plots dimensionality reduction (PCA, t-sne, UMAP) of a SingleCellExperiment object. 
-plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
+plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby, filename = 'sc-dimred', save_pdf = FALSE, plot_layers = NULL) {
   
   # Check if the provided dimRed exists in reducedDimNames.
   if (!(dimRed %in% SingleCellExperiment::reducedDimNames(sceObject))) {
@@ -1461,7 +1481,7 @@ plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
   )
   
   # Plot using ggplot2.
-  ggplot(dimred_df, aes(x = .data$axis1, y = .data$axis2, color = .data$colorBy)) +
+  plotdot <- ggplot(dimred_df, aes(x = .data$axis1, y = .data$axis2, color = .data$colorBy)) +
     geom_point() +
     labs(
       title = paste("Dimensionality Reduction Plot:", dimRed), 
@@ -1470,6 +1490,22 @@ plotDimRedSCAtlasExperiment <- function( sceObject, dimRed, colorby ) {
       color = colorby
     ) +
     theme_minimal()
+  
+  # If not NULL, plot the theme of users choice. 
+  if (!is.null(plot_layers)) {
+    plotdot <- plotdot + plot_layers
+  }
+  
+  # PDF is saved (only if save_pdf = TRUE).
+   if(save_pdf){
+     if (!grepl("\\.pdf$", filename, ignore.case = TRUE)) {
+       filename <- paste0(filename, ".pdf")
+     }
+  
+     ggsave(filename, plot = plotdot, width = 8, height = 6)
+  }
+   return(plotdot)
+
 }
 
 # heatmapSCAtlasEXperiment 
@@ -1480,7 +1516,9 @@ heatmapSCAtlasExperiment <- function(
     sel.K = NULL,
     scaleNormExp = FALSE,
     show_row_names = FALSE,
-    geneLabel = c("name", "id")
+    geneLabel = c("name", "id"),
+    filename = 'sc-heatmap',
+    save_pdf = FALSE 
 ) {
   
   # Get one of the supported versions for geneLabel.
@@ -1732,6 +1770,8 @@ heatmapSCAtlasExperiment <- function(
     dense_matrix,
     name = if (isTRUE(scaleNormExp)) "Gene z-score" else "Expression",
     col = viridis::viridis(400),
+    use_raster = TRUE,
+    raster_quality = 5,
     left_annotation = row_annotation,
     row_labels = display_labels,
     show_row_names = show_row_names,
@@ -1743,6 +1783,17 @@ heatmapSCAtlasExperiment <- function(
     row_split = gene_clusters
   )
   
+  # PDF save (only if user choose save_pdf = TRUE)
+  if (save_pdf) {
+    if (!grepl("\\.pdf$", filename, ignore.case = TRUE)) {
+      filename <- paste0(filename, ".pdf")
+    }
+    
+    pdf(filename, width = 8, height = 8)
+    ComplexHeatmap::draw(heat_df)
+    dev.off()
+  }
+  
   return(heat_df)
 }
 
@@ -1753,7 +1804,10 @@ dotPlotSCAtlasExperiment <- function(
     genes,
     sel.K = NULL,
     scaleNormExp = FALSE,
-    geneLabel = c("name", "id")
+    geneLabel = c("name", "id"),
+    filename = 'sc-dotplot',
+    save_pdf = FALSE,
+    dot_theme = NULL 
 ) {
   
   # Get one of the supported versions for geneLabel.
@@ -2014,13 +2068,13 @@ dotPlotSCAtlasExperiment <- function(
     "Mean expression"
   }
   
-  ggplot2::ggplot(
+  dot_plot <- ggplot2::ggplot(
     df_avg,
     ggplot2::aes(
-      x = Cluster,
-      y = Gene,
-      size = Average_Expression,
-      color = Average_Expression
+      x = .data$Cluster,
+      y = .data$Gene,
+      size = .data$Average_Expression,
+      color = .data$Average_Expression
     )
   ) +
     ggplot2::geom_point() +
@@ -2039,4 +2093,20 @@ dotPlotSCAtlasExperiment <- function(
       size = expression_label,
       color = expression_label
     )
-}
+  
+  # If not NULL, plot the theme of users choice. 
+  if(!is.null(dot_theme)) {
+    dot_plot <- dot_plot + dot_theme
+  }
+  
+  # PDF save (only if save_pdf = TRUE).
+  if(save_pdf){
+    if (!grepl("\\.pdf$", filename, ignore.case = TRUE)) {
+      filename <- paste0(filename, ".pdf")
+    }
+    
+    ggsave(filename, plot = dot_plot, width = 8, height = 6)
+  }
+  return(dot_plot)
+
+  }

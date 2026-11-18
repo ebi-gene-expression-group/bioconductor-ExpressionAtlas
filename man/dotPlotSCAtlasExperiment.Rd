@@ -6,7 +6,7 @@
     from a Single-Cell Expression Atlas experiment.
 }
 \usage{
-    dotPlotSCAtlasExperiment( singleCellExperiment, genes, sel.K=NULL, scaleNormExp=FALSE, geneLabel = c('name', 'id') )
+    dotPlotSCAtlasExperiment( singleCellExperiment, genes, sel.K=NULL, scaleNormExp=FALSE, geneLabel = c('name', 'id'), filename = 'sc-dotplot', save_pdf = FALSE, dot_theme = NULL )
 }
 \arguments{
     \item{singleCellExperiment}{
@@ -24,6 +24,17 @@
     \item{geneLabel}{
       Whether to plot with Gene IDs = 'id' or Gene names = 'name'. Default is 'name'.
     }
+    \item{ filename }{
+         File name or path for the heatmap PDF. Defaults to
+        \code{"sc-dotplot"}, which is saved as \code{sc-dotplot.pdf}.
+    }
+    \item{ save_pdf  }{
+        Save PDF file with the heatmap. Default is \code{FALSE}.
+    }
+    \item{ dot_theme }{
+        Allows user to put a list of ggplot2 components, such as themes, to be added before saving and returning the dot plot. 
+        e.g. dot_theme = list(ggplot2::theme_classic())
+    }
 }
 \value{
     A Heatmap-class object from the ComplexHeatmap package. This object can be further customized or combined with other heatmaps using the ComplexHeatmap package's functions.
@@ -32,6 +43,6 @@
 
     egeod6552 <- getAtlasSCExperiment( "E-GEOD-36552" )
 
-    dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4)
+    dotPlotSCAtlasExperiment(egeod6552, genes=c('ENSG00000166681','ENSG00000178928', 'ENSG00000142182' , 'ENSG00000160282' ), sel.K=4, save_pdf = FALSE, dot_theme = NULL)
 
 }

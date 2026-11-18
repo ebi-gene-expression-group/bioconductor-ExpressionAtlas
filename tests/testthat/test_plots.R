@@ -4,7 +4,7 @@
 test_that("heatmapAtlasExperiment returns a Heatmap for TPM", {
   skip_if_offline()
   
-  heatmap_tpm <- getNormalisedAtlasExpression("E-GEOD-74322", "tpm")
+  heatmap_tpm <- getNormalisedAtlasExpression("E-MTAB-1733", "tpm")
   
   result <- heatmapAtlasExperiment( heatmap_tpm, "tpm-heatmap.pdf", FALSE, TRUE,  "viridis", TRUE, NULL,  NULL, TRUE, 'name' )
   
@@ -15,7 +15,7 @@ test_that("heatmapAtlasExperiment returns a Heatmap for TPM", {
 test_that("heatmapAtlasExperiment returns a Heatmap for CPM", {
   skip_if_offline()
   
-  heatmap_cpm <- getNormalisedAtlasExpression("E-GEOD-74322", "cpm")
+  heatmap_cpm <- getNormalisedAtlasExpression("E-MTAB-1733", "cpm")
   
 
   result <- heatmapAtlasExperiment( heatmap_cpm, "tpm-heatmap.pdf", FALSE, TRUE,  "viridis", TRUE, NULL, NULL, TRUE, 'name' )
@@ -27,8 +27,8 @@ test_that("heatmapAtlasExperiment returns a Heatmap for CPM", {
 test_that("CPM gene names match TPM annotations", {
   skip_if_offline()
   
-  cpm <- getNormalisedAtlasExpression("E-MTAB-4045", "cpm")
-  tpm <- getNormalisedAtlasExpression("E-MTAB-4045", "tpm")
+  cpm <- getNormalisedAtlasExpression("E-MTAB-1733", "cpm")
+  tpm <- getNormalisedAtlasExpression("E-MTAB-1733", "tpm")
   
   
   matching_rows <- match(cpm$GeneID, tpm$GeneID)
@@ -81,7 +81,9 @@ test_that("plotDimRedSCAtlasExperiment returns a ggplot", {
   result <- plotDimRedSCAtlasExperiment(
     single_cell_test,
     dimRed = reductions[[1]],
-    colorby = metadata_columns[[1]]
+    colorby = metadata_columns[[1]],
+    save_pdf = FALSE, 
+    plot_layer = NULL 
   )
   
   expect_s3_class(result, "ggplot")
@@ -96,7 +98,7 @@ test_that("heatmapSCAtlasExperiment returns heatmap for single cell experiment",
   
 
   heatmap_single_result <- heatmapSCAtlasExperiment( heatmap_single_test, genes=NULL, sel.K=NULL, geneLabel = 'name',
-                                                     scaleNormExp=TRUE, show_row_names=FALSE ) 
+                                                     scaleNormExp=TRUE, show_row_names=FALSE, save_pdf = FALSE ) 
   expect_s4_class(heatmap_single_result, "Heatmap")
 })
 
@@ -108,7 +110,8 @@ test_that("dotPlotSCAtlasExperiment returns dot plot for single cell experiment"
   
   result_dotplot <- dotPlotSCAtlasExperiment(dotplot_exp, genes=c('ENSG00000166681','ENSG00000178928', 
                                                                 'ENSG00000142182' , 'ENSG00000160282' ),
-                                             sel.K=4, geneLabel = 'name', scaleNormExp=TRUE) + theme_classic()
+                                             sel.K=4, geneLabel = 'name', scaleNormExp=TRUE, save_pdf = FALSE, 
+                                             dot_theme = list(ggplot2::theme_classic()))
 
   expect_true("ggplot" %in% class(result_dotplot))
   
@@ -122,7 +125,8 @@ test_that("dotPlotSCAtlasExperiment returns data", {
   
   result_dotplot <- dotPlotSCAtlasExperiment(dotplot_exp, genes=c('ENSG00000166681','ENSG00000178928',
                                                                   'ENSG00000142182' , 'ENSG00000160282' ), geneLabel = 'name',
-                                             sel.K=4, scaleNormExp=TRUE) + theme_classic()
+                                             sel.K=4, scaleNormExp=TRUE, save_pdf = FALSE, 
+                                             dot_theme = list(ggplot2::theme_classic()))
   
   expect_false(is.null(result_dotplot$data))
   expect_gt(nrow(result_dotplot$data), 0)

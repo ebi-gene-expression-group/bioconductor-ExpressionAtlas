@@ -3,7 +3,7 @@ import( HDF5Array, SummarizedExperiment, limma, XML, xml2, BiocStyle, gplots, ge
 importClassesFrom( Biobase, ExpressionSet )
 importFrom( S4Vectors, SimpleList, DataFrame, List, subset )
 importFrom( httr, GET, status_code, content )
-importFrom( utils, URLencode, download.file, read.table )
+importFrom( utils, URLencode, download.file, read.table, read.delim )
 importFrom( jsonlite, fromJSON )
 importFrom( zellkonverter, readH5AD )
 importFrom( edgeR, cpm )

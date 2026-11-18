@@ -40,8 +40,8 @@ test_that("getAtlasData returns a non-empty SimpleList", {
 test_that("getNormalisedAtlasExpression return data frame", {
   skip_if_offline()
   
-  data_frame_tpm <- getNormalisedAtlasExpression("E-MTAB-4045", "tpm")
-  data_frame_cpm <- getNormalisedAtlasExpression("E-MTAB-4045", "cpm")
+  data_frame_tpm <- getNormalisedAtlasExpression("E-MTAB-1733", "tpm")
+  data_frame_cpm <- getNormalisedAtlasExpression("E-MTAB-1733", "cpm")
   
   expect_s3_class(data_frame_tpm, 'data.frame')
   expect_true(nrow(data_frame_tpm) > 0)
