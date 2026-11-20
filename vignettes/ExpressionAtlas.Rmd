@@ -280,7 +280,7 @@ As default you can plot top ranked genes per tissue from downloaded experiment. 
 ```{r plot-tpm-heatmap, eval=TRUE, fig.width=7, fig.height=8}
 mtab1733_tpm <- getNormalisedAtlasExpression( "E-MTAB-1733", "tpm" ) 
 
-mtab1733_heatmap_tpm_top <- heatmapAtlasExperiment( df = mtab1733_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", marker = TRUE, gene_list = NULL, top_n = 20, scaled = FALSE, show_heatmap_title = TRUE, geneLabel = 'name' )
+mtab1733_heatmap_tpm_top <- heatmapAtlasExperiment( df = mtab1733_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", markers = TRUE, gene_list = NULL, top_n = 20, scaled = FALSE, show_heatmap_title = TRUE, geneLabel = 'name' )
 
 mtab1733_heatmap_tpm <- heatmapAtlasExperiment( df = mtab1733_tpm, save_pdf = FALSE, show_plot = TRUE, palette = "viridis", markers = TRUE, gene_list = c("FGR", "CFH", "STPG1"), top_n = 20, scaled = FALSE, show_heatmap_title = TRUE, geneLabel = 'name' )
 
