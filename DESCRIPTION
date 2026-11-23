@@ -50,3 +50,5 @@ Collate: functions.R
 License: GPL (>= 3)
 LazyLoad: yes
 NeedsCompilation: no
+BugReports: https://github.com/ebi-gene-expression-group/bioconductor-ExpressionAtlas/issues
+Config/Bioconductor/UnsupportedPlatforms: windows
