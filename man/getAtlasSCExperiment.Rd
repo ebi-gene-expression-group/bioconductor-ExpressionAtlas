@@ -4,6 +4,9 @@
 \description{
     This function downloads and returns a SingleCellExperiment object representing a
     Single-Cell Expression Atlas experiment.
+    Windows users: Importing single-cell .h5ad files with getAtlasSCExperiment() 
+    may fail when setting up or using the Python environment required by zellkonverter. 
+    This can happen even if the file downloads successfully.
 }
 \usage{
     getAtlasSCExperiment( experimentAccession )

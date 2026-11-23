@@ -50,3 +50,4 @@ Collate: functions.R
 License: GPL (>= 3)
 LazyLoad: yes
 NeedsCompilation: no
+Config/Bioconductor/UnsupportedPlatforms: windows
